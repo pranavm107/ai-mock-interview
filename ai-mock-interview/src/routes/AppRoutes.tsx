@@ -23,6 +23,9 @@ import Interview from '../pages/Interview';
 import History from '../pages/History';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
+import Resume from '../pages/Resume';
+import Analytics from '../pages/Analytics';
+import Achievements from '../pages/Achievements';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +53,9 @@ const router = createBrowserRouter([
       { path: 'history', element: <History /> },
       { path: 'profile/*', element: <Profile /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'resume', element: <Resume /> },
+      { path: 'analytics', element: <Analytics /> },
+      { path: 'achievements', element: <Achievements /> },
     ],
   },
   {

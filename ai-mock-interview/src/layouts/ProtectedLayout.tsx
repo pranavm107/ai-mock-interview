@@ -1,13 +1,19 @@
 import React from 'react';
-import { Outlet, Navigate, Link } from 'react-router-dom';
-import { useAuth, UserButton } from '@clerk/clerk-react';
+import { Outlet, Navigate } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
+import { Sidebar } from '../components/dashboard/Sidebar';
+import { TopHeader } from '../components/dashboard/TopHeader';
 
 const ProtectedLayout: React.FC = () => {
   const { isLoaded, userId } = useAuth();
 
   // Show a loading state while Clerk is determining auth status
   if (!isLoaded) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   // Redirect to sign-in page if user is not authenticated
@@ -16,30 +22,20 @@ const ProtectedLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar for protected routes */}
-      <aside className="w-64 bg-gray-100 dark:bg-gray-800 border-r flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between">
-          <span className="font-bold text-lg">AI Mock Interview</span>
-        </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <Link to="/dashboard" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Dashboard</Link>
-          <Link to="/generate" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Generate Interview</Link>
-          <Link to="/interview/1" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Mock Interview</Link>
-          <Link to="/history" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Interview History</Link>
-          <Link to="/profile" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Profile</Link>
-          <Link to="/settings" className="block p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">Settings</Link>
-        </nav>
-        <div className="p-4 border-t flex items-center gap-3">
-          <UserButton />
-          <span className="text-sm font-medium">My Account</span>
-        </div>
-      </aside>
+    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 relative">
+      {/* Subtle Background Gradients */}
+      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
+      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none translate-y-1/4 -translate-x-1/4"></div>
 
-      {/* Main content area */}
-      <main className="flex-1 overflow-y-auto p-8">
-        <Outlet />
-      </main>
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        <TopHeader />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 scroll-smooth">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

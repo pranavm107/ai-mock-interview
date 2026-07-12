@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
+import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
 import AuthHandler from '../handlers/AuthHandler';
 import { Brain, Menu, X, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -9,6 +9,7 @@ const PublicLayout: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +26,11 @@ const PublicLayout: React.FC = () => {
     { name: 'Pricing', path: '/pricing' },
     { name: 'Contact', path: '/contact' },
   ];
+
+  if (isLoaded && isSignedIn) {
+    // Completely separate authenticated experience
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -69,26 +75,16 @@ const PublicLayout: React.FC = () => {
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-4">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button variant="outline" className="border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 text-gray-700 font-semibold rounded-full px-6 transition-all">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-full px-6 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
-                  Start Free <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <Link to="/dashboard">
-                <Button variant="outline" className="border-indigo-200 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-full px-6 transition-all">
-                  Dashboard
-                </Button>
-              </Link>
-              <UserButton appearance={{ elements: { avatarBox: "w-10 h-10 ring-2 ring-indigo-50 border-2 border-white" } }} />
-            </SignedIn>
+            <SignInButton mode="modal">
+              <Button variant="outline" className="border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 text-gray-700 font-semibold rounded-full px-6 transition-all">
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-full px-6 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+                Start Free <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </SignUpButton>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -119,24 +115,12 @@ const PublicLayout: React.FC = () => {
             ))}
             <div className="h-px bg-gray-100 my-2" />
             <div className="flex flex-col gap-3 pb-2">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="outline" className="w-full justify-center rounded-xl h-12 text-base">Sign In</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button className="w-full justify-center rounded-xl h-12 text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white">Start Free</Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full justify-center rounded-xl h-12 text-base bg-indigo-50 text-indigo-700 hover:bg-indigo-100">
-                    Dashboard
-                  </Button>
-                </Link>
-                <div className="flex justify-center mt-2">
-                  <UserButton />
-                </div>
-              </SignedIn>
+              <SignInButton mode="modal">
+                <Button variant="outline" className="w-full justify-center rounded-xl h-12 text-base">Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button className="w-full justify-center rounded-xl h-12 text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white">Start Free</Button>
+              </SignUpButton>
             </div>
           </div>
         )}

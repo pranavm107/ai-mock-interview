@@ -1,16 +1,16 @@
 import React from 'react';
-import { History as HistoryIcon, Clock } from 'lucide-react';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { EmptyState } from '../components/dashboard/EmptyState';
 import { motion } from 'framer-motion';
 
-const History: React.FC = () => {
+const Analytics: React.FC = () => {
   return (
     <div className="pb-24">
       <PageHeader 
-        title="Interview History" 
-        description="Review past sessions, read detailed AI feedback, and track your improvement across different roles."
-        icon={HistoryIcon}
+        title="Analytics" 
+        description="Track your interview performance over time and identify areas where you can improve the most."
+        icon={BarChart3}
       />
       
       <motion.div 
@@ -19,9 +19,9 @@ const History: React.FC = () => {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <EmptyState 
-          title="No interviews yet"
-          description="You haven't completed any mock interviews. Generate your first AI interview to start tracking your performance."
-          icon={Clock}
+          title="Not enough data"
+          description="Complete at least one mock interview to unlock your performance analytics and charts."
+          icon={TrendingUp}
           actionLabel="Generate Interview"
           actionTo="/generate"
         />
@@ -30,4 +30,4 @@ const History: React.FC = () => {
   );
 };
 
-export default History;
+export default Analytics;
