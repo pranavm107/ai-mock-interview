@@ -8,6 +8,7 @@ import ProtectedLayout from '../layouts/ProtectedLayout';
 // Public Pages
 import Home from '../pages/Home';
 import Features from '../pages/Features';
+import HowItWorks from '../pages/HowItWorks';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Pricing from '../pages/Pricing';
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'features', element: <Features /> },
+      { path: 'how-it-works', element: <HowItWorks /> },
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
       { path: 'pricing', element: <Pricing /> },
