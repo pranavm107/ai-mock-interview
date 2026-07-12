@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { TopHeader } from '../components/dashboard/TopHeader';
+import AuthHandler from '../handlers/AuthHandler';
 
 const ProtectedLayout: React.FC = () => {
   const { isLoaded, userId } = useAuth();
@@ -22,7 +23,8 @@ const ProtectedLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 relative">
+    <AuthHandler>
+      <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 relative">
       {/* Subtle Background Gradients */}
       <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
       <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none translate-y-1/4 -translate-x-1/4"></div>
@@ -37,6 +39,7 @@ const ProtectedLayout: React.FC = () => {
         </main>
       </div>
     </div>
+    </AuthHandler>
   );
 };
 
