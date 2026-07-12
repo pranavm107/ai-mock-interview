@@ -1,5 +1,5 @@
-import {ClerkProvider} from '@clerk/react';
-import { shadcn } from '@clerk/ui/themes'
+import {ClerkProvider} from '@clerk/clerk-react';
+import { shadcn } from '@clerk/themes'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

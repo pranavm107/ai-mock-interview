@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Navigate, Link } from 'react-router-dom';
-import { useAuth, UserButton } from '@clerk/react';
+import { useAuth, UserButton } from '@clerk/clerk-react';
 
 const ProtectedLayout: React.FC = () => {
   const { isLoaded, userId } = useAuth();

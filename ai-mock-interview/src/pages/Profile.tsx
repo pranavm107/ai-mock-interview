@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserProfile } from '@clerk/react';
+import { UserProfile } from '@clerk/clerk-react';
 
 const Profile: React.FC = () => {
   return (
