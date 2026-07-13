@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Check, X, Sparkles, Star, ChevronDown, ChevronUp, Lock, Zap, 
   FileText, Globe, Brain, MessageSquare, Rocket, HelpCircle, 
-  Database, LineChart, Code, Building, CreditCard, Mail, Cloud
+  Database, LineChart, Code, Mail, Cloud
 } from 'lucide-react';
 
 const fadeUp: any = {

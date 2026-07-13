@@ -21,3 +21,11 @@ export interface User {
 }
 
 export type { Resume, ResumeUploadMetadata } from './resume';
+export type {
+  Interview,
+  InterviewQuestion,
+  InterviewType,
+  InterviewDifficulty,
+  ExperienceLevel,
+  InterviewStatus
+} from './interview';

@@ -11,9 +11,10 @@ interface StatCardProps {
     isPositive: boolean;
   };
   delay?: number;
+  description?: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, trend, delay = 0 }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, trend, delay = 0, description }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,6 +47,9 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, tr
             </span>
           )}
         </div>
+        {description && (
+          <p className="text-xs text-slate-500 mt-2">{description}</p>
+        )}
       </div>
     </motion.div>
   );

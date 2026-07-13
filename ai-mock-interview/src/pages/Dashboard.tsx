@@ -8,7 +8,7 @@ import {
   Star,
   Sparkles,
   History,
-  TrendingUp,
+
   BrainCircuit,
   Upload,
   BarChart3

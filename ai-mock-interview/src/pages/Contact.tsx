@@ -8,7 +8,7 @@ import {
   MessageSquare, Mail, Briefcase, Wrench, MapPin, Clock, Phone, 
   Globe, Code, Video, MessageCircle, CheckCircle2, 
   Lock, Zap, ShieldCheck, ChevronDown, ChevronUp, Copy, Check,
-  Send, Sparkles, Brain, Paperclip, Loader2, Handshake, Bug, Lightbulb, CreditCard, UserCog, Star, HelpCircle
+  Send, Brain, Paperclip, Loader2, Handshake, Bug, Lightbulb, CreditCard, UserCog, Star, HelpCircle
 } from 'lucide-react';
 
 const fadeUp: any = {

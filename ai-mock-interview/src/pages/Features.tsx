@@ -5,12 +5,12 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight, Brain, FileText, Shield, Cloud,
+  ArrowRight, Brain, FileText, Cloud,
   CheckCircle2, Code, Database, Bot, Layout, Server, Users, 
   MessageSquare, LineChart, Sparkles, Zap, Check, Lock, MonitorSmartphone,
-  Star, Upload, FileUp, Award, Target, 
-  ChevronDown, ChevronUp, ArrowUpRight, ShieldCheck, Globe, Mail, MessageCircle,
-  X, Gauge, Key, SearchCode, Braces, RefreshCw, Layers, Clock, Cpu, Network, Briefcase, Mic, CheckSquare, FastForward, LockKeyhole, Fingerprint
+  Star, Upload, FileUp, Target, 
+  ChevronDown, ChevronUp, ShieldCheck, Globe, Mail, MessageCircle,
+  X, Gauge, SearchCode, Braces, RefreshCw, Layers, Clock, Cpu, Network, Briefcase, Mic, CheckSquare, FastForward, LockKeyhole, Fingerprint
 } from 'lucide-react';
 
 const fadeUp: any = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Code2, Server, Layout, Database, Terminal, Shield, BrainCircuit, LineChart, Users, Boxes } from 'lucide-react';
+import { Code2, Server, Layout, Database, Terminal, BrainCircuit, LineChart, Users, Boxes } from 'lucide-react';
 
 const categories = [
   { name: 'Frontend', icon: Layout, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' },
