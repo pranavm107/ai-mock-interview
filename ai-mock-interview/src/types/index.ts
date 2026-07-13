@@ -19,3 +19,5 @@ export interface User {
   updatedAt: Timestamp;
   lastLogin: Timestamp;
 }
+
+export type { Resume, ResumeUploadMetadata } from './resume';

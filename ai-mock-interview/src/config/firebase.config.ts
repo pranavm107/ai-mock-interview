@@ -1,5 +1,6 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 console.log(import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
@@ -15,4 +16,6 @@ const firebaseConfig = {
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
-export { app, db };
+const storage = getStorage(app);
+
+export { app, db, storage };

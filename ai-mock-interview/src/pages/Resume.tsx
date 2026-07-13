@@ -1,34 +1,78 @@
-import React from 'react';
-import { FileText, Upload } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Loader2, AlertCircle } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
-import { EmptyState } from '../components/dashboard/EmptyState';
+import { ResumeUpload } from '../components/resume/ResumeUpload';
+import { ResumeList } from '../components/resume/ResumeList';
+import { useResume } from '../hooks/useResume';
 import { motion } from 'framer-motion';
 
 const Resume: React.FC = () => {
+  const { resumes, loading, error, uploadResume, deleteResume, setDefaultResume } = useResume();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUpload = async (file: File) => {
+    try {
+      setIsUploading(true);
+      await uploadResume(file);
+    } catch (err) {
+      console.error('Failed to upload resume', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="pb-24">
       <PageHeader 
         title="Resume Manager" 
         description="Upload, manage, and organize your resumes so PrepPilot AI can tailor your mock interviews perfectly."
         icon={FileText}
-        actionLabel="Upload Resume"
-        actionIcon={Upload}
-        actionTo="/resume" // For now just points to itself
       />
       
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-      >
-        <EmptyState 
-          title="No resumes uploaded"
-          description="You haven't uploaded any resumes yet. Upload a PDF to automatically extract your skills and experiences."
-          icon={FileText}
-          actionLabel="Upload Resume"
-          actionTo="/resume"
-        />
-      </motion.div>
+      {error && (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl flex items-center gap-3 text-destructive">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
+
+      <div className="space-y-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-card border border-border/50 p-6 rounded-2xl shadow-sm"
+        >
+          <h2 className="text-lg font-semibold text-foreground mb-4">Upload New Resume</h2>
+          <ResumeUpload onUpload={handleUpload} isUploading={isUploading} />
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-foreground">Your Resumes</h2>
+            <div className="text-sm text-muted-foreground">
+              {resumes.length} {resumes.length === 1 ? 'resume' : 'resumes'}
+            </div>
+          </div>
+          
+          {loading && resumes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+              <p>Loading resumes...</p>
+            </div>
+          ) : (
+            <ResumeList 
+              resumes={resumes} 
+              onSetDefault={setDefaultResume} 
+              onDelete={deleteResume} 
+            />
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };
