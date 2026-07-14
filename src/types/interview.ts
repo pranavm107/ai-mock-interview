@@ -3,7 +3,8 @@ import { Timestamp } from 'firebase/firestore';
 export type InterviewType = "Technical" | "HR" | "Behavioral" | "Mixed";
 export type InterviewDifficulty = "Easy" | "Medium" | "Hard";
 export type ExperienceLevel = "Fresher" | "Junior" | "Mid" | "Senior";
-export type InterviewStatus = "Draft" | "Ready" | "In Progress" | "Completed" | "Cancelled";
+export type InterviewStatus = "Draft" | "Ready" | "In Progress" | "Completed" | "Cancelled" | "Paused";
+export type QuestionStatus = "pending" | "current" | "answered";
 
 export interface Interview {
   id: string;
@@ -21,8 +22,16 @@ export interface Interview {
   completedQuestions: number;
   score: number | null;
   feedbackId: string | null;
+  currentQuestion: number;
+  elapsedSeconds: number;
   aiProvider: string;
   status: InterviewStatus;
+  cameraEnabled?: boolean;
+  recordingStarted?: boolean;
+  recordingCompleted?: boolean;
+  videoUrl?: string | null;
+  videoSize?: number | null;
+  videoDuration?: number | null;
   startedAt: Timestamp | null;
   completedAt: Timestamp | null;
   createdAt: Timestamp;
@@ -35,11 +44,10 @@ export interface InterviewQuestion {
   order: number;
   question: string;
   expectedAnswer: string;
-  userAnswer: string;
-  aiFeedback: string;
-  aiScore: number;
-  answered: boolean;
-  skipped: boolean;
-  duration: number;
+  answer: string;
+  answerDuration: number;
+  score: number | null;
+  feedback: string | null;
+  status: QuestionStatus;
   createdAt: Timestamp;
 }

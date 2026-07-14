@@ -55,17 +55,37 @@ const Generate: React.FC = () => {
     }
 
     try {
-      // 1. Create Firestore Interview & Placeholder questions
-      const placeholderQuestions = Array.from({ length: formData.totalQuestions }).map((_, i) => ({
-        order: i + 1,
-        question: `This is a placeholder question ${i + 1} for ${formData.role} at ${formData.company}. Real generation happens in Phase 3.3.`,
-        expectedAnswer: 'This is a placeholder expected answer.',
-        userAnswer: '',
-        aiFeedback: '',
-        aiScore: 0,
-        answered: false,
-        skipped: false,
-        duration: 0,
+      // 1. Fetch questions from the backend
+      const response = await fetch('http://localhost:3001/api/interviews/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company: formData.company,
+          role: formData.role,
+          experience: formData.experienceLevel,
+          difficulty: formData.difficulty,
+          questionCount: formData.totalQuestions,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate questions from server');
+      }
+
+      const generatedQuestions = await response.json();
+
+      const mockQuestions = generatedQuestions.map((q: any, index: number) => ({
+        order: index + 1,
+        question: q.question,
+        expectedAnswer: q.expectedAnswer,
+        answer: '',
+        answerDuration: 0,
+        score: null,
+        feedback: null,
+        status: 'pending'
       }));
 
       const newInterview = await createInterview(
@@ -84,7 +104,7 @@ const Generate: React.FC = () => {
           aiProvider: 'Gemini',
           feedbackId: null
         },
-        placeholderQuestions
+        mockQuestions
       );
 
       // 2. Navigate to Interview Session using slug
