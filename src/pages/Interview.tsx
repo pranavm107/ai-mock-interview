@@ -9,12 +9,13 @@ import { Building, Clock, Target, Calendar, FileText, Activity, Layers, ArrowLef
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { InterviewSessionView } from '../components/interview/session/InterviewSessionView';
 
 const Interview: React.FC = () => {
   const { id: slug } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useUser();
-  const { interviews, loading, refreshInterviews } = useInterview();
+  const { interviews, loading, refreshInterviews, startInterview } = useInterview();
   const { resumes, loading: loadingResumes, refreshResumes } = useResume();
   
   const idFragment = slug ? slug.split('-').pop() : null;
@@ -85,6 +86,14 @@ const Interview: React.FC = () => {
   }
 
   if (!interview) return null;
+
+  if (interview.status === 'In Progress' || interview.status === 'Paused') {
+    return (
+      <div className="pb-24 px-4 md:px-0">
+        <InterviewSessionView interviewId={interview.id} />
+      </div>
+    );
+  }
 
   return (
     <div className="pb-24 space-y-8 px-4 md:px-0">
@@ -301,7 +310,10 @@ const Interview: React.FC = () => {
                 <p className="text-slate-500 mb-8 px-4">
                   Your AI mock interview for <strong className="text-slate-700">{interview.role}</strong> at <strong className="text-slate-700">{interview.company}</strong> is ready. The session is estimated to take {interview.duration} minutes.
                 </p>
-                <Button className="bg-blue-600 hover:bg-blue-700 h-14 px-8 text-base rounded-xl font-semibold shadow-sm w-full md:w-auto transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                <Button 
+                  onClick={() => startInterview(interview.id)}
+                  className="bg-blue-600 hover:bg-blue-700 h-14 px-8 text-base rounded-xl font-semibold shadow-sm w-full md:w-auto transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
                   Start Session Now
                 </Button>
               </div>
