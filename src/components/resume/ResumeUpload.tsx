@@ -11,20 +11,29 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploading }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'uploading' | 'extracting' | 'cleaning' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'uploading' | 'extracting' | 'cleaning' | 'structuring' | 'analyzing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let timeout1: NodeJS.Timeout;
     let timeout2: NodeJS.Timeout;
+    let timeout3: NodeJS.Timeout;
+    let timeout4: NodeJS.Timeout;
+
     if (isUploading && status === 'uploading') {
       timeout1 = setTimeout(() => {
         setStatus('extracting');
         timeout2 = setTimeout(() => {
            setStatus('cleaning');
-        }, 1500);
-      }, 1500);
-    } else if (!isUploading && (status === 'uploading' || status === 'extracting' || status === 'cleaning')) {
+           timeout3 = setTimeout(() => {
+             setStatus('structuring');
+             timeout4 = setTimeout(() => {
+               setStatus('analyzing');
+             }, 1000);
+           }, 1000);
+        }, 1000);
+      }, 1000);
+    } else if (!isUploading && status !== 'idle' && status !== 'error') {
       setStatus('success');
       setTimeout(() => {
         setStatus('idle');
@@ -33,6 +42,8 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
     return () => {
       clearTimeout(timeout1);
       clearTimeout(timeout2);
+      clearTimeout(timeout3);
+      clearTimeout(timeout4);
     };
   }, [isUploading, status]);
 
@@ -121,7 +132,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
         
         <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
           <AnimatePresence mode="wait">
-            {(status === 'uploading' || status === 'extracting' || status === 'cleaning') || (isUploading && status !== 'error' && status !== 'success') ? (
+            {(status !== 'idle' && status !== 'error' && status !== 'success') ? (
               <motion.div
                 key="uploading"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -131,7 +142,10 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
               >
                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
                 <p className="mt-4 text-sm font-medium text-primary">
-                  {status === 'cleaning' ? 'Cleaning Resume...' : status === 'extracting' ? 'Extracting PDF...' : 'Uploading...'}
+                  {status === 'analyzing' ? 'AI Analysis...' :
+                   status === 'structuring' ? 'Building Resume Profile...' :
+                   status === 'cleaning' ? 'Cleaning Resume...' : 
+                   status === 'extracting' ? 'Extracting PDF...' : 'Uploading...'}
                 </p>
               </motion.div>
             ) : status === 'success' ? (

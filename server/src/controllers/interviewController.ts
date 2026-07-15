@@ -3,7 +3,7 @@ import { generateQuestions } from '../services/interviewQuestionService';
 
 export const generateInterviewQuestions = async (req: Request, res: Response) => {
   try {
-    const { company, role, experience, difficulty, skills, questionCount } = req.body;
+    const { company, role, experience, difficulty, skills, questionCount, userId, resumeId } = req.body;
 
     if (!company || !role || !questionCount) {
       return res.status(400).json({ error: 'Missing required fields: company, role, or questionCount' });
@@ -15,7 +15,9 @@ export const generateInterviewQuestions = async (req: Request, res: Response) =>
       experience: experience || 'Mid',
       difficulty: difficulty || 'Medium',
       skills,
-      questionCount
+      questionCount,
+      userId,
+      resumeId
     });
 
     res.json(questions);

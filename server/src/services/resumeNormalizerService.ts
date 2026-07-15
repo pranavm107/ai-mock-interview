@@ -6,18 +6,25 @@ import { detectLanguage } from './languageDetector';
 import { buildStructuredResume } from './structuredObjectBuilder';
 
 export const normalizeResumeText = (rawText: string) => {
+  const startClean = performance.now();
   const { text: normalizedText, stats: normalizationStats } = cleanText(rawText);
+  const normalizeMs = performance.now() - startClean;
   
+  const startEntities = performance.now();
   const entities = extractEntities(normalizedText);
+  const entityExtractionMs = performance.now() - startEntities;
+
+  const startSections = performance.now();
   const sections = detectSections(normalizedText);
+  const sectionDetectionMs = performance.now() - startSections;
   
-  if (sections.skills && sections.skills.text) {
-    sections.skills.text = normalizeSkills(sections.skills.text);
-  }
+  // Note: Skills are normalized inside buildStructuredResume.
 
   const language = detectLanguage(normalizedText);
   
+  const startStructure = performance.now();
   const structuredResume = buildStructuredResume(normalizedText, sections, entities);
+  const structureMs = performance.now() - startStructure;
 
   return {
     normalizedText,
@@ -25,6 +32,12 @@ export const normalizeResumeText = (rawText: string) => {
     entities,
     sections,
     language,
-    structuredResume
+    structuredResume,
+    timings: {
+      normalizeMs,
+      entityExtractionMs,
+      sectionDetectionMs,
+      structureMs
+    }
   };
 };

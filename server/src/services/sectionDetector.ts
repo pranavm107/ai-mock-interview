@@ -2,21 +2,22 @@ export const detectSections = (normalizedText: string): any => {
   const sections: any = {};
   
   const sectionKeywords = [
-    'SUMMARY', 'PROFILE', 'OBJECTIVE',
-    'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'EMPLOYMENT HISTORY',
-    'EDUCATION', 'ACADEMIC BACKGROUND',
-    'SKILLS', 'TECHNICAL SKILLS', 'CORE COMPETENCIES',
-    'PROJECTS', 'PERSONAL PROJECTS', 'OPEN SOURCE',
+    'CAREER OBJECTIVE', 'PROFESSIONAL SUMMARY', 'SKILLS SUMMARY', 'SUMMARY', 'PROFILE', 'OBJECTIVE',
+    'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY', 'EXPERIENCE', 'INTERNSHIP',
+    'EDUCATIONAL QUALIFICATION', 'ACADEMIC BACKGROUND', 'ACADEMIC QUALIFICATION', 'EDUCATION',
+    'TECHNICAL EXPERTISE', 'CORE COMPETENCIES', 'TECHNICAL SKILLS', 'PROFESSIONAL SKILLS', 'CORE SKILLS', 'SKILLS',
+    'PERSONAL PROJECTS', 'ACADEMIC PROJECTS', 'OPEN SOURCE', 'PROJECTS',
     'CERTIFICATIONS', 'LICENSES',
     'ACHIEVEMENTS', 'AWARDS', 'HONORS',
-    'LANGUAGES'
-  ];
+    'LANGUAGES',
+    'INTERESTS'
+  ].sort((a, b) => b.length - a.length);
 
   const lines = normalizedText.split('\n');
   
   let currentSectionKey = 'unclassified';
   let currentContent: string[] = [];
-  let currentConfidence = 0.5; // Default for unclassified
+  let currentConfidence = 0.5;
 
   const saveCurrentSection = () => {
     if (currentContent.length > 0) {
@@ -29,7 +30,6 @@ export const detectSections = (normalizedText: string): any => {
           };
         } else {
           sections[currentSectionKey].text += '\n\n' + joined;
-          // Keep highest confidence if appending
         }
       }
       currentContent = [];
@@ -39,13 +39,14 @@ export const detectSections = (normalizedText: string): any => {
   const normalizeKey = (header: string) => {
     const h = header.toUpperCase();
     if (h.includes('SUMMARY') || h.includes('PROFILE') || h.includes('OBJECTIVE')) return 'summary';
-    if (h.includes('EXPERIENCE') || h.includes('EMPLOYMENT') || h.includes('WORK')) return 'experience';
-    if (h.includes('EDUCATION') || h.includes('ACADEMIC')) return 'education';
-    if (h.includes('SKILL') || h.includes('COMPETENC')) return 'skills';
+    if (h.includes('EXPERIENCE') || h.includes('EMPLOYMENT') || h.includes('WORK') || h.includes('INTERNSHIP')) return 'experience';
+    if (h.includes('EDUCATION') || h.includes('ACADEMIC') || h.includes('QUALIFICATION')) return 'education';
+    if (h.includes('SKILL') || h.includes('COMPETENC') || h.includes('EXPERTISE')) return 'skills';
     if (h.includes('PROJECT') || h.includes('OPEN SOURCE')) return 'projects';
     if (h.includes('CERTIFICATION') || h.includes('LICENSE')) return 'certifications';
     if (h.includes('ACHIEVEMENT') || h.includes('AWARD') || h.includes('HONOR')) return 'achievements';
     if (h.includes('LANGUAGE')) return 'languages';
+    if (h.includes('INTEREST')) return 'interests';
     return header.toLowerCase().replace(/[^a-z0-9]/g, '_');
   };
 
@@ -58,22 +59,27 @@ export const detectSections = (normalizedText: string): any => {
     let matchConfidence = 0;
 
     const upperLine = trimmedLine.toUpperCase();
-    
-    // Direct match against known headers (allowing optional trailing colon)
     const exactMatch = sectionKeywords.find(kw => kw === upperLine || kw + ':' === upperLine);
     
     if (exactMatch) {
       isHeader = true;
       matchedHeader = exactMatch;
-      matchConfidence = 0.98; // Very high confidence for exact match
+      matchConfidence = 0.98; // Exact match
     } else {
-      // Check if it's a known header with some minor noise (e.g., "--- EXPERIENCE ---")
       const cleanedUpper = upperLine.replace(/[^A-Z ]/g, '').trim();
-      const cleanMatch = sectionKeywords.find(kw => kw === cleanedUpper);
-      if (cleanMatch && trimmedLine.length < 40) {
+      const fuzzyMatch = sectionKeywords.find(kw => kw === cleanedUpper);
+      if (fuzzyMatch && trimmedLine.length < 40) {
         isHeader = true;
-        matchedHeader = cleanMatch;
-        matchConfidence = 0.85; // Lower confidence for fuzzy match
+        matchedHeader = fuzzyMatch;
+        matchConfidence = 0.90; // Fuzzy match (ignoring symbols)
+      } else if (trimmedLine.length < 40) {
+        // Heuristic match
+        const heuristicMatch = sectionKeywords.find(kw => upperLine.includes(kw));
+        if (heuristicMatch) {
+          isHeader = true;
+          matchedHeader = heuristicMatch;
+          matchConfidence = 0.80;
+        }
       }
     }
 
@@ -87,6 +93,5 @@ export const detectSections = (normalizedText: string): any => {
   }
 
   saveCurrentSection();
-
   return sections;
 };

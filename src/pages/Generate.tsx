@@ -28,6 +28,7 @@ const Generate: React.FC = () => {
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const handleReset = () => {
     setFormData({
@@ -55,11 +56,36 @@ const Generate: React.FC = () => {
     }
 
     try {
-      // 1. Create Firestore Interview & Placeholder questions
-      const placeholderQuestions = Array.from({ length: formData.totalQuestions }).map((_, i) => ({
+      setGenerating(true);
+      
+      // 1. Generate real questions from the backend
+      const response = await fetch('http://localhost:3001/api/interviews/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          resumeId: formData.resumeId || null,
+          company: formData.company,
+          role: formData.role,
+          interviewType: formData.interviewType,
+          difficulty: formData.difficulty,
+          experience: formData.experienceLevel,
+          language: formData.language,
+          questionCount: formData.totalQuestions,
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Failed to generate questions from AI.');
+      }
+
+      const generatedQuestions = await response.json();
+
+      const questionsToSave = generatedQuestions.map((q: any, i: number) => ({
         order: i + 1,
-        question: `This is a placeholder question ${i + 1} for ${formData.role} at ${formData.company}. Real generation happens in Phase 3.3.`,
-        expectedAnswer: 'This is a placeholder expected answer.',
+        question: q.question,
+        expectedAnswer: q.expectedAnswer,
         userAnswer: '',
         aiFeedback: '',
         aiScore: 0,
@@ -68,6 +94,7 @@ const Generate: React.FC = () => {
         duration: 0,
       }));
 
+      // 2. Create Firestore Interview & Save questions
       const newInterview = await createInterview(
         user.id,
         {
@@ -84,15 +111,17 @@ const Generate: React.FC = () => {
           aiProvider: 'Gemini',
           feedbackId: null
         },
-        placeholderQuestions
+        questionsToSave
       );
 
-      // 2. Navigate to Interview Session using slug
+      // 3. Navigate to Interview Session using slug
       const slug = generateInterviewSlug(newInterview);
       navigate(`/interview/${slug}`);
       
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -255,13 +284,13 @@ const Generate: React.FC = () => {
             </button>
             <button 
               type="submit"
-              disabled={creatingInterview || !user?.id}
+              disabled={creatingInterview || generating || !user?.id}
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {creatingInterview ? (
+              {generating || creatingInterview ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Generating...
+                  {generating ? 'Generating AI Questions...' : 'Saving...'}
                 </>
               ) : (
                 <>

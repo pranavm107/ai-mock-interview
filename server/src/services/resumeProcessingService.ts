@@ -5,10 +5,18 @@ import { parsePdf } from './pdfParserService';
 import { normalizeResumeText } from './resumeNormalizerService';
 import crypto from 'crypto';
 
-export const processResume = async (resumeId: string, fileUrl: string): Promise<void> => {
+export interface ProcessResumeResult {
+  success: boolean;
+  aiSuccess: boolean;
+  aiError?: any;
+}
+
+export const processResume = async (resumeId: string, fileUrl: string): Promise<ProcessResumeResult> => {
   const resumeRef = doc(db, 'resumes', resumeId);
   const startTime = performance.now();
   let currentPhase = 'PROCESSING';
+  let aiSuccess = true;
+  let aiErrorObj = null;
 
   try {
     // 1. Update status to PROCESSING
@@ -50,14 +58,17 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
 
     // 6. Run normalization
     // 6. Run normalization & structuring
-    const normalizeStart = performance.now();
-    const { normalizedText, normalizationStats, entities, sections, language, structuredResume } = normalizeResumeText(parsedText);
-    const normalizeMs = Math.round(performance.now() - normalizeStart);
+    const { normalizedText, normalizationStats, entities, sections, language, structuredResume, timings } = normalizeResumeText(parsedText);
     
-    // We can consider the structure time as part of normalizeMs, or just log it all here.
+    // 7. Validate Data Quality
+    const startValidation = performance.now();
+    const { validateStructuredResume } = require('./structuredResumeValidator');
+    validateStructuredResume(structuredResume);
+    const validationMs = Math.round(performance.now() - startValidation);
+
     const totalMs = Math.round(performance.now() - startTime);
 
-    // 7. Update Firestore to STRUCTURED
+    // 8. Update Firestore to STRUCTURED
     currentPhase = 'STRUCTURING';
     await updateDoc(resumeRef, {
       'analysis.normalizedText': normalizedText,
@@ -69,16 +80,84 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
       'analysis.processingMetrics': {
         downloadMs,
         parseMs,
-        normalizeMs,
-        structureMs: 0, // bundled in normalizeMs for now
+        normalizeMs: Math.round(timings.normalizeMs),
+        entityExtractionMs: Math.round(timings.entityExtractionMs),
+        sectionDetectionMs: Math.round(timings.sectionDetectionMs),
+        structureMs: Math.round(timings.structureMs),
+        validationMs,
         totalMs
       },
       'status.state': 'STRUCTURED'
     });
 
+    // 8. Run AI Analysis
+    currentPhase = 'ANALYZING';
+    await updateDoc(resumeRef, {
+      'status.state': 'AI_ANALYZING'
+    });
+
+    const analyzeStart = performance.now();
+    
+    try {
+      let aiAnalysis;
+      
+      // Check cache
+      const { collection, query, where, getDocs } = require('firebase/firestore');
+      const resumesCol = collection(db, 'resumes');
+      const q = query(resumesCol, where('metadata.hash', '==', textHash), where('status.state', '==', 'AI_COMPLETED'));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty && querySnapshot.docs[0].data().analysis?.aiAnalysis) {
+        console.log(`[AI Cache Hit] Reusing AI analysis for hash ${textHash}`);
+        aiAnalysis = querySnapshot.docs[0].data().analysis.aiAnalysis;
+      } else {
+        console.log(`[AI Cache Miss] Calling Gemini for hash ${textHash}`);
+        const { analyzeStructuredResume } = require('./ai/resumeAnalysisService');
+        aiAnalysis = await analyzeStructuredResume(structuredResume);
+      }
+      
+      const analyzeMs = Math.round(performance.now() - analyzeStart);
+      const finalTotalMs = Math.round(performance.now() - startTime);
+
+      // 9. Update Firestore to AI_COMPLETED
+      console.log(`[AI Analysis Completed] Successfully analyzed resume ${resumeId}`);
+      await updateDoc(resumeRef, {
+        'analysis.aiAnalysis': aiAnalysis,
+        'analysis.processingMetrics.analyzeMs': analyzeMs,
+        'analysis.processingMetrics.totalMs': finalTotalMs,
+        'status.state': 'AI_COMPLETED',
+        'status.lastAnalysisAt': serverTimestamp()
+      });
+    } catch (aiError: any) {
+      console.error(`[Gemini Request Failed] Failed to analyze resume ${resumeId}:`, aiError.message);
+      
+      // Extract specific AI error code if available, otherwise generic
+      const errorCode = aiError.code || 'AI_ANALYSIS_ERROR';
+      aiSuccess = false;
+      aiErrorObj = {
+        code: errorCode,
+        message: aiError.message || 'Failed to generate AI analysis.',
+        retryable: aiError.retryable !== false
+      };
+      
+      await updateDoc(resumeRef, {
+        'status.state': 'AI_ANALYSIS_FAILED',
+        'status.lastAnalysisAt': serverTimestamp(),
+        'status.error': {
+          phase: 'ANALYZING',
+          code: errorCode,
+          message: aiError.message || 'Failed to generate AI analysis.',
+          timestamp: serverTimestamp()
+        }
+      });
+      // Do NOT throw error; the deterministic resume processing was successful.
+    }
+
+    return { success: true, aiSuccess, aiError: aiErrorObj };
+
   } catch (error: any) {
     console.error(`Failed to process resume ${resumeId} at phase ${currentPhase}:`, error);
-    // 8. Update to FAILED on error with detailed object
+    // 10. Update to FAILED on unrecoverable deterministic error
     try {
       await updateDoc(resumeRef, {
         'status.state': 'FAILED',
@@ -92,6 +171,14 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
     } catch (updateErr) {
       console.error(`Failed to update status to FAILED for resume ${resumeId}:`, updateErr);
     }
-    throw error;
+    
+    // Create structured error
+    throw {
+      success: false,
+      code: error.code || 'DETERMINISTIC_PROCESSING_ERROR',
+      phase: currentPhase,
+      message: error.message || 'Failed to parse resume.',
+      retryable: false
+    };
   }
 };

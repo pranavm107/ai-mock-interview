@@ -10,7 +10,7 @@ export interface ResumeMetadata {
 }
 
 export interface ResumeStatus {
-  state: 'UPLOADED' | 'PROCESSING' | 'PARSED' | 'NORMALIZING' | 'NORMALIZED' | 'STRUCTURING' | 'STRUCTURED' | 'ANALYZING' | 'ANALYZED' | 'QUESTION_GENERATED' | 'FAILED';
+  state: 'UPLOADED' | 'PROCESSING' | 'PARSED' | 'NORMALIZING' | 'NORMALIZED' | 'STRUCTURING' | 'STRUCTURED' | 'AI_ANALYZING' | 'AI_COMPLETED' | 'AI_ANALYSIS_FAILED' | 'ANALYZING' | 'ANALYZED' | 'QUESTION_GENERATED' | 'FAILED';
   uploadedAt: any; // Firestore Timestamp
   processingStartedAt?: any;
   processedAt?: any;
@@ -61,7 +61,12 @@ export interface ProcessingMetrics {
   downloadMs: number;
   parseMs: number;
   normalizeMs: number;
+  entityExtractionMs?: number;
+  sectionDetectionMs?: number;
+  skillsNormalizationMs?: number;
   structureMs?: number;
+  validationMs?: number;
+  analyzeMs?: number;
   totalMs: number;
 }
 
@@ -79,21 +84,71 @@ export interface ResumeLanguage {
   confidence: number;
 }
 
+export interface StructuredExperience {
+  company: string;
+  role: string;
+  duration: string;
+  bullets: string[];
+}
+
+export interface StructuredProject {
+  title: string;
+  technologies: string[];
+  description: string[];
+  outcomes: string[];
+}
+
+export interface StructuredEducation {
+  degree: string;
+  institution: string;
+  cgpa: string;
+  startYear: string;
+  endYear: string;
+}
+
+export interface StructuredSkills {
+  languages: string[];
+  frameworks: string[];
+  databases: string[];
+  cloud: string[];
+  tools: string[];
+  concepts: string[];
+}
+
 export interface StructuredResume {
   candidate: {
     name: string;
+    headline: string;
+    location: string;
     email: string;
     phone: string;
     github: string;
     linkedin: string;
     portfolio: string;
   };
-  skills: string[];
-  experience: string[];
-  education: string[];
-  projects: string[];
+  skills: StructuredSkills;
+  experience: StructuredExperience[];
+  education: StructuredEducation[];
+  projects: StructuredProject[];
   certifications: string[];
   languages: string[];
+}
+
+export interface ResumeAIAnalysis {
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  missingSkills: string[];
+  recommendedRoles: string[];
+  careerLevel: 'Student' | 'Intern' | 'Junior' | 'Mid' | 'Senior';
+  experienceLevel: string;
+  atsScore: number;
+  technicalScore: number;
+  communicationScore: number;
+  overallScore: number;
+  confidence: number;
+  recommendations: string[];
+  promptVersion?: string;
 }
 
 export interface ResumeAnalysis {
@@ -103,6 +158,7 @@ export interface ResumeAnalysis {
   entities?: ResumeEntities;
   language?: ResumeLanguage;
   structuredResume?: StructuredResume;
+  aiAnalysis?: ResumeAIAnalysis;
   normalizationStats?: NormalizationStats;
   processingMetrics?: ProcessingMetrics;
   

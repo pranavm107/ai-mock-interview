@@ -9,6 +9,8 @@ export const useResume = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [warning, setWarning] = useState<string | null>(null);
+
   const fetchResumes = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -36,6 +38,7 @@ export const useResume = () => {
     if (!user?.id) throw new Error("User not authenticated");
     try {
       setLoading(true);
+      setWarning(null);
       const newResume = await resumeService.createResume(user.id, file, title);
       
       // 2. Ping backend for processing
@@ -52,11 +55,23 @@ export const useResume = () => {
           })
         });
         
+        const responseData = await response.json();
+
         if (!response.ok) {
-           console.error('Failed to process resume on backend', await response.text());
+           console.error('Failed to process resume on backend', responseData);
+           throw new Error(responseData.message || 'Failed to process resume on backend');
+        }
+
+        if (!responseData.aiSuccess) {
+          if (responseData.aiError?.code === 'GEMINI_QUOTA_EXCEEDED') {
+            setWarning('Resume uploaded successfully. AI analysis is temporarily unavailable because the Gemini API daily quota has been exhausted. You can retry the AI analysis later without uploading the resume again.');
+          } else {
+            setWarning(`Resume uploaded successfully, but AI analysis failed: ${responseData.aiError?.message || 'Unknown error'}`);
+          }
         }
       } catch (backendError) {
         console.error('Backend process request failed:', backendError);
+        setWarning('Resume uploaded successfully, but backend processing encountered an error.');
       }
 
       // Add the new resume and refetch to ensure correct ordering/default status
@@ -106,6 +121,7 @@ export const useResume = () => {
     resumes,
     loading,
     error,
+    warning,
     uploadResume,
     deleteResume,
     setDefaultResume,

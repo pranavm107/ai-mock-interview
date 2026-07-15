@@ -1,5 +1,8 @@
 import { downloadResume } from './src/utils/downloadResume';
 import { normalizeResumeText } from './src/services/resumeNormalizerService';
+import { analyzeStructuredResume } from './src/services/ai/resumeAnalysisService';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function test() {
   try {
@@ -12,7 +15,7 @@ async function test() {
     const textResult = await parser.getText();
     console.log('Parsed text length:', textResult.text.length);
     
-    console.log('Normalizing...');
+    console.log('Normalizing & Structuring...');
     const { normalizedText, normalizationStats, entities, language, sections, structuredResume } = normalizeResumeText(textResult.text);
     console.log('Normalized text length:', normalizedText.length);
     console.log('Stats:', normalizationStats);
@@ -20,6 +23,12 @@ async function test() {
     console.log('Entities:', entities);
     console.log('Detected sections:', Object.keys(sections));
     console.log('Structured Resume:', JSON.stringify(structuredResume, null, 2));
+
+    console.log('Running AI Analysis...');
+    if (structuredResume) {
+      const aiAnalysis = await analyzeStructuredResume(structuredResume);
+      console.log('AI Analysis:', JSON.stringify(aiAnalysis, null, 2));
+    }
 
     console.log('Success!');
   } catch (e) {
