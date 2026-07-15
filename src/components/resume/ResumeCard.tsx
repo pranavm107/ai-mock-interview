@@ -78,8 +78,8 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-foreground truncate" title={resume.title}>
-            {resume.title}
+          <h3 className="text-lg font-semibold text-foreground truncate" title={resume.metadata?.title || (resume as any).title}>
+            {resume.metadata?.title || (resume as any).title}
           </h3>
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-xs text-muted-foreground">
@@ -89,7 +89,7 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({
             </div>
             <div className="flex items-center gap-1.5">
               <HardDrive className="w-3.5 h-3.5" />
-              <span>{formatBytes(resume.fileSize)}</span>
+              <span>{formatBytes(resume.metadata?.fileSize || (resume as any).fileSize)}</span>
             </div>
           </div>
         </div>

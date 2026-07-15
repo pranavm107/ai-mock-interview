@@ -37,6 +37,28 @@ export const useResume = () => {
     try {
       setLoading(true);
       const newResume = await resumeService.createResume(user.id, file, title);
+      
+      // 2. Ping backend for processing
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${apiUrl}/api/resumes/process`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            resumeId: newResume.id,
+            fileUrl: newResume.metadata.fileUrl
+          })
+        });
+        
+        if (!response.ok) {
+           console.error('Failed to process resume on backend', await response.text());
+        }
+      } catch (backendError) {
+        console.error('Backend process request failed:', backendError);
+      }
+
       // Add the new resume and refetch to ensure correct ordering/default status
       await fetchResumes();
       return newResume;

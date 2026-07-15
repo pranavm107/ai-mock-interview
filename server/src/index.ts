@@ -15,8 +15,10 @@ app.get('/health', (req, res) => {
 });
 
 import interviewRoutes from './routes/interviewRoutes';
+import resumeRoutes from './routes/resumeRoutes';
 
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/resumes', resumeRoutes);
 
 const server = http.createServer(app);
 
