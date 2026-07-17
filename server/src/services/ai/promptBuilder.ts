@@ -1,4 +1,4 @@
-import { StructuredResume } from '../../../../src/types/resume';
+import { StructuredResume } from '../../types/resume';
 
 export const PROMPT_VERSION = "v1.0";
 

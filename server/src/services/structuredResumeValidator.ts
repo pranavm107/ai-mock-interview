@@ -1,4 +1,4 @@
-import { StructuredResume } from '../../../src/types/resume';
+import { StructuredResume } from '../types/resume';
 
 export const validateStructuredResume = (resume: StructuredResume): void => {
   // 1. Candidate Validation

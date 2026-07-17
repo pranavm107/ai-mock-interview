@@ -1,4 +1,4 @@
-import { StructuredSkills } from '../../../src/types/resume';
+import { StructuredSkills } from '../types/resume';
 
 const skillDictionary: Record<string, { name: string, category: keyof StructuredSkills }> = {
   // Languages

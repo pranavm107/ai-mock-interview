@@ -1,4 +1,4 @@
-import { ResumeAIAnalysis } from '../../../../src/types/resume';
+import { ResumeAIAnalysis } from '../../types/resume';
 
 export const validateAIAnalysis = (jsonString: string): ResumeAIAnalysis => {
   let parsed: any;

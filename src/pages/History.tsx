@@ -3,7 +3,7 @@ import { History as HistoryIcon, Clock, AlertCircle, TrendingUp, CheckCircle, Ta
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { motion } from 'framer-motion';
 import { useUser } from '@clerk/clerk-react';
-import { useInterview } from '../hooks/useInterview';
+import { useInterviewHistory } from '../hooks/useInterviewHistory';
 import { InterviewList } from '../components/interview/InterviewList';
 import { InterviewFilters } from '../components/interview/InterviewFilters';
 import type { InterviewStatus, InterviewDifficulty, InterviewType } from '../types';
@@ -16,12 +16,12 @@ const History: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const { 
-    interviews, 
+    sessions: interviews, 
     loading, 
     error, 
-    refreshInterviews, 
-    deleteInterview 
-  } = useInterview();
+    fetchUserSessions: refreshInterviews, 
+    deleteSession: deleteInterview 
+  } = useInterviewHistory();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InterviewStatus | 'All'>('All');
@@ -40,7 +40,11 @@ const History: React.FC = () => {
         interview.role.toLowerCase().includes(searchQuery.toLowerCase()) || 
         interview.company.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesStatus = statusFilter === 'All' || interview.status === statusFilter;
+      const matchesStatus = statusFilter === 'All' || 
+        (statusFilter === 'Completed' && interview.state === 'COMPLETED') ||
+        (statusFilter === 'In Progress' && ['STARTED', 'ASKING', 'ANSWERING', 'EVALUATING', 'PAUSED'].includes(interview.state)) ||
+        (statusFilter === 'Draft' && ['CREATED', 'READY'].includes(interview.state));
+      
       const matchesDifficulty = difficultyFilter === 'All' || interview.difficulty === difficultyFilter;
       const matchesType = typeFilter === 'All' || interview.interviewType === typeFilter;
       
@@ -51,18 +55,18 @@ const History: React.FC = () => {
   // Dashboard Stats calculation
   const stats = useMemo(() => {
     const total = interviews.length;
-    const completed = interviews.filter(i => i.status === 'Completed').length;
-    const inProgress = interviews.filter(i => i.status === 'In Progress').length;
+    const completed = interviews.filter(i => i.state === 'COMPLETED').length;
+    const inProgress = interviews.filter(i => ['STARTED', 'ASKING', 'ANSWERING', 'EVALUATING', 'PAUSED'].includes(i.state)).length;
     
-    const completedWithScore = interviews.filter(i => i.status === 'Completed' && i.score !== null);
+    const completedWithScore = interviews.filter(i => i.state === 'COMPLETED' && i.score !== null);
     
     const avgScore = completedWithScore.length > 0 
       ? `${Math.round(completedWithScore.reduce((acc, curr) => acc + (curr.score || 0), 0) / completedWithScore.length)}%`
       : '—';
 
-    const completedWithDuration = interviews.filter(i => i.status === 'Completed' && i.duration);
+    const completedWithDuration = interviews.filter(i => i.state === 'COMPLETED' && i.metrics?.totalDurationMs);
     const avgDuration = completedWithDuration.length > 0 
-      ? `${Math.round(completedWithDuration.reduce((acc, curr) => acc + curr.duration, 0) / completedWithDuration.length)}m`
+      ? `${Math.round(completedWithDuration.reduce((acc, curr) => acc + (curr.metrics.totalDurationMs / 60000), 0) / completedWithDuration.length)}m`
       : '—';
 
     return { total, completed, inProgress, avgScore, avgDuration };
@@ -70,15 +74,18 @@ const History: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (user?.id) {
-      await deleteInterview(user.id, id);
+      await deleteInterview(id);
     }
   };
 
   const handleNavigation = (id: string) => {
     const interview = interviews.find(i => i.id === id);
     if (interview) {
-      const slug = generateInterviewSlug(interview);
-      navigate(`/interview/${slug}`);
+      if (interview.state === 'COMPLETED') {
+        navigate(`/report/${interview.id}`);
+      } else {
+        navigate(`/session/${interview.id}`);
+      }
     }
   };
 

@@ -65,13 +65,13 @@ const Generate: React.FC = () => {
         body: JSON.stringify({
           userId: user.id,
           resumeId: formData.resumeId || null,
-          company: formData.company,
-          role: formData.role,
+          targetCompany: formData.company,
+          targetRole: formData.role,
           interviewType: formData.interviewType,
           difficulty: formData.difficulty,
-          experience: formData.experienceLevel,
+          candidateExperienceLevel: formData.experienceLevel,
           language: formData.language,
-          questionCount: formData.totalQuestions,
+          totalQuestions: formData.totalQuestions,
         })
       });
 
@@ -80,43 +80,29 @@ const Generate: React.FC = () => {
         throw new Error(errorData?.error || 'Failed to generate questions from AI.');
       }
 
-      const generatedQuestions = await response.json();
+      const responseData = await response.json();
+      
+      const interviewId = responseData.id;
+      if (!interviewId) throw new Error('No interview ID returned from generation.');
 
-      const questionsToSave = generatedQuestions.map((q: any, i: number) => ({
-        order: i + 1,
-        question: q.question,
-        expectedAnswer: q.expectedAnswer,
-        userAnswer: '',
-        aiFeedback: '',
-        aiScore: 0,
-        answered: false,
-        skipped: false,
-        duration: 0,
-      }));
+      // 2. Create Interview Session for this interview
+      const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          interviewId: interviewId
+        })
+      });
 
-      // 2. Create Firestore Interview & Save questions
-      const newInterview = await createInterview(
-        user.id,
-        {
-          resumeId: formData.resumeId || null,
-          title: `${formData.role} at ${formData.company}`,
-          company: formData.company,
-          role: formData.role,
-          interviewType: formData.interviewType,
-          difficulty: formData.difficulty,
-          experienceLevel: formData.experienceLevel,
-          language: formData.language,
-          duration: formData.duration,
-          totalQuestions: formData.totalQuestions,
-          aiProvider: 'Gemini',
-          feedbackId: null
-        },
-        questionsToSave
-      );
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create interview session.');
+      }
 
-      // 3. Navigate to Interview Session using slug
-      const slug = generateInterviewSlug(newInterview);
-      navigate(`/interview/${slug}`);
+      const sessionData = await sessionResponse.json();
+
+      // 3. Navigate to Interview Session Runtime
+      navigate(`/session/${sessionData.id}`);
       
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview');
@@ -186,7 +172,7 @@ const Generate: React.FC = () => {
               >
                 <option value="">No Resume Context</option>
                 {resumes.map(r => (
-                  <option key={r.id} value={r.id}>{r.title || r.fileName}</option>
+                  <option key={r.id} value={r.id}>{r.metadata?.title || r.metadata?.fileName || r.id}</option>
                 ))}
               </select>
             </div>

@@ -1,4 +1,4 @@
-import { ResumeSections, ResumeEntities, StructuredResume, StructuredExperience, StructuredProject, StructuredEducation, StructuredSkills } from '../../../src/types/resume';
+import { ResumeSections, ResumeEntities, StructuredResume, StructuredExperience, StructuredProject, StructuredEducation, StructuredSkills } from '../types/resume';
 import { normalizeSkills } from './skillNormalizer';
 
 export const buildStructuredResume = (

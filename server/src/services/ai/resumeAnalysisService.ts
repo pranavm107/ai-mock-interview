@@ -1,4 +1,4 @@
-import { StructuredResume, ResumeAIAnalysis } from '../../../../src/types/resume';
+import { StructuredResume, ResumeAIAnalysis } from '../../types/resume';
 import { buildResumeAnalysisPrompt, PROMPT_VERSION } from './promptBuilder';
 import { generateJson } from './geminiClient';
 import { validateAIAnalysis } from './responseValidator';

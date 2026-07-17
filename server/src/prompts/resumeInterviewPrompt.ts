@@ -1,4 +1,4 @@
-import { StructuredResume } from '../../../src/types/resume';
+import { StructuredResume } from '../types/resume';
 
 export interface ResumePromptInput {
   company: string;
