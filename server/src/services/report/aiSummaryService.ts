@@ -45,7 +45,7 @@ export const generateReportSummaryAndVerdict = async (
   role: string,
   experienceLevel: string
 ): Promise<{ summary: string; hiringRecommendation: HiringRecommendation }> => {
-  
+
   const prompt = SUMMARY_PROMPT
     .replace('{role}', role)
     .replace('{experience_level}', experienceLevel)

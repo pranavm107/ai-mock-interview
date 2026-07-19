@@ -7,6 +7,7 @@ export const useInterviewSession = (sessionId?: string) => {
   const [answers, setAnswers] = useState<SessionAnswer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reportPending, setReportPending] = useState(false);
 
   const fetchSession = useCallback(async (id: string) => {
     try {
@@ -50,14 +51,30 @@ export const useInterviewSession = (sessionId?: string) => {
 
   const nextQuestion = async () => {
     if (!session) return;
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 35000); // 35s timeout
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/next`, { method: 'POST' });
+      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/next`, { 
+        method: 'POST',
+        signal: abortController.signal
+      });
       if (!res.ok) throw new Error('Failed to advance to next question');
-      setSession(await res.json());
+      const data = await res.json();
+      if (data.reportPending) {
+        setReportPending(true);
+        setSession(data.session);
+      } else {
+        setSession(data.session || data);
+      }
     } catch (err: any) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError('Request timed out while generating report.');
+      } else {
+        setError(err.message);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -82,14 +99,30 @@ export const useInterviewSession = (sessionId?: string) => {
 
   const skipQuestion = async () => {
     if (!session) return;
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 35000); // 35s timeout
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/skip`, { method: 'POST' });
+      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/skip`, { 
+        method: 'POST',
+        signal: abortController.signal
+      });
       if (!res.ok) throw new Error('Failed to skip question');
-      setSession(await res.json());
+      const data = await res.json();
+      if (data.reportPending) {
+        setReportPending(true);
+        setSession(data.session);
+      } else {
+        setSession(data.session || data);
+      }
     } catch (err: any) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError('Request timed out while generating report.');
+      } else {
+        setError(err.message);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -100,6 +133,7 @@ export const useInterviewSession = (sessionId?: string) => {
     answers,
     loading,
     error,
+    reportPending,
     startSession,
     nextQuestion,
     submitAnswer,

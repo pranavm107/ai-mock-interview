@@ -70,8 +70,17 @@ export const advanceSession = async (req: Request, res: Response) => {
     
     if (updatedSession.state === 'COMPLETED') {
       const { generateInterviewReport } = await import('../services/report/reportGenerationService');
-      // Await report generation so it's ready when frontend redirects
-      await generateInterviewReport(updatedSession, interview);
+      try {
+        await generateInterviewReport(updatedSession, interview);
+      } catch (generationError) {
+        console.error('Failed to generate interview report:', generationError);
+        return res.json({
+          success: true,
+          reportPending: true,
+          message: "Interview completed. AI report generation failed due to quota limits.",
+          session: updatedSession
+        });
+      }
     }
 
     res.json(updatedSession);
@@ -94,7 +103,17 @@ export const skipSessionQuestion = async (req: Request, res: Response) => {
     
     if (updatedSession.state === 'COMPLETED') {
       const { generateInterviewReport } = await import('../services/report/reportGenerationService');
-      await generateInterviewReport(updatedSession, interview);
+      try {
+        await generateInterviewReport(updatedSession, interview);
+      } catch (generationError) {
+        console.error('Failed to generate interview report:', generationError);
+        return res.json({
+          success: true,
+          reportPending: true,
+          message: "Interview completed. AI report generation failed due to quota limits.",
+          session: updatedSession
+        });
+      }
     }
 
     res.json(updatedSession);
