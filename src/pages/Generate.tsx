@@ -28,6 +28,7 @@ const Generate: React.FC = () => {
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const handleReset = () => {
     setFormData({
@@ -55,44 +56,58 @@ const Generate: React.FC = () => {
     }
 
     try {
-      // 1. Create Firestore Interview & Placeholder questions
-      const placeholderQuestions = Array.from({ length: formData.totalQuestions }).map((_, i) => ({
-        order: i + 1,
-        question: `This is a placeholder question ${i + 1} for ${formData.role} at ${formData.company}. Real generation happens in Phase 3.3.`,
-        expectedAnswer: 'This is a placeholder expected answer.',
-        userAnswer: '',
-        aiFeedback: '',
-        aiScore: 0,
-        answered: false,
-        skipped: false,
-        duration: 0,
-      }));
-
-      const newInterview = await createInterview(
-        user.id,
-        {
+      setGenerating(true);
+      
+      // 1. Generate real questions from the backend
+      const response = await fetch('http://localhost:3001/api/interviews/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
           resumeId: formData.resumeId || null,
-          title: `${formData.role} at ${formData.company}`,
-          company: formData.company,
-          role: formData.role,
+          targetCompany: formData.company,
+          targetRole: formData.role,
           interviewType: formData.interviewType,
           difficulty: formData.difficulty,
-          experienceLevel: formData.experienceLevel,
+          candidateExperienceLevel: formData.experienceLevel,
           language: formData.language,
-          duration: formData.duration,
           totalQuestions: formData.totalQuestions,
-          aiProvider: 'Gemini',
-          feedbackId: null
-        },
-        placeholderQuestions
-      );
+        })
+      });
 
-      // 2. Navigate to Interview Session using slug
-      const slug = generateInterviewSlug(newInterview);
-      navigate(`/interview/${slug}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Failed to generate questions from AI.');
+      }
+
+      const responseData = await response.json();
+      
+      const interviewId = responseData.id;
+      if (!interviewId) throw new Error('No interview ID returned from generation.');
+
+      // 2. Create Interview Session for this interview
+      const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          interviewId: interviewId
+        })
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create interview session.');
+      }
+
+      const sessionData = await sessionResponse.json();
+
+      // 3. Navigate to Interview Session Runtime
+      navigate(`/session/${sessionData.id}`);
       
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -157,7 +172,7 @@ const Generate: React.FC = () => {
               >
                 <option value="">No Resume Context</option>
                 {resumes.map(r => (
-                  <option key={r.id} value={r.id}>{r.title || r.fileName}</option>
+                  <option key={r.id} value={r.id}>{r.metadata?.title || r.metadata?.fileName || r.id}</option>
                 ))}
               </select>
             </div>
@@ -255,13 +270,13 @@ const Generate: React.FC = () => {
             </button>
             <button 
               type="submit"
-              disabled={creatingInterview || !user?.id}
+              disabled={creatingInterview || generating || !user?.id}
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {creatingInterview ? (
+              {generating || creatingInterview ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Generating...
+                  {generating ? 'Generating AI Questions...' : 'Saving...'}
                 </>
               ) : (
                 <>
