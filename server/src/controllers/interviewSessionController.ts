@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { initializeSession, startSession, submitAnswer, proceedToNextQuestion, skipQuestion } from '../services/runtime/sessionService';
+import { processAdaptiveAnswer } from '../services/adaptive/adaptiveInterviewService';
 import { getInterviewById } from '../services/interview/interviewStorageService';
 import { getInterviewSessionById } from '../services/runtime/sessionStorageService';
 
@@ -172,4 +173,31 @@ const calculateMockScore = (session: any) => {
   if (session.metrics.questionsAnswered === 0) return 0;
   // A simple 0-100 score based on answered questions
   return Math.min(100, Math.round((session.metrics.questionsAnswered / session.progress.totalQuestions) * 100));
+};
+
+export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
+  try {
+    const sessionId = req.params.sessionId as string;
+    const { questionId, questionText, answerText, remainingQuestions, durationMs, targetRole, expectedSkills } = req.body;
+    
+    if (!questionId || !questionText || !answerText) {
+      return res.status(400).json({ error: 'Missing adaptive answer details' });
+    }
+
+    const adaptiveResult = await processAdaptiveAnswer({
+      sessionId,
+      questionId,
+      questionText,
+      answerText,
+      remainingQuestions: remainingQuestions || 1,
+      durationMs: durationMs || 0,
+      targetRole,
+      expectedSkills
+    });
+
+    res.json(adaptiveResult);
+  } catch (error: any) {
+    console.error('Failed to submit adaptive answer:', error);
+    res.status(500).json({ error: error.message || 'Failed to submit adaptive answer' });
+  }
 };
