@@ -178,7 +178,7 @@ const calculateMockScore = (session: any) => {
 export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
-    const { questionId, questionText, answerText, remainingQuestions, durationMs, targetRole, expectedSkills } = req.body;
+    const { questionId, questionText, answerText, remainingQuestions, durationMs, remainingTimeMs, targetRole, expectedSkills } = req.body;
     
     if (!questionId || !questionText || !answerText) {
       return res.status(400).json({ error: 'Missing adaptive answer details' });
@@ -191,6 +191,7 @@ export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
       answerText,
       remainingQuestions: remainingQuestions || 1,
       durationMs: durationMs || 0,
+      remainingTimeMs,
       targetRole,
       expectedSkills
     });

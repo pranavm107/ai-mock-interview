@@ -2,9 +2,9 @@ import {
   AdaptiveState, 
   AdaptiveEvaluationResult, 
   DifficultyLevel,
-  InterviewerPersonalityType,
-  DecisionAction
+  InterviewerPersonalityType
 } from '../../types/adaptive';
+import { DecisionType } from '../../types/decision';
 import { 
   getAdaptiveState, 
   saveAdaptiveState 
@@ -17,9 +17,11 @@ import {
 } from './conversationMemory';
 import { evaluateAnswerAndGenerateFollowUp } from './followUpEngine';
 import { evaluateNextDecision } from './decisionEngine';
+import { evaluateInterviewFlow, FlowEngineInput } from './interviewFlowEngine';
 import { evaluateNextDifficulty } from './adaptiveDifficultyService';
 import crypto from 'crypto';
 import { FollowUpContext } from '../../types/followUp';
+import { DecisionContext } from '../../types/decision';
 
 export interface AdaptiveInput {
   sessionId: string;
@@ -28,6 +30,7 @@ export interface AdaptiveInput {
   answerText: string;
   remainingQuestions: number;
   durationMs: number;
+  remainingTimeMs?: number;
   targetRole?: string;
   expectedSkills?: string[];
 }
@@ -61,7 +64,7 @@ const getMaxFollowUps = (difficulty: string): number => {
 };
 
 export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<AdaptiveEvaluationResult> => {
-  const { sessionId, questionId, questionText, answerText, remainingQuestions, durationMs, targetRole, expectedSkills } = input;
+  const { sessionId, questionId, questionText, answerText, remainingQuestions, durationMs, remainingTimeMs, targetRole, expectedSkills } = input;
   
   let state = await getAdaptiveState(sessionId);
   if (!state) {
@@ -93,8 +96,19 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
   // Refresh memory from DB since updateMemory updated it
   memory = await getMemory(sessionId) as NonNullable<typeof memory>;
 
-  // 4. Update follow-up queue if Gemini suggested one
+  // 4. Evaluate Interview Flow
+  const flowInput: FlowEngineInput = {
+    memory,
+    durationMs,
+    remainingQuestions,
+    remainingTimeMs
+  };
+  const flowEvaluation = evaluateInterviewFlow(flowInput);
+
+  // 5. Update follow-up queue if Gemini suggested one
+  let isFollowUpRequestedByEngine = false;
   if (evalResult.followUp.shouldGenerate && evalResult.followUp.question) {
+    isFollowUpRequestedByEngine = true;
     await queueFollowUp(sessionId, evalResult.followUp.question, 'Auto-generated', evalResult.followUp.category || 'Clarification');
     state.followUpHistory.push({
       originalQuestionId: questionId,
@@ -104,32 +118,35 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
     });
   }
 
-  // 5. Decide next action
-  const lastAction = state.decisionHistory.length > 0 ? state.decisionHistory[state.decisionHistory.length - 1].action : undefined;
-  
-  const decisionResult = await evaluateNextDecision({
-    memory,
-    currentScore: score,
-    remainingQuestions,
-    currentDifficulty: state.currentDifficulty,
-    durationMs,
-    lastAction
-  });
+  // 6. Decide next action
+  const twoMinsAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+  const followUpCount = memory.followUpHistory.filter(f => f.createdAt > twoMinsAgo).length;
 
-  // If follow-up engine says we should generate, override the decision to FOLLOW_UP
-  let finalDecision = decisionResult.action;
-  if (evalResult.followUp.shouldGenerate && evalResult.followUp.question) {
-    finalDecision = 'FOLLOW_UP';
-  }
+  const decisionContext: DecisionContext = {
+    memory,
+    currentQuestion: questionText,
+    currentSection: flowEvaluation.currentSection,
+    currentDifficulty: state.currentDifficulty,
+    currentPersonality: state.personality,
+    answerScore: score,
+    remainingQuestions,
+    remainingTimeMs: flowEvaluation.estimatedTimeRemainingMs,
+    durationMs,
+    followUpCount,
+    isFollowUpRequestedByEngine,
+    targetRole
+  };
+
+  const decisionResult = await evaluateNextDecision(decisionContext);
 
   state.decisionHistory.push({
     timestamp: new Date().toISOString(),
-    action: finalDecision,
-    reasoning: evalResult.followUp.reason || decisionResult.reasoning,
-    context: { score }
+    action: decisionResult.decision,
+    reasoning: decisionResult.reason,
+    context: { score, evidence: decisionResult.evidence }
   });
 
-  // 6. Adjust Difficulty
+  // 7. Adjust Difficulty
   const recentScores = memory.confidenceHistory.slice(-3).map(c => c.score);
   const avgConfidence = recentScores.length ? recentScores.reduce((a,b)=>a+b, 0) / recentScores.length : 50;
   
@@ -145,41 +162,42 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
     else break;
   }
 
-  const nextDifficulty = evaluateNextDifficulty({
-    currentDifficulty: state.currentDifficulty,
-    answerScore: score,
-    averageConfidence: avgConfidence,
-    consecutiveHighScores,
-    consecutiveLowScores
-  });
+  let nextDifficulty = state.currentDifficulty;
+  if (decisionResult.decision === 'INCREASE_DIFFICULTY') {
+    nextDifficulty = evaluateNextDifficulty({ currentDifficulty: state.currentDifficulty, answerScore: score, averageConfidence: avgConfidence, consecutiveHighScores: 2, consecutiveLowScores: 0 });
+  } else if (decisionResult.decision === 'DECREASE_DIFFICULTY') {
+    nextDifficulty = evaluateNextDifficulty({ currentDifficulty: state.currentDifficulty, answerScore: score, averageConfidence: avgConfidence, consecutiveHighScores: 0, consecutiveLowScores: 2 });
+  }
 
   if (nextDifficulty !== state.currentDifficulty) {
     state.difficultyHistory.push({
       timestamp: new Date().toISOString(),
       previousLevel: state.currentDifficulty,
       newLevel: nextDifficulty,
-      reason: `Score was ${score}, avg confidence ${avgConfidence}`
+      reason: `Engine decided ${decisionResult.decision}`
     });
     state.currentDifficulty = nextDifficulty;
   }
 
   await saveAdaptiveState(sessionId, state);
 
-  // Calculate remaining follow ups
-  const twoMinsAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-  const currentCount = memory.followUpHistory.filter(f => f.createdAt > twoMinsAgo).length;
-  const maxLimit = getMaxFollowUps(state.currentDifficulty);
-
   return {
-    decision: finalDecision,
-    followUpQuestion: evalResult.followUp.question || undefined,
+    decision: decisionResult.decision,
+    decisionConfidence: decisionResult.decisionConfidence,
+    reason: decisionResult.reason,
+    evidence: decisionResult.evidence,
     difficulty: state.currentDifficulty,
+    nextAction: decisionResult.alternativeDecision || 'NEXT_QUESTION',
+    remainingQuestions,
+    remainingTime: flowEvaluation.estimatedTimeRemainingMs,
+    topicsCovered: flowEvaluation.topicsCovered,
+    topicsRemaining: flowEvaluation.topicsRemaining,
+    weakTopics: memory.weakAreas,
+    strongTopics: memory.strongAreas,
+    followUp: evalResult.followUp.question ? evalResult.followUp : undefined,
+    interviewProgress: flowEvaluation,
     memoryUpdated: true,
     personality: state.personality,
-    reasoning: evalResult.followUp.reason || decisionResult.reasoning,
-    category: evalResult.followUp.category,
-    priority: evalResult.followUp.priority,
-    reason: evalResult.followUp.reason,
-    remainingFollowUps: Math.max(0, maxLimit - currentCount)
+    reasoning: decisionResult.reason
   };
 };

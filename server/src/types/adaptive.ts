@@ -10,14 +10,7 @@ export type InterviewerPersonalityType =
   | 'Startup Founder' 
   | 'System Design';
 
-export type DecisionAction = 
-  | 'NEXT_QUESTION' 
-  | 'FOLLOW_UP' 
-  | 'REPEAT' 
-  | 'CHANGE_TOPIC' 
-  | 'INCREASE_DIFFICULTY' 
-  | 'DECREASE_DIFFICULTY' 
-  | 'FINISH';
+import { DecisionType } from './decision';
 
 export type FollowUpType = 
   | 'Clarification' 
@@ -58,7 +51,7 @@ export interface DifficultyHistoryEntry {
 
 export interface DecisionHistoryEntry {
   timestamp: string;
-  action: DecisionAction;
+  action: DecisionType;
   reasoning: string;
   context: any;
 }
@@ -76,7 +69,7 @@ export interface AdaptiveState {
 }
 
 export interface AdaptiveEvaluationResult {
-  decision: DecisionAction;
+  decision: DecisionType;
   followUpQuestion?: string;
   difficulty: DifficultyLevel;
   memoryUpdated: boolean;
@@ -85,5 +78,15 @@ export interface AdaptiveEvaluationResult {
   category?: string | null;
   reason?: string | null;
   priority?: string | null;
-  remainingFollowUps?: number;
+  decisionConfidence?: string;
+  evidence?: any[];
+  nextAction?: string;
+  remainingQuestions?: number;
+  remainingTime?: number;
+  topicsCovered?: string[];
+  topicsRemaining?: string[];
+  weakTopics?: any[];
+  strongTopics?: any[];
+  followUp?: any;
+  interviewProgress?: any;
 }
