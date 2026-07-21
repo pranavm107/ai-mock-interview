@@ -136,7 +136,7 @@ export const normalizeSkills = (skillsSection: string | undefined): StructuredSk
   cleanedText = cleanedText.replace(/also familiar with:?/gi, '');
   
   // 2. Split by common delimiters
-  const rawTokens = cleanedText.split(/[,|•\/;\n]|\s{2,}/);
+  const rawTokens = cleanedText.split(/[,|•/;\n]|\s{2,}/);
   
   const processed = rawTokens
     .map(t => t.trim().replace(/[()]/g, '')) // Remove parentheses like (Scikit-Learn)

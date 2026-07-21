@@ -1,7 +1,7 @@
 import { cleanText } from './textCleaner';
 import { extractEntities } from './entityExtractor';
 import { detectSections } from './sectionDetector';
-import { normalizeSkills } from './skillNormalizer';
+
 import { detectLanguage } from './languageDetector';
 import { buildStructuredResume } from './structuredObjectBuilder';
 

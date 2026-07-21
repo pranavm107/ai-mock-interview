@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SkillAnalysis } from '../../../server/src/types/interviewReport';
-import { Star, StarHalf, Layers } from 'lucide-react';
+import { Star, Layers } from 'lucide-react';
 
 interface Props {
   skills: SkillAnalysis[];

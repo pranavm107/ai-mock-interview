@@ -15,10 +15,10 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    let timeout1: NodeJS.Timeout;
-    let timeout2: NodeJS.Timeout;
-    let timeout3: NodeJS.Timeout;
-    let timeout4: NodeJS.Timeout;
+    let timeout1: ReturnType<typeof setTimeout>;
+    let timeout2: ReturnType<typeof setTimeout>;
+    let timeout3: ReturnType<typeof setTimeout>;
+    let timeout4: ReturnType<typeof setTimeout>;
 
     if (isUploading && status === 'uploading') {
       timeout1 = setTimeout(() => {
@@ -47,7 +47,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
     };
   }, [isUploading, status]);
 
-  const validateAndUpload = async (file: File) => {
+  const validateAndUpload = useCallback(async (file: File) => {
     setErrorMessage('');
     if (file.type !== 'application/pdf') {
       setStatus('error');
@@ -66,12 +66,12 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
     try {
       setStatus('uploading');
       await onUpload(file);
-    } catch (err) {
+    } catch {
       setStatus('error');
       setErrorMessage("Upload failed. Please try again.");
       setTimeout(() => setStatus('idle'), 4000);
     }
-  };
+  }, [onUpload]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -93,7 +93,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       validateAndUpload(e.dataTransfer.files[0]);
     }
-  }, [isUploading]);
+  }, [isUploading, validateAndUpload]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -103,7 +103,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
       validateAndUpload(e.target.files[0]);
     }
     e.target.value = '';
-  }, [isUploading]);
+  }, [isUploading, validateAndUpload]);
 
   return (
     <div className="w-full">

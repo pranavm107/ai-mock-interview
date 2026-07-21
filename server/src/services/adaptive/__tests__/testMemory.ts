@@ -1,13 +1,10 @@
 import { 
   initializeMemory, 
-  extractEntities, 
   mergeMemory, 
   getConversationSummary,
   getRecentContext,
   getProjectHistory,
   getSkillHistory,
-  getWeakTopics,
-  getStrongTopics,
   resetMemory
 } from '../conversationMemory';
 import { MemoryUpdate } from '../../../types/conversationMemory';

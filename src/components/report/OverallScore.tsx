@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { OverallEvaluation } from '../../../server/src/types/interviewReport';
-import { motion, useAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer 
 } from 'recharts';

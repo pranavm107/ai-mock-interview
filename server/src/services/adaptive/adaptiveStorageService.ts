@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase.config";
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ConversationMemory, MemorySnapshot } from "../../types/conversationMemory";
 import { AdaptiveState } from "../../types/adaptive";
 

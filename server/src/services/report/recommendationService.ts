@@ -1,4 +1,4 @@
-import { QuestionEvaluation, Recommendation, ImprovementPlan, SkillAnalysis } from "../../types/interviewReport";
+import { Recommendation, ImprovementPlan, SkillAnalysis } from "../../types/interviewReport";
 import { generateJson } from "../ai/geminiClient";
 
 const RECOMMENDATION_PROMPT = `You are an expert career coach and technical interviewer.

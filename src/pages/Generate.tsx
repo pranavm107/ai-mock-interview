@@ -6,13 +6,12 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { motion } from 'framer-motion';
 import { useInterview } from '../hooks/useInterview';
 import { useResume } from '../hooks/useResume';
-import { generateInterviewSlug } from '../utils/slugHelper';
 import type { InterviewType, InterviewDifficulty, ExperienceLevel } from '../types';
 
 const Generate: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
-  const { createInterview, loading: creatingInterview } = useInterview();
+  const { loading: creatingInterview } = useInterview();
   const { resumes, loading: loadingResumes } = useResume();
 
   const [formData, setFormData] = useState({

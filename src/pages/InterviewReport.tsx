@@ -83,9 +83,7 @@ const InterviewReportPage: React.FC = () => {
         <ActionableInsights 
           strengths={report.strengths} 
           weaknesses={report.weaknesses} 
-          recommendations={report.recommendations} 
           improvementPlan={report.improvementPlan} 
-          skillsAnalysis={report.skillsAnalysis}
         />
         
         <QuestionReview evaluations={report.questionEvaluations} />

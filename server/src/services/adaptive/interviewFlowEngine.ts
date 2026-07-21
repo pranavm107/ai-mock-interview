@@ -1,5 +1,4 @@
 import { ConversationMemory } from '../../types/conversationMemory';
-import { InterviewProgress } from '../../types/decision';
 
 export interface FlowEngineInput {
   memory: ConversationMemory;
@@ -20,7 +19,6 @@ export interface FlowEvaluation {
 }
 
 const DEFAULT_BLUEPRINT = ['Technical', 'Behavioral', 'HR'];
-const AVG_MS_PER_QUESTION = 5 * 60 * 1000; // 5 minutes
 
 export const evaluateInterviewFlow = (input: FlowEngineInput): FlowEvaluation => {
   const { memory, durationMs, remainingQuestions, remainingTimeMs, blueprint = DEFAULT_BLUEPRINT } = input;

@@ -36,7 +36,6 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
   }, [state]);
 
   const wsRef = useRef<WebSocket | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null); // Kept for type safety if needed elsewhere
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
@@ -51,62 +50,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
     }
   }, [state.isMuted, state.isSpeaking]);
 
-  const connectWebSocket = useCallback(() => {
-    if (!sessionId) return;
-    
-    // Connect to WebSocket using the current host, handling dev server ports
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Use API base URL from env if present, else fallback to current origin
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    const wsUrl = backendUrl.replace(/^http/, 'ws') + `/api/voice/socket?sessionId=${sessionId}`;
 
-    setState(prev => ({ ...prev, connectionStatus: 'connecting' }));
-    
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      setState(prev => ({ ...prev, connectionStatus: 'connected' }));
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        switch (data.type) {
-          case 'TRANSCRIPT':
-            setState(prev => ({ ...prev, transcript: data.data.transcript, interviewState: 'LISTENING' }));
-            break;
-          case 'USER_PAUSED':
-            setState(prev => ({ ...prev, interviewState: 'PAUSED' }));
-            break;
-          case 'AI_SPEAKING':
-            setState(prev => ({ ...prev, isSpeaking: true }));
-            break;
-          case 'AI_FINISHED':
-            setState(prev => ({ ...prev, isSpeaking: false }));
-            break;
-          case 'USER_STARTED':
-            setState(prev => ({ ...prev, interviewState: 'LISTENING' }));
-            break;
-          case 'Error':
-            console.error('Voice Socket Error:', data.message);
-            setState(prev => ({ ...prev, connectionStatus: 'error' }));
-            break;
-        }
-      } catch (e) {
-        console.error('Error parsing WebSocket message', e);
-      }
-    };
-
-    ws.onclose = () => {
-      setState(prev => ({ ...prev, connectionStatus: 'disconnected' }));
-    };
-
-    ws.onerror = () => {
-      setState(prev => ({ ...prev, connectionStatus: 'error' }));
-    };
-
-  }, [sessionId]);
 
   const disconnectWebSocket = useCallback(() => {
     if (wsRef.current) {
@@ -126,7 +70,6 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
 
       // Return a promise to wait for WS to connect
       await new Promise<void>((resolve, reject) => {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = backendUrl.replace(/^http/, 'ws') + `/api/voice/socket?sessionId=${sessionId}`;
 
         setState(prev => ({ ...prev, connectionStatus: 'connecting' }));
@@ -215,7 +158,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
   };
 
 
-  const stopVoice = async () => {
+  const stopVoice = useCallback(async () => {
     if (processorRef.current) {
       processorRef.current.disconnect();
       processorRef.current = null;
@@ -235,7 +178,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
       const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       fetch(`${backendUrl}/api/voice/session/${sessionId}/stop`, { method: 'POST' }).catch(console.error);
     }
-  };
+  }, [sessionId, disconnectWebSocket]);
 
   const startAnswer = async () => {
     if (!sessionId) return;
@@ -302,7 +245,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
     return () => {
       stopVoice();
     };
-  }, [sessionId]);
+  }, [sessionId, stopVoice]);
 
   return {
     ...state,

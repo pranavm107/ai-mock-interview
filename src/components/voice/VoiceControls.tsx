@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, PhoneOff, Play, Loader2, RotateCcw, Check, SkipForward } from 'lucide-react';
+import { Mic, MicOff, PhoneOff, Loader2, RotateCcw, Check, SkipForward } from 'lucide-react';
 import type { InterviewState } from '../../hooks/useVoiceInterview';
 
 interface VoiceControlsProps {

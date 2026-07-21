@@ -1,5 +1,7 @@
-export type DifficultyLevel = 'Beginner' | 'Easy' | 'Medium' | 'Advanced' | 'Senior' | 'Expert';
+import type { DecisionType } from './decision';
+import type { LiveEvaluation } from './liveEvaluation';
 
+export type DifficultyLevel = 'Beginner' | 'Easy' | 'Medium' | 'Advanced' | 'Senior' | 'Expert';
 
 export type InterviewerPersonalityType = 
   | 'Friendly' 
@@ -9,9 +11,6 @@ export type InterviewerPersonalityType =
   | 'Engineering Manager' 
   | 'Startup Founder' 
   | 'System Design';
-
-import { DecisionType } from './decision';
-import { LiveEvaluation } from './evaluation';
 
 export type FollowUpType = 
   | 'Clarification' 
@@ -40,8 +39,6 @@ export interface FollowUpHistoryEntry {
   answerText?: string;
   timestamp: string;
 }
-
-
 
 export interface DifficultyHistoryEntry {
   timestamp: string;

@@ -1,10 +1,7 @@
 import { 
   AdaptiveState, 
-  AdaptiveEvaluationResult, 
-  DifficultyLevel,
-  InterviewerPersonalityType
+  AdaptiveEvaluationResult
 } from '../../types/adaptive';
-import { DecisionType } from '../../types/decision';
 import { 
   getAdaptiveState, 
   saveAdaptiveState 
@@ -50,18 +47,6 @@ const initializeState = async (sessionId: string): Promise<AdaptiveState> => {
   };
   await saveAdaptiveState(sessionId, initialState);
   return initialState;
-};
-
-const getMaxFollowUps = (difficulty: string): number => {
-  switch (difficulty) {
-    case 'Beginner': return 0;
-    case 'Easy': return 1;
-    case 'Medium': return 2;
-    case 'Advanced': return 3;
-    case 'Senior': return 4;
-    case 'Expert': return 4;
-    default: return 2;
-  }
 };
 
 export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<AdaptiveEvaluationResult> => {

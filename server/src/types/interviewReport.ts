@@ -1,4 +1,4 @@
-import { SessionEvent } from './interviewSession';
+import type { SessionEvent } from './interviewSession';
 
 export interface QuestionEvaluation {
   questionId: string;

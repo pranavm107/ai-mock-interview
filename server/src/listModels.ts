@@ -9,8 +9,6 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-
 async function listModels() {
   try {
     // Actually @google/generative-ai doesn't expose listModels directly easily, 

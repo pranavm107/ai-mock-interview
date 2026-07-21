@@ -31,7 +31,7 @@ export const InterviewTimeline: React.FC<Props> = ({ events }) => {
       </div>
 
       <div className="relative pl-4 border-l-2 border-slate-100 ml-4 space-y-8">
-        {events.map((event, index) => (
+        {events.map((event) => (
           <div key={event.id} className="relative">
             {/* Timeline Dot */}
             <div className="absolute -left-[25px] top-1 bg-white border-2 border-slate-200 rounded-full p-1 shadow-sm">

@@ -1,4 +1,4 @@
-import { ResumeSections, ResumeEntities, StructuredResume, StructuredExperience, StructuredProject, StructuredEducation, StructuredSkills } from '../types/resume';
+import { ResumeSections, ResumeEntities, StructuredResume, StructuredExperience, StructuredProject, StructuredEducation } from '../types/resume';
 import { normalizeSkills } from './skillNormalizer';
 
 export const buildStructuredResume = (
@@ -52,7 +52,7 @@ export const buildStructuredResume = (
   const extractLanguages = (text: string | undefined): string[] => {
     if (!text) return [];
     // Split on delimiters AND words like "and", "&".
-    const raw = text.split(/[,|•\/;\n&]|\b(?:and)\b|\s{2,}/i);
+    const raw = text.split(/[,|•/;\n&]|\b(?:and)\b|\s{2,}/i);
     const ignoreList = ['read', 'write', 'speak', 'native', 'fluent', 'beginner', 'intermediate', 'advanced', 'proficient'];
     
     return Array.from(new Set(
@@ -78,9 +78,9 @@ export const buildStructuredResume = (
     let currentExp: Partial<StructuredExperience> | null = null;
     
     for (const line of lines) {
-      const isBullet = /^[•\-\*]\s/.test(line);
+      const isBullet = /^[•\-*]\s/.test(line);
       const isDate = /\b(?:19|20)\d{2}\b/.test(line);
-      const hasDelimiter = /\||—|-/.test(line) && !isBullet;
+      // const hasDelimiter = /\||—|-/.test(line) && !isBullet;
       
       // If it's not a bullet, and it looks like a header (has dates, delimiters, or is short)
       if (!isBullet && (hasDelimiter || isDate || line.length < 50)) {
@@ -106,7 +106,7 @@ export const buildStructuredResume = (
         
         currentExp = { role, company, duration, bullets: [] };
       } else if (currentExp) {
-        currentExp.bullets!.push(line.replace(/^[•\-\*]\s*/, '').trim());
+        currentExp.bullets!.push(line.replace(/^[•\-*]\s*/, '').trim());
       }
     }
     if (currentExp) experiences.push(currentExp as StructuredExperience);
@@ -119,7 +119,7 @@ export const buildStructuredResume = (
     let currentProj: Partial<StructuredProject> | null = null;
     
     for (const line of lines) {
-      const isBullet = /^[•\-\*]\s/.test(line);
+      const isBullet = /^[•\-*]\s/.test(line);
       const lower = line.toLowerCase();
       const isToolsLine = lower.startsWith('tools used:') || lower.startsWith('technologies:');
       
@@ -144,7 +144,7 @@ export const buildStructuredResume = (
           const techStr = line.replace(/^(?:\w+\s+)+:/i, '');
           currentProj.technologies!.push(...cleanArray(techStr.split(/[,|]/)));
         } else {
-          const cleaned = line.replace(/^[•\-\*]\s*/, '').trim();
+          const cleaned = line.replace(/^[•\-*]\s*/, '').trim();
           if (cleaned.toLowerCase().startsWith('outcome:')) {
             currentProj.outcomes!.push(cleaned.replace(/^outcome:\s*/i, ''));
           } else {
@@ -163,7 +163,7 @@ export const buildStructuredResume = (
     let currentEdu: Partial<StructuredEducation> | null = null;
     
     for (const line of lines) {
-      const hasDate = /\b(20\d{2})\b/.test(line);
+      // const hasDate = /\b(20\d{2})\b/.test(line);
       const hasCgpa = /cgpa|gpa/i.test(line);
       const hasDelimiter = /\||—|-/.test(line);
       
@@ -224,6 +224,6 @@ export const buildStructuredResume = (
     experience: parseExperience(getLines(sections.experience?.text)),
     education: parseEducation(getLines(sections.education?.text)),
     projects: parseProjects(getLines(sections.projects?.text)),
-    certifications: cleanArray(getLines(sections.certifications?.text).map(l => l.replace(/^[•\-\*]\s*/, '')))
+    certifications: cleanArray(getLines(sections.certifications?.text).map(l => l.replace(/^[•\-*]\s*/, '')))
   };
 };

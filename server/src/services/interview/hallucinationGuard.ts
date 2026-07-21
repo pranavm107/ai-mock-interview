@@ -12,15 +12,7 @@ export const runHallucinationGuard = (
   questions: InterviewQuestion[],
   blueprint: InterviewBlueprint
 ) => {
-  const { resumeCoverage, skillCoverage } = blueprint;
-
-  // Compile all known terms from the resume (lowercase for matching)
-  const knownTerms = new Set([
-    ...resumeCoverage.targetProjects.map(p => p.toLowerCase()),
-    ...resumeCoverage.targetExperience.map(e => e.toLowerCase()),
-    ...skillCoverage.prioritySkills.map(s => s.toLowerCase()),
-    ...skillCoverage.optionalSkills.map(s => s.toLowerCase())
-  ]);
+  const { resumeCoverage } = blueprint;
 
   for (const q of questions) {
     if (q.section === "RESUME") {

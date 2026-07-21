@@ -46,7 +46,7 @@ export const initializeSession = async (
   return session;
 };
 
-export const startSession = async (sessionId: string, interview: Interview): Promise<InterviewSession> => {
+export const startSession = async (sessionId: string, _interview?: any): Promise<InterviewSession> => {
   const session = await getInterviewSessionById(sessionId);
   if (!session) throw new Error("Session not found");
 

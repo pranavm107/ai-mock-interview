@@ -5,17 +5,24 @@ import { useVoiceInterview } from '../hooks/useVoiceInterview';
 import { VoiceControls } from '../components/voice/VoiceControls';
 import { VoiceVisualizer } from '../components/voice/VoiceVisualizer';
 import { LiveTranscript } from '../components/voice/LiveTranscript';
-import { Loader2, Play, Square, SkipForward, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Loader2, Play, SkipForward, CheckCircle2, MessageSquare } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { InterviewAnalyticsPanel } from '../components/interview/analytics/InterviewAnalyticsPanel';
 
 const InterviewRuntime: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { session, interview, loading, error, reportPending, startSession, nextQuestion, submitAnswer, skipQuestion } = useInterviewSession(sessionId);
+  const { 
+    session, interview, liveEvaluation, loading, error, reportPending, 
+    decision, difficulty, remainingQuestions, remainingTime, confidence,
+    adaptiveResult, analyticsError, loadingAnalytics,
+    startSession, nextQuestion, submitAnswer, skipQuestion 
+  } = useInterviewSession(sessionId);
 
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [questionStartTime, setQuestionStartTime] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [dynamicQuestion, setDynamicQuestion] = useState<any>(null);
 
 
 
@@ -23,7 +30,7 @@ const InterviewRuntime: React.FC = () => {
     if ((session?.state === 'STARTED' || session?.state === 'ASKING') && !questionStartTime) {
       setQuestionStartTime(new Date().toISOString());
     }
-  }, [session?.state, session?.progress.currentQuestionIndex]);
+  }, [session?.state, session?.progress.currentQuestionIndex, questionStartTime]);
 
   useEffect(() => {
     if (session?.state === 'COMPLETED' && !reportPending) {
@@ -35,16 +42,12 @@ const InterviewRuntime: React.FC = () => {
     }
   }, [session?.state, session?.id, navigate, reportPending]);
 
-  const currentQuestion = session?.progress?.currentQuestionIndex !== undefined && session.progress.currentQuestionIndex >= 0 && interview?.questions
+  const currentQuestion = dynamicQuestion || (session?.progress?.currentQuestionIndex !== undefined && session.progress.currentQuestionIndex >= 0 && interview?.questions
     ? interview.questions[session.progress.currentQuestionIndex]
-    : null;
+    : null);
 
   const handleStart = async () => {
     await startSession();
-  };
-
-  const handleNext = async () => {
-    await nextQuestion();
   };
 
   const handleSkip = async () => {
@@ -53,23 +56,26 @@ const InterviewRuntime: React.FC = () => {
 
   const isSubmittingRef = React.useRef(false);
 
-  const handleSubmit = async (overrideAnswer?: string, shouldAdvance = true) => {
+  const handleSubmit = React.useCallback(async (overrideAnswer?: string, shouldAdvance = true) => {
     if (!currentQuestion || !questionStartTime || !session || isSubmittingRef.current) return;
     const answerToSubmit = overrideAnswer || currentAnswer;
     if (!answerToSubmit.trim()) return;
 
     isSubmittingRef.current = true;
     try {
-      await submitAnswer(currentQuestion.id || `q_${session.progress.currentQuestionIndex}`, answerToSubmit, questionStartTime, answerToSubmit.split(' ').length);
+      const responseData = await submitAnswer(currentQuestion.id || `q_${session.progress.currentQuestionIndex}`, answerToSubmit, questionStartTime, answerToSubmit.split(' ').length);
       setCurrentAnswer('');
       setQuestionStartTime(null);
-      if (shouldAdvance) {
+      if (responseData?.nextQuestion) {
+        setDynamicQuestion(responseData.nextQuestion);
+      } else if (shouldAdvance) {
+        setDynamicQuestion(null);
         await nextQuestion();
       }
     } finally {
       isSubmittingRef.current = false;
     }
-  };
+  }, [currentQuestion, questionStartTime, session, currentAnswer, submitAnswer, nextQuestion]);
 
   const handleSubmitRef = React.useRef(handleSubmit);
   useEffect(() => {
@@ -133,9 +139,13 @@ const InterviewRuntime: React.FC = () => {
   }
 
   return (
-    <div className="pb-24 max-w-4xl mx-auto">
-      <PageHeader 
-        title={`Live Interview: ${interview.role}`}
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
+      
+      {/* Left side: Interview Content */}
+      <div className="flex-1 lg:w-2/3 overflow-y-auto pb-24 px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="max-w-4xl mx-auto lg:mx-0">
+          <PageHeader 
+            title={`Live Interview: ${interview.role}`}
         description={`Session State: ${session.state} | Progress: ${session.progress.currentQuestionIndex + 1}/${session.progress.totalQuestions}`}
         icon={Play}
       />
@@ -287,6 +297,25 @@ const InterviewRuntime: React.FC = () => {
         )}
 
       </div>
+        </div>
+      </div>
+
+      {/* Right side: Analytics Panel */}
+      <div className="w-full lg:w-1/3 h-full border-t lg:border-t-0 border-slate-200 bg-slate-50">
+        <InterviewAnalyticsPanel 
+          evaluation={liveEvaluation}
+          decision={decision}
+          difficulty={difficulty}
+          remainingQuestions={remainingQuestions}
+          remainingTime={remainingTime}
+          confidence={confidence}
+          adaptiveResult={adaptiveResult}
+          isLoading={loadingAnalytics || (loading && !liveEvaluation)}
+          error={analyticsError}
+          hasStarted={session.state === 'STARTED' || session.state === 'ASKING'}
+        />
+      </div>
+
     </div>
   );
 };

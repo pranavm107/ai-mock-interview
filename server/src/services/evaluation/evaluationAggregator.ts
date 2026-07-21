@@ -5,7 +5,6 @@ import {
   Weakness, 
   ConfidenceHistory,
   LiveEvaluation,
-  Trend,
   InterviewProgress
 } from '../../types/evaluation';
 import { ConversationMemory } from '../../types/conversationMemory';

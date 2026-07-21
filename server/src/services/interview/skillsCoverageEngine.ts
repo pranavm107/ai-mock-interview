@@ -19,7 +19,6 @@ export const determineSkillCoverage = (structuredResume: any, roleProfile: any):
   }
 
   const rolePriority = roleProfile?.prioritySkills || [];
-  const roleOptional = roleProfile?.optionalSkills || [];
 
   // Match resume skills with role priority to form priority list
   resumeSkills.forEach(skill => {

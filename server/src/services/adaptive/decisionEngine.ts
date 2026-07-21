@@ -1,4 +1,4 @@
-import { DecisionContext, DecisionResult, DecisionType, DecisionConfidence } from '../../types/decision';
+import { DecisionContext, DecisionResult } from '../../types/decision';
 
 export const evaluateNextDecision = (context: DecisionContext): DecisionResult => {
   const { 

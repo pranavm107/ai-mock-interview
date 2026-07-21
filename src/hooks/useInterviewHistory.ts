@@ -28,8 +28,10 @@ export interface EnrichedInterviewSession {
   score: number | null;
 }
 
+import type { Interview } from '../types';
+
 export const useInterviewHistory = () => {
-  const [sessions, setSessions] = useState<EnrichedInterviewSession[]>([]);
+  const [sessions, setSessions] = useState<Interview[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +43,7 @@ export const useInterviewHistory = () => {
       if (!res.ok) throw new Error('Failed to load sessions');
       const data = await res.json();
       
-      const mappedSessions = data.map((session: EnrichedInterviewSession): any => {
+      const mappedSessions = data.map((session: EnrichedInterviewSession): Interview => {
         let status = 'Draft';
         if (['CREATED', 'READY'].includes(session.state)) status = 'Draft';
         else if (session.state === 'COMPLETED') status = 'Completed';
@@ -51,19 +53,25 @@ export const useInterviewHistory = () => {
         return {
           id: session.id,
           userId: session.userId,
+          resumeId: null,
+          title: `${session.role} Interview`,
           company: session.company,
           role: session.role,
-          difficulty: session.difficulty,
-          interviewType: session.interviewType,
-          status,
+          difficulty: session.difficulty as any,
+          interviewType: session.interviewType as any,
+          experienceLevel: 'Mid' as any,
+          language: 'English',
+          status: status as any,
           score: session.score,
           totalQuestions: session.progress?.totalQuestions || 5,
           completedQuestions: session.metrics?.questionsAnswered || 0,
           duration: session.metrics?.totalDurationMs ? Math.round(session.metrics.totalDurationMs / 60000) : 30,
+          feedbackId: null,
+          aiProvider: 'openai',
+          startedAt: session.startedAt || null,
+          completedAt: session.completedAt || null,
           createdAt: session.createdAt,
-          updatedAt: session.updatedAt,
-          state: session.state, 
-          metrics: session.metrics 
+          updatedAt: session.updatedAt
         };
       });
       

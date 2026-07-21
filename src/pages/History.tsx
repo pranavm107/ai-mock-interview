@@ -8,7 +8,6 @@ import { InterviewList } from '../components/interview/InterviewList';
 import { InterviewFilters } from '../components/interview/InterviewFilters';
 import type { InterviewStatus, InterviewDifficulty, InterviewType } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { generateInterviewSlug } from '../utils/slugHelper';
 import { StatCard } from '../components/dashboard/StatCard';
 import { Button } from '@/components/ui/button';
 
@@ -41,9 +40,9 @@ const History: React.FC = () => {
         interview.company.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesStatus = statusFilter === 'All' || 
-        (statusFilter === 'Completed' && interview.state === 'COMPLETED') ||
-        (statusFilter === 'In Progress' && ['STARTED', 'ASKING', 'ANSWERING', 'EVALUATING', 'PAUSED'].includes(interview.state)) ||
-        (statusFilter === 'Draft' && ['CREATED', 'READY'].includes(interview.state));
+        (statusFilter === 'Completed' && interview.status === 'Completed') ||
+        (statusFilter === 'In Progress' && interview.status === 'In Progress') ||
+        (statusFilter === 'Draft' && (interview.status === 'Draft' || interview.status === 'Ready'));
       
       const matchesDifficulty = difficultyFilter === 'All' || interview.difficulty === difficultyFilter;
       const matchesType = typeFilter === 'All' || interview.interviewType === typeFilter;
@@ -55,18 +54,18 @@ const History: React.FC = () => {
   // Dashboard Stats calculation
   const stats = useMemo(() => {
     const total = interviews.length;
-    const completed = interviews.filter(i => i.state === 'COMPLETED').length;
-    const inProgress = interviews.filter(i => ['STARTED', 'ASKING', 'ANSWERING', 'EVALUATING', 'PAUSED'].includes(i.state)).length;
+    const completed = interviews.filter(i => i.status === 'Completed').length;
+    const inProgress = interviews.filter(i => i.status === 'In Progress').length;
     
-    const completedWithScore = interviews.filter(i => i.state === 'COMPLETED' && i.score !== null);
+    const completedWithScore = interviews.filter(i => i.status === 'Completed' && i.score !== null);
     
     const avgScore = completedWithScore.length > 0 
       ? `${Math.round(completedWithScore.reduce((acc, curr) => acc + (curr.score || 0), 0) / completedWithScore.length)}%`
       : '—';
 
-    const completedWithDuration = interviews.filter(i => i.state === 'COMPLETED' && i.metrics?.totalDurationMs);
+    const completedWithDuration = interviews.filter(i => i.status === 'Completed' && i.duration);
     const avgDuration = completedWithDuration.length > 0 
-      ? `${Math.round(completedWithDuration.reduce((acc, curr) => acc + (curr.metrics.totalDurationMs / 60000), 0) / completedWithDuration.length)}m`
+      ? `${Math.round(completedWithDuration.reduce((acc, curr) => acc + (curr.duration || 0), 0) / completedWithDuration.length)}m`
       : '—';
 
     return { total, completed, inProgress, avgScore, avgDuration };
@@ -81,7 +80,7 @@ const History: React.FC = () => {
   const handleNavigation = (id: string) => {
     const interview = interviews.find(i => i.id === id);
     if (interview) {
-      if (interview.state === 'COMPLETED') {
+      if (interview.status === 'Completed') {
         navigate(`/report/${interview.id}`);
       } else {
         navigate(`/session/${interview.id}`);

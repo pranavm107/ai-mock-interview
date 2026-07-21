@@ -1,6 +1,6 @@
 import { db } from "../../config/firebase.config";
 import { doc, setDoc, getDoc, deleteDoc, query, collection, where, getDocs, updateDoc } from "firebase/firestore";
-import { InterviewSession, SessionAnswer, SessionEvent } from "../../types/interviewSession";
+import { InterviewSession } from "../../types/interviewSession";
 
 export const createInterviewSession = async (session: InterviewSession): Promise<string> => {
   const docRef = doc(db, "interviewSessions", session.id);

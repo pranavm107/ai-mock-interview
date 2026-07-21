@@ -1,4 +1,4 @@
-import { InterviewSession, QuestionState } from "../../types/interviewSession";
+import { InterviewSession } from "../../types/interviewSession";
 import { InterviewQuestion } from "../../types/interview";
 
 export const getNextQuestion = (

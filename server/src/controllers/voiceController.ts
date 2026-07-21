@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { VoiceSessionService } from '../services/voice/voiceSessionService';
-import { VoiceSessionStatus } from '../types/voice';
 import { voiceConfig } from '../config/voiceConfig';
 
 // In a real app, you might manage these in a Map or DB
@@ -27,7 +26,7 @@ export const startVoiceSession = async (req: Request, res: Response) => {
     try {
       const dgPkg = require('@deepgram/sdk/package.json');
       console.log('Deepgram SDK version:', dgPkg.version);
-    } catch (e) {
+    } catch {
       console.log('Deepgram SDK version: unknown');
     }
 
@@ -110,7 +109,7 @@ export const startAnswer = async (req: Request, res: Response) => {
     // Starting an answer shouldn't clear transcript unless specifically requested,
     // but in this flow, start answer transitions the state.
     res.json({ success: true });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to start answer' });
   }
 };
@@ -123,7 +122,7 @@ export const finishAnswer = async (req: Request, res: Response) => {
     
     // Mark as submitting
     res.json({ success: true, transcript: voiceSessionService.getCurrentTranscript() });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to finish answer' });
   }
 };
@@ -137,7 +136,7 @@ export const restartAnswer = async (req: Request, res: Response) => {
     // Clear transcript
     voiceSessionService.clearTranscript();
     res.json({ success: true });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to restart answer' });
   }
 };
@@ -151,7 +150,7 @@ export const nextQuestion = async (req: Request, res: Response) => {
     // Reset state for next question
     voiceSessionService.clearTranscript();
     res.json({ success: true });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch next question' });
   }
 };

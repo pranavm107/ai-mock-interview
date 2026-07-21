@@ -81,7 +81,7 @@ export const setupDeepgramSocket = (server: HttpServer) => {
           bufferToSend = Buffer.from(message);
         } else if (typeof message === 'string') {
           try {
-            const parsed = JSON.parse(message);
+            JSON.parse(message);
             bufferToSend = Buffer.from(message); 
           } catch {
             bufferToSend = Buffer.from(message, 'base64');

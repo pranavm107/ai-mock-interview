@@ -245,7 +245,7 @@ export const queueFollowUp = async (sessionId: string, questionText: string, top
   await saveConversationMemory(sessionId, memory);
 };
 
-export const clearFollowUpQueue = async (sessionId: string): Promise<void> => {
+export const clearFollowUpQueue = async (_sessionId: string): Promise<void> => {
   // In our model, we might just mark them as handled, but for this method, maybe we just want to clear a specific queue.
   // We'll leave it as a no-op if followUpHistory is supposed to be permanent. 
   // Let's assume there's a separate pending list if needed, or we just don't clear history.

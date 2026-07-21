@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase.config";
-import { doc, setDoc, collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { SessionEvent } from "../../types/interviewSession";
 
 export const logSessionEvent = async (

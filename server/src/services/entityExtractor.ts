@@ -17,7 +17,7 @@ export const extractEntities = (text: string) => {
   // 3. URL extraction (inclusive of bare domains like github.com/user)
   // Strict regex to prevent matching "React.js", "0.91", etc.
   // Requires http(s):// OR www. OR a known valid TLD.
-  const urlRegex = /(?:https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)|(?:[-a-zA-Z0-9@:%._\+~#=]{1,256}\.(?:com|org|net|io|co|app|dev|xyz|me|in|uk|us|edu|gov|tech|site|ai)\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
+  const urlRegex = /(?:https?:\/\/|www\.)[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*)|(?:[-a-zA-Z0-9@:%._+~#=]{1,256}\.(?:com|org|net|io|co|app|dev|xyz|me|in|uk|us|edu|gov|tech|site|ai)\b(?:[-a-zA-Z0-9()@:%_+.~#?&//=]*))/gi;
   const allUrls = text.match(urlRegex) || [];
   
   // Clean URLs by removing trailing colons/dots and prefixes like "GitHub : "

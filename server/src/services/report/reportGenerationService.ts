@@ -26,7 +26,7 @@ export const generateInterviewReport = async (
   let answers: SessionAnswer[] = [];
   try {
     answers = await getAnswersBySession(session.id);
-  } catch (e) {
+  } catch (_e) {
     console.warn("Failed to get answers from getAnswersBySession");
   }
   

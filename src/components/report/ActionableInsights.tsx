@@ -1,16 +1,14 @@
 import React from 'react';
-import type { Recommendation, ImprovementPlan, SkillAnalysis } from '../../../server/src/types/interviewReport';
+import type { ImprovementPlan } from '../../../server/src/types/interviewReport';
 import { TrendingUp, TrendingDown, Lightbulb, Compass, BookOpen } from 'lucide-react';
 
 interface Props {
   strengths: string[];
   weaknesses: string[];
-  recommendations: Recommendation[];
   improvementPlan: ImprovementPlan;
-  skillsAnalysis: SkillAnalysis[];
 }
 
-export const ActionableInsights: React.FC<Props> = ({ strengths, weaknesses, recommendations, improvementPlan, skillsAnalysis }) => {
+export const ActionableInsights: React.FC<Props> = ({ strengths, weaknesses, improvementPlan }) => {
   return (
     <div className="space-y-8">
       

@@ -42,7 +42,7 @@ export const generateInterview = async (
       }
     }
     parsedResponse = JSON.parse(jsonText);
-  } catch (error) {
+  } catch (_e) {
     throw new Error("Failed to parse AI response as JSON");
   }
   

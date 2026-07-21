@@ -178,25 +178,50 @@ const calculateMockScore = (session: any) => {
 export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
-    const { questionId, questionText, answerText, remainingQuestions, durationMs, remainingTimeMs, targetRole, expectedSkills } = req.body;
+    const { questionId, answerText, startTime, wordCount } = req.body;
     
-    if (!questionId || !questionText || !answerText) {
-      return res.status(400).json({ error: 'Missing adaptive answer details' });
+    if (!questionId || !answerText || !startTime) {
+      return res.status(400).json({ error: 'Missing answer details' });
     }
 
+    // 1. Persist the standard answer and get updated session
+    const updatedSession = await submitAnswer(sessionId, questionId, answerText, startTime, wordCount || 0);
+
+    // 2. Lookup interview for adaptive details
+    const interview = await getInterviewById(updatedSession.interviewId);
+    if (!interview) return res.status(404).json({ error: 'Interview not found' });
+
+    const currentQIndex = updatedSession.progress.currentQuestionIndex;
+    const questionText = interview.questions.find((q: any) => q.id === questionId)?.question || 'Unknown question';
+    
+    const remainingQuestions = updatedSession.progress.totalQuestions - currentQIndex - 1;
+    const durationMs = new Date().getTime() - new Date(startTime).getTime();
+
+    // 3. Process adaptive answer
     const adaptiveResult = await processAdaptiveAnswer({
       sessionId,
       questionId,
       questionText,
       answerText,
-      remainingQuestions: remainingQuestions || 1,
-      durationMs: durationMs || 0,
-      remainingTimeMs,
-      targetRole,
-      expectedSkills
+      remainingQuestions: Math.max(0, remainingQuestions),
+      durationMs,
+      remainingTimeMs: 30 * 60 * 1000,
+      targetRole: interview.role,
+      expectedSkills: (interview.settings as any)?.skills || []
     });
 
-    res.json(adaptiveResult);
+    const nextQuestion = adaptiveResult.followUp?.question ? {
+      id: `q_followup_${Date.now()}`,
+      question: adaptiveResult.followUp.question,
+      context: "Follow-up question based on your previous answer"
+    } : undefined;
+
+    res.json({
+      session: updatedSession,
+      liveEvaluation: adaptiveResult.liveEvaluation,
+      adaptiveResult,
+      nextQuestion
+    });
   } catch (error: any) {
     console.error('Failed to submit adaptive answer:', error);
     res.status(500).json({ error: error.message || 'Failed to submit adaptive answer' });

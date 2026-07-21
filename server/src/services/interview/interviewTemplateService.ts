@@ -1,4 +1,4 @@
-import { InterviewSection } from "../../types/interview";
+
 
 export interface TemplateDistribution {
   RESUME: number;
