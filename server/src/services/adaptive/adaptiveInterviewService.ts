@@ -19,6 +19,7 @@ import { evaluateAnswerAndGenerateFollowUp } from './followUpEngine';
 import { evaluateNextDecision } from './decisionEngine';
 import { evaluateInterviewFlow, FlowEngineInput } from './interviewFlowEngine';
 import { evaluateNextDifficulty } from './adaptiveDifficultyService';
+import { executeLiveEvaluation } from '../evaluation/liveEvaluationEngine';
 import crypto from 'crypto';
 import { FollowUpContext } from '../../types/followUp';
 import { DecisionContext } from '../../types/decision';
@@ -179,6 +180,28 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
     state.currentDifficulty = nextDifficulty;
   }
 
+  // 8. Execute Live Evaluation Engine
+  const liveEvaluation = await executeLiveEvaluation({
+    sessionId,
+    questionId,
+    questionText,
+    answerText,
+    baseScore: score,
+    extractedSkills: memory.strongAreas.map(s => s.topic),
+    extractedWeaknesses: memory.weakAreas.map(w => w.topic),
+    memory,
+    difficulty: state.currentDifficulty,
+    decision: decisionResult.decision,
+    interviewProgress: flowEvaluation,
+    currentSkillMatrix: state.liveEvaluation?.skillMatrix,
+    currentSkillHistory: state.liveEvaluation?.skillMatrix ? [] : [], // We didn't persist full skill history in state yet to save space, but it can be handled if needed
+    currentConfidenceTimeline: state.liveEvaluation?.confidenceTimeline,
+    currentStrengths: state.liveEvaluation?.strengths,
+    currentWeaknesses: state.liveEvaluation?.weaknesses
+  });
+
+  state.liveEvaluation = liveEvaluation;
+
   await saveAdaptiveState(sessionId, state);
 
   return {
@@ -195,7 +218,8 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
     weakTopics: memory.weakAreas,
     strongTopics: memory.strongAreas,
     followUp: evalResult.followUp.question ? evalResult.followUp : undefined,
-    interviewProgress: flowEvaluation,
+    interviewProgress: liveEvaluation.interviewProgress,
+    liveEvaluation,
     memoryUpdated: true,
     personality: state.personality,
     reasoning: decisionResult.reason

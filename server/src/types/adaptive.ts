@@ -11,6 +11,7 @@ export type InterviewerPersonalityType =
   | 'System Design';
 
 import { DecisionType } from './decision';
+import { LiveEvaluation } from './evaluation';
 
 export type FollowUpType = 
   | 'Clarification' 
@@ -64,6 +65,7 @@ export interface AdaptiveState {
   difficultyHistory: DifficultyHistoryEntry[];
   decisionHistory: DecisionHistoryEntry[];
   followUpHistory: FollowUpHistoryEntry[];
+  liveEvaluation?: LiveEvaluation;
   createdAt: string;
   updatedAt: string;
 }
@@ -89,4 +91,5 @@ export interface AdaptiveEvaluationResult {
   strongTopics?: any[];
   followUp?: any;
   interviewProgress?: any;
+  liveEvaluation?: LiveEvaluation;
 }
