@@ -42,6 +42,7 @@ export interface VoiceSession {
   microphoneState: 'muted' | 'unmuted';
   speakerState: 'muted' | 'unmuted';
   currentTranscript: string;
+  currentWords: any[]; // Stores word metadata
   language: string;
   createdAt: string; // ISO Date String
   updatedAt: string; // ISO Date String

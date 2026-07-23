@@ -5,6 +5,7 @@ import { OverallScore } from '../components/report/OverallScore';
 import { QuestionReview } from '../components/report/QuestionReview';
 import { ActionableInsights } from '../components/report/ActionableInsights';
 import { ReportSummary } from '../components/report/ReportSummary';
+import { SpeechSummaryReport } from '../components/report/SpeechSummaryReport';
 import { ATSReadiness } from '../components/report/ATSReadiness';
 import { HiringRecommendation } from '../components/report/HiringRecommendation';
 import { SkillMatrix } from '../components/report/SkillMatrix';
@@ -75,6 +76,10 @@ const InterviewReportPage: React.FC = () => {
         )}
 
         <OverallScore evaluation={report.overallEvaluation} />
+
+        {report.speechSummary && (
+          <SpeechSummaryReport summary={report.speechSummary} />
+        )}
         
         {report.skillsAnalysis && (
           <SkillMatrix skills={report.skillsAnalysis} />

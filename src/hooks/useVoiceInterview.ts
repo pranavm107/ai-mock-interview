@@ -228,6 +228,11 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
       });
+      
+      if (!response.ok) {
+        throw new Error(`Replay request failed with status ${response.status}`);
+      }
+      
       const data = await response.json();
       if (data.audio) {
         const audio = new Audio(`data:audio/mpeg;base64,${data.audio}`);

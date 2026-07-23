@@ -71,7 +71,7 @@ export const submitAnswer = async (
   answerText: string,
   startTime: string,
   wordCount: number
-): Promise<InterviewSession> => {
+): Promise<{ session: InterviewSession; answerId: string }> => {
   const session = await getInterviewSessionById(sessionId);
   if (!session) throw new Error("Session not found");
 
@@ -103,7 +103,7 @@ export const submitAnswer = async (
   await updateInterviewSession(sessionId, { metrics: session.metrics });
   await logSessionEvent(sessionId, 'Answer Submitted', questionId, { durationMs, wordCount });
 
-  return session;
+  return { session, answerId: answer.id };
 };
 
 export const proceedToNextQuestion = async (sessionId: string, interview: Interview): Promise<InterviewSession> => {

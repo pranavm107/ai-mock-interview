@@ -21,9 +21,42 @@ export const getGeminiModel = (modelName: string = 'gemini-2.5-flash'): Generati
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const FALLBACK_MODELS = [
+  'gemini-2.5-flash', 
+  'gemini-1.5-flash',
+  'gemini-2.5-pro',
+  'gemini-1.5-pro',
+  'gemini-1.5-flash-8b'
+];
+
+export const generateText = async (prompt: string, maxRetries = 2): Promise<string> => {
+  let lastError: any;
+
+  for (const modelName of FALLBACK_MODELS) {
+    const model = getGeminiModel(modelName);
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        if (!text) throw new Error("Gemini returned empty response.");
+        return text;
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`[Text] Attempt ${attempt} with ${modelName} failed:`, error.message || error);
+        
+        if (error.status === 400 || error.status === 401 || error.status === 403) break;
+        if (attempt < maxRetries) await delay(Math.pow(2, attempt) * 1000);
+      }
+    }
+  }
+  
+  throw new Error(`Failed to generate text after multiple attempts. Last error: ${lastError?.message || lastError}`);
+};
+
 export const generateJson = async (prompt: string, maxRetries = 3): Promise<string> => {
   let lastError: any;
-  const models = ['gemini-2.5-flash', 'gemini-2.5-pro'];
+  const models = FALLBACK_MODELS;
 
   for (const modelName of models) {
     const model = getGeminiModel(modelName);

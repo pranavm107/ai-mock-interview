@@ -9,6 +9,7 @@ import { calculateScores } from "./scoringEngine";
 import { saveReport, getReportBySessionId } from "./reportStorageService";
 import { generateReportSummaryAndVerdict } from "./aiSummaryService";
 import { getSessionTimeline } from "../runtime/eventLogger";
+import { SpeechSummary } from "../../types/speech";
 
 export const generateInterviewReport = async (
   session: InterviewSession,
@@ -75,7 +76,25 @@ export const generateInterviewReport = async (
     overallEmployability
   };
 
-  // 10. Assemble Report
+  // 10. Fetch Speech Analytics
+  const { getSessionSpeechSummary } = await import('../speech/speechStorageService');
+  const speechAnalytics = await getSessionSpeechSummary(session.id);
+  let speechSummary: SpeechSummary | undefined = undefined;
+  
+  if (speechAnalytics) {
+    speechSummary = {
+      overallCommunicationScore: speechAnalytics.averageCommunicationScore,
+      averageFluency: speechAnalytics.averageFluency,
+      averageGrammar: speechAnalytics.averageGrammar,
+      averageVocabulary: speechAnalytics.averageVocabulary,
+      averagePronunciation: speechAnalytics.averagePronunciation,
+      averagePace: speechAnalytics.averagePace,
+      totalFillerWords: speechAnalytics.averageFillers,
+      topRecommendations: speechAnalytics.recommendations
+    };
+  }
+
+  // 11. Assemble Report
   const reportId = `rep_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
   
   const report: InterviewReport = {
@@ -92,6 +111,7 @@ export const generateInterviewReport = async (
     
     hiringRecommendation,
     atsReadiness,
+    speechSummary,
     timeline,
     
     strengths,

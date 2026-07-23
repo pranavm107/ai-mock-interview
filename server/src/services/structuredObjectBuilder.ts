@@ -80,7 +80,7 @@ export const buildStructuredResume = (
     for (const line of lines) {
       const isBullet = /^[•\-*]\s/.test(line);
       const isDate = /\b(?:19|20)\d{2}\b/.test(line);
-      // const hasDelimiter = /\||—|-/.test(line) && !isBullet;
+      const hasDelimiter = /\||—|-/.test(line) && !isBullet;
       
       // If it's not a bullet, and it looks like a header (has dates, delimiters, or is short)
       if (!isBullet && (hasDelimiter || isDate || line.length < 50)) {

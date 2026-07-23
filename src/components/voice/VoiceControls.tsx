@@ -4,6 +4,7 @@ import type { InterviewState } from '../../hooks/useVoiceInterview';
 
 interface VoiceControlsProps {
   isVoiceMode: boolean;
+  isSpeaking: boolean;
   connectionStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
   interviewState: InterviewState;
   isMuted: boolean;
@@ -20,6 +21,7 @@ interface VoiceControlsProps {
 
 export const VoiceControls: React.FC<VoiceControlsProps> = ({
   isVoiceMode,
+  isSpeaking,
   connectionStatus,
   interviewState,
   isMuted,
@@ -67,11 +69,17 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
 
       <button
         onClick={onReplayQuestion}
-        disabled={connectionStatus !== 'connected'}
-        className="p-4 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors disabled:opacity-50"
+        disabled={connectionStatus !== 'connected' || isSpeaking}
+        className={`p-4 rounded-full transition-all duration-300 ${
+          isSpeaking 
+            ? 'bg-indigo-100 text-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.3)] scale-105' 
+            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50'
+        }`}
         title="Replay Question"
       >
-        <RotateCcw size={24} />
+        <div className={`transition-transform duration-700 ${isSpeaking ? '-rotate-180 opacity-80' : ''}`}>
+          {isSpeaking ? <Loader2 size={24} className="animate-spin" /> : <RotateCcw size={24} />}
+        </div>
       </button>
 
       {(interviewState === 'LISTENING' || interviewState === 'PAUSED') && (

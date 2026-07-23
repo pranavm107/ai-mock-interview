@@ -1,4 +1,5 @@
 import type { SessionEvent } from './interviewSession';
+import type { SpeechSummary } from './speech';
 
 export interface QuestionEvaluation {
   questionId: string;
@@ -86,6 +87,7 @@ export interface InterviewReport {
   technicalEvaluation: TechnicalEvaluation;
   communicationEvaluation: CommunicationEvaluation;
   behavioralEvaluation: BehaviorEvaluation;
+  speechSummary?: SpeechSummary;
   
   hiringRecommendation?: HiringRecommendation;
   atsReadiness?: ATSReadiness;

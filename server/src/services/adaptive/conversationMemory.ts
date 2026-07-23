@@ -6,7 +6,7 @@ import {
   CandidateProject,
   CandidateSkill
 } from '../../types/conversationMemory';
-import { getGeminiModel } from '../ai/geminiClient';
+import { generateText } from '../ai/geminiClient';
 import crypto from 'crypto';
 
 export const initializeMemory = async (sessionId: string, initialTopics: string[] = [], profile?: { targetRole?: string, level?: string }): Promise<ConversationMemory> => {
@@ -49,7 +49,6 @@ export const resetMemory = async (sessionId: string): Promise<ConversationMemory
 };
 
 export const extractEntities = async (question: string, answerText: string): Promise<MemoryUpdate> => {
-  const model = getGeminiModel();
   const prompt = `
 Extract structured entities from the candidate's answer to the following question.
 Question: "${question}"
@@ -68,8 +67,7 @@ If no entities of a specific type are found, return an empty array for that fiel
 `;
 
   try {
-    const result = await model.generateContent(prompt);
-    let text = result.response.text();
+    let text = await generateText(prompt);
     text = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(text);
     return parsed as MemoryUpdate;

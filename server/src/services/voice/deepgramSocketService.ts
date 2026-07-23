@@ -59,11 +59,12 @@ export class DeepgramSocketService extends EventEmitter {
       console.log('Transcript Event:', JSON.stringify(data, null, 2));
       if (data.channel && data.channel.alternatives && data.channel.alternatives[0]) {
         const transcript = data.channel.alternatives[0].transcript;
+        const words = data.channel.alternatives[0].words || [];
         const isFinal = data.is_final;
         const speechFinal = data.speech_final;
         
         if (transcript.trim().length > 0) {
-          this.emit(VoiceEvent.TRANSCRIPT, { transcript, isFinal, speechFinal });
+          this.emit(VoiceEvent.TRANSCRIPT, { transcript, words, isFinal, speechFinal });
         }
       }
     });

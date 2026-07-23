@@ -1,4 +1,4 @@
-import { getGeminiModel } from '../ai/geminiClient';
+import { getGeminiModel, generateText } from '../ai/geminiClient';
 import { 
   FollowUpContext, 
   FollowUpEvaluation, 
@@ -142,13 +142,11 @@ export const evaluateAnswerAndGenerateFollowUp = async (context: FollowUpContext
   }
 
   const prompt = buildPrompt(context);
-  const model = getGeminiModel();
   let validationFailures = 0;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
+      let text = await generateText(prompt);
       text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
       
       const parsed = JSON.parse(text) as FollowUpQuestion;

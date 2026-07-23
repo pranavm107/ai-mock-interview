@@ -13,7 +13,7 @@ export const voiceConfig = {
   tts: {
     provider: (process.env.TTS_PROVIDER || 'elevenlabs') as 'elevenlabs' | 'google' | 'azure',
     apiKey: process.env.TTS_API_KEY || '',
-    voiceId: process.env.TTS_VOICE_ID || 'pNInz6obpgDQGcFmaJcg', // Default ElevenLabs voice
+    voiceId: process.env.TTS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB', // Default ElevenLabs voice (Adam)
     model: process.env.TTS_MODEL || 'eleven_turbo_v2',
   },
   session: {

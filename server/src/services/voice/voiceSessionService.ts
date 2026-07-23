@@ -22,6 +22,7 @@ export class VoiceSessionService extends EventEmitter {
       microphoneState: 'unmuted',
       speakerState: 'unmuted',
       currentTranscript: '',
+      currentWords: [],
       language: 'en-US',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -37,11 +38,16 @@ export class VoiceSessionService extends EventEmitter {
 
   private setupListeners() {
     this.deepgramService.on(VoiceEvent.TRANSCRIPT, (data) => {
-      const { transcript, isFinal, speechFinal } = data;
+      const { transcript, words, isFinal, speechFinal } = data;
       
       if (isFinal) {
         if (transcript.trim()) {
           this.session.currentTranscript += (this.session.currentTranscript ? ' ' : '') + transcript;
+          if (words && Array.isArray(words)) {
+            // Adjust timestamps of incoming words if we have a continuously running session
+            // For now, just push them.
+            this.session.currentWords.push(...words);
+          }
         }
         this.session.updatedAt = new Date().toISOString();
         this.emit(VoiceEvent.TRANSCRIPT, { transcript: this.session.currentTranscript, isFinal: true });
@@ -129,10 +135,15 @@ export class VoiceSessionService extends EventEmitter {
 
   public clearTranscript() {
     this.session.currentTranscript = '';
+    this.session.currentWords = [];
     this.emit(VoiceEvent.TRANSCRIPT, { transcript: '', isFinal: true });
   }
 
   public getCurrentTranscript(): string {
     return this.session.currentTranscript;
+  }
+  
+  public getCurrentWords(): any[] {
+    return this.session.currentWords;
   }
 }

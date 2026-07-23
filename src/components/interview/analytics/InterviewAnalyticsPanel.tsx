@@ -15,8 +15,10 @@ import { RecommendationsPanel } from './RecommendationsPanel';
 import { QuestionProgress } from './QuestionProgress';
 import { DifficultyIndicator } from './DifficultyIndicator';
 import { PerformanceTrend } from './PerformanceTrend';
+import { CommunicationDashboard } from '../speech/CommunicationDashboard';
 import { Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { CommunicationAnalytics, SpeechAnalyticsRecord } from '../../../types/speech';
 
 interface InterviewAnalyticsPanelProps {
   evaluation: LiveEvaluation | null;
@@ -26,6 +28,8 @@ interface InterviewAnalyticsPanelProps {
   remainingTime?: number | null;
   confidence?: number | null;
   adaptiveResult?: AdaptiveEvaluationResult | null;
+  communicationAnalytics?: CommunicationAnalytics | null;
+  speechTimeline?: SpeechAnalyticsRecord[] | null;
   isLoading: boolean;
   error: string | null;
   hasStarted: boolean;
@@ -39,6 +43,8 @@ export const InterviewAnalyticsPanel: React.FC<InterviewAnalyticsPanelProps> = (
   remainingTime,
   confidence,
   adaptiveResult,
+  communicationAnalytics,
+  speechTimeline,
   isLoading,
   error
 }) => {
@@ -92,8 +98,8 @@ export const InterviewAnalyticsPanel: React.FC<InterviewAnalyticsPanelProps> = (
                   <PerformanceTrend trend={evaluation.performanceTrend} />
                 </div>
                 <QuestionProgress 
-                  currentQuestion={evaluation.interviewProgress.currentQuestionIndex + 1} 
-                  totalQuestions={evaluation.interviewProgress.totalQuestions} 
+                  currentQuestion={(evaluation.interviewProgress?.currentQuestionIndex ?? 0) + 1} 
+                  totalQuestions={evaluation.interviewProgress?.totalQuestions ?? (remainingQuestions || 0)} 
                 />
               </div>
 
@@ -113,7 +119,7 @@ export const InterviewAnalyticsPanel: React.FC<InterviewAnalyticsPanelProps> = (
                  </div>
                  <div>
                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Candidate Confidence</span>
-                   <p className="font-semibold text-slate-800 text-sm mt-1">{confidence !== null && confidence !== undefined ? `${Math.round(confidence * 100)}%` : 'N/A'}</p>
+                   <p className="font-semibold text-slate-800 text-sm mt-1">{confidence !== null && confidence !== undefined ? `${Math.round(confidence > 1 ? confidence : confidence * 100)}%` : 'N/A'}</p>
                  </div>
                  <div className="col-span-2">
                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Follow-up Status</span>
@@ -133,6 +139,17 @@ export const InterviewAnalyticsPanel: React.FC<InterviewAnalyticsPanelProps> = (
               <RecommendationsPanel weaknesses={evaluation.weaknesses} />
               <StrengthsPanel strengths={evaluation.strengths} />
               <WeaknessesPanel weaknesses={evaluation.weaknesses} />
+              
+              {/* Communication Dashboard */}
+              {communicationAnalytics && (
+                <div className="bg-slate-800 p-5 rounded-2xl shadow-xl overflow-hidden mt-6 relative">
+                  <CommunicationDashboard 
+                    analytics={communicationAnalytics} 
+                    timeline={speechTimeline || undefined}
+                    isVoice={communicationAnalytics.pronunciationScore > 0} 
+                  />
+                </div>
+              )}
               
               <div className="h-8"></div> {/* Bottom spacer */}
             </motion.div>

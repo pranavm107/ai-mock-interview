@@ -3,6 +3,9 @@ import { initializeSession, startSession, submitAnswer, proceedToNextQuestion, s
 import { processAdaptiveAnswer } from '../services/adaptive/adaptiveInterviewService';
 import { getInterviewById } from '../services/interview/interviewStorageService';
 import { getInterviewSessionById } from '../services/runtime/sessionStorageService';
+import { getActiveVoiceSession } from './voiceController';
+import { generateCommunicationAnalytics } from '../services/speech/speechAnalyticsEngine';
+import { saveSpeechAnalytics, getSessionSpeechSummary, getSpeechTimeline } from '../services/speech/speechStorageService';
 
 export const createNewSession = async (req: Request, res: Response) => {
   try {
@@ -19,8 +22,9 @@ export const createNewSession = async (req: Request, res: Response) => {
 
     const session = await initializeSession(interviewId, userId, interview);
     res.status(201).json(session);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to create session' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to create session';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -36,8 +40,9 @@ export const startSessionEndpoint = async (req: Request, res: Response) => {
 
     const updatedSession = await startSession(id, interview);
     res.json(updatedSession);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to start session' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to start session';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -50,10 +55,11 @@ export const submitSessionAnswer = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing answer details' });
     }
 
-    const updatedSession = await submitAnswer(id, questionId, answerText, startTime, wordCount || 0);
+    const { session: updatedSession } = await submitAnswer(id, questionId, answerText, startTime, wordCount || 0);
     res.json(updatedSession);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to submit answer' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to submit answer';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -85,8 +91,9 @@ export const advanceSession = async (req: Request, res: Response) => {
     }
 
     res.json(updatedSession);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to advance session' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to advance session';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -118,8 +125,9 @@ export const skipSessionQuestion = async (req: Request, res: Response) => {
     }
 
     res.json(updatedSession);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to skip question' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to skip question';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -133,10 +141,18 @@ export const getSession = async (req: Request, res: Response) => {
     }
     
     res.json(session);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch session' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to fetch session';
+    res.status(500).json({ error: msg });
   }
 };
+
+interface SessionWithSettings {
+  settings?: {
+    interviewType?: string;
+    skills?: string[];
+  };
+}
 
 export const getUserSessions = async (req: Request, res: Response) => {
   try {
@@ -148,11 +164,12 @@ export const getUserSessions = async (req: Request, res: Response) => {
     const enrichedSessions = await Promise.all(
       sessions.map(async (session) => {
         const interview = await getInterviewById(session.interviewId);
+        const interviewSettings = interview as unknown as SessionWithSettings;
         return {
           ...session,
           company: interview?.company || 'Unknown',
           role: interview?.role || 'Unknown',
-          interviewType: (interview?.settings as any)?.interviewType || 'Technical',
+          interviewType: interviewSettings?.settings?.interviewType || 'Technical',
           difficulty: interview?.difficulty || 'Mixed',
           score: session.state === 'COMPLETED' ? calculateMockScore(session) : null
         };
@@ -163,8 +180,9 @@ export const getUserSessions = async (req: Request, res: Response) => {
     enrichedSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
     res.json(enrichedSessions);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch user sessions' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to fetch user sessions';
+    res.status(500).json({ error: msg });
   }
 };
 
@@ -185,17 +203,21 @@ export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
     }
 
     // 1. Persist the standard answer and get updated session
-    const updatedSession = await submitAnswer(sessionId, questionId, answerText, startTime, wordCount || 0);
+    const { session: updatedSession, answerId } = await submitAnswer(sessionId, questionId, answerText, startTime, wordCount || 0);
 
     // 2. Lookup interview for adaptive details
     const interview = await getInterviewById(updatedSession.interviewId);
     if (!interview) return res.status(404).json({ error: 'Interview not found' });
 
     const currentQIndex = updatedSession.progress.currentQuestionIndex;
-    const questionText = interview.questions.find((q: any) => q.id === questionId)?.question || 'Unknown question';
+    const question = interview.questions.find((q) => q.id === questionId);
+    const questionText = question?.question || 'Unknown question';
     
     const remainingQuestions = updatedSession.progress.totalQuestions - currentQIndex - 1;
     const durationMs = new Date().getTime() - new Date(startTime).getTime();
+
+    const interviewSettings = interview as unknown as SessionWithSettings;
+    const expectedSkills = interviewSettings?.settings?.skills || [];
 
     // 3. Process adaptive answer
     const adaptiveResult = await processAdaptiveAnswer({
@@ -207,7 +229,7 @@ export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
       durationMs,
       remainingTimeMs: 30 * 60 * 1000,
       targetRole: interview.role,
-      expectedSkills: (interview.settings as any)?.skills || []
+      expectedSkills
     });
 
     const nextQuestion = adaptiveResult.followUp?.question ? {
@@ -216,14 +238,52 @@ export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
       context: "Follow-up question based on your previous answer"
     } : undefined;
 
+    // 4. Generate Communication Analytics
+    const activeVoiceSession = getActiveVoiceSession(sessionId);
+    const isVoice = !!activeVoiceSession;
+    let wordMetadata = [];
+
+    if (activeVoiceSession) {
+      wordMetadata = activeVoiceSession.getCurrentWords();
+    }
+
+    const communicationAnalytics = await generateCommunicationAnalytics(
+      answerText,
+      wordMetadata,
+      durationMs,
+      isVoice
+    );
+
+    if (activeVoiceSession) {
+      // Clear transcript/words here to prevent memory growth.
+      activeVoiceSession.clearTranscript();
+    }
+
+    // Save analytics
+    await saveSpeechAnalytics(
+      sessionId,
+      answerId,
+      currentQIndex,
+      durationMs,
+      communicationAnalytics,
+      adaptiveResult.liveEvaluation
+    );
+    
+    const summary = await getSessionSpeechSummary(sessionId);
+    const timeline = await getSpeechTimeline(sessionId);
+
     res.json({
       session: updatedSession,
       liveEvaluation: adaptiveResult.liveEvaluation,
+      communicationAnalytics, // This must be the detailed CommunicationAnalytics for the current answer
+      summary,
+      timeline,
       adaptiveResult,
       nextQuestion
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to submit adaptive answer:', error);
-    res.status(500).json({ error: error.message || 'Failed to submit adaptive answer' });
+    const msg = error instanceof Error ? error.message : 'Failed to submit adaptive answer';
+    res.status(500).json({ error: msg });
   }
 };

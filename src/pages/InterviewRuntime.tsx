@@ -15,7 +15,7 @@ const InterviewRuntime: React.FC = () => {
   const { 
     session, interview, liveEvaluation, loading, error, reportPending, 
     decision, difficulty, remainingQuestions, remainingTime, confidence,
-    adaptiveResult, analyticsError, loadingAnalytics,
+    adaptiveResult, communicationAnalytics, speechTimeline, analyticsError, loadingAnalytics,
     startSession, nextQuestion, submitAnswer, skipQuestion 
   } = useInterviewSession(sessionId);
 
@@ -239,6 +239,7 @@ const InterviewRuntime: React.FC = () => {
                 />
                 <VoiceControls 
                   isVoiceMode={isVoiceMode}
+                  isSpeaking={voice.isSpeaking}
                   connectionStatus={voice.connectionStatus}
                   interviewState={voice.interviewState}
                   isMuted={voice.isMuted}
@@ -310,6 +311,8 @@ const InterviewRuntime: React.FC = () => {
           remainingTime={remainingTime}
           confidence={confidence}
           adaptiveResult={adaptiveResult}
+          communicationAnalytics={communicationAnalytics}
+          speechTimeline={speechTimeline}
           isLoading={loadingAnalytics || (loading && !liveEvaluation)}
           error={analyticsError}
           hasStarted={session.state === 'STARTED' || session.state === 'ASKING'}

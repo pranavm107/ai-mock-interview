@@ -3,11 +3,14 @@ import type { InterviewSession, SessionAnswer, Interview } from '../types/interv
 import type { LiveEvaluation } from '../types/liveEvaluation';
 import type { DecisionType } from '../types/decision';
 import type { DifficultyLevel, AdaptiveEvaluationResult } from '../types/adaptive';
+import type { CommunicationAnalytics, SpeechAnalyticsRecord } from '../types/speech';
 
 export const useInterviewSession = (sessionId?: string) => {
   const [session, setSession] = useState<InterviewSession | null>(null);
   const [interview, setInterview] = useState<Interview | null>(null);
   const [liveEvaluation, setLiveEvaluation] = useState<LiveEvaluation | null>(null);
+  const [communicationAnalytics, setCommunicationAnalytics] = useState<CommunicationAnalytics | null>(null);
+  const [speechTimeline, setSpeechTimeline] = useState<SpeechAnalyticsRecord[]>([]);
   
   // New Adaptive State
   const [decision, setDecision] = useState<DecisionType | null>(null);
@@ -128,6 +131,14 @@ export const useInterviewSession = (sessionId?: string) => {
         setRemainingTime(adaptive.remainingTime ?? null);
       }
       
+      if (data.communicationAnalytics) {
+        setCommunicationAnalytics(data.communicationAnalytics);
+      }
+      
+      if (data.timeline) {
+        setSpeechTimeline(data.timeline);
+      }
+      
       setAnalyticsLastUpdated(new Date().toISOString());
       return data;
     } catch (err: any) {
@@ -177,6 +188,8 @@ export const useInterviewSession = (sessionId?: string) => {
     error,
     reportPending,
     liveEvaluation,
+    communicationAnalytics,
+    speechTimeline,
     decision,
     difficulty,
     remainingQuestions,
