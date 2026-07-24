@@ -22,6 +22,8 @@ import Generate from '../pages/Generate';
 import Interview from '../pages/Interview';
 import InterviewRuntime from '../pages/InterviewRuntime';
 import InterviewReportPage from '../pages/InterviewReport';
+import InterviewReplay from '../pages/InterviewReplay';
+import InterviewReview from '../pages/InterviewReview';
 import History from '../pages/History';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
@@ -54,6 +56,8 @@ const router = createBrowserRouter([
       { path: 'interview/:id', element: <Interview /> },
       { path: 'session/:sessionId', element: <InterviewRuntime /> },
       { path: 'report/:sessionId', element: <InterviewReportPage /> },
+      { path: 'replay/:sessionId', element: <InterviewReplay /> },
+      { path: 'review/:sessionId', element: <InterviewReview /> },
       { path: 'history', element: <History /> },
       { path: 'profile/*', element: <Profile /> },
       { path: 'settings', element: <Settings /> },

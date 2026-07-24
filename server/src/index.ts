@@ -3,11 +3,13 @@ import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { setupVoiceSocket } from './websocket/voiceSocketHandler';
+import { clerkMiddleware } from '@clerk/express';
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(clerkMiddleware());
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -18,12 +20,16 @@ import resumeRoutes from './routes/resumeRoutes';
 import sessionRoutes from './routes/sessionRoutes';
 import reportRoutes from './routes/interviewReportRoutes';
 import voiceRoutes from './routes/voiceRoutes';
+import replayRoutes from './routes/replayRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/interview-sessions', sessionRoutes);
+app.use('/api/interview-sessions', replayRoutes);
 app.use('/api/interview-reports', reportRoutes);
 app.use('/api/voice', voiceRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const server = http.createServer(app);
 

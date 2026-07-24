@@ -7,6 +7,21 @@ export const getSessionReport = async (req: Request, res: Response) => {
     const report = await getReportBySessionId(sessionId);
     
     if (!report) {
+      // Automatic recovery: If the report was not generated during session completion (e.g. due to rate limits), try to generate it now.
+      const { getInterviewSessionById } = await import('../services/runtime/sessionStorageService');
+      const session = await getInterviewSessionById(sessionId);
+      
+      if (session && session.status === 'completed') {
+        const { getInterviewById } = await import('../services/interview/interviewStorageService');
+        const interview = await getInterviewById(session.interviewId);
+        if (interview) {
+          const { generateInterviewReport } = await import('../services/report/reportGenerationService');
+          report = await generateInterviewReport(session, interview);
+        }
+      }
+    }
+    
+    if (!report) {
       return res.status(404).json({ error: 'Report not found for this session.' });
     }
     
