@@ -12,12 +12,14 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Zap
+  Zap,
+  Compass
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Career Coach', path: '/career', icon: Compass },
   { name: 'Generate Interview', path: '/generate', icon: Sparkles },
   { name: 'Interview History', path: '/history', icon: History },
   { name: 'Resume Manager', path: '/resume', icon: FileText },

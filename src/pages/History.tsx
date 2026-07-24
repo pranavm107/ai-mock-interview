@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { History as HistoryIcon, Clock, AlertCircle, TrendingUp, CheckCircle, Target, Activity, FileQuestion } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { motion } from 'framer-motion';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { useInterview } from '../hooks/useInterview';
 import { InterviewList } from '../components/interview/InterviewList';
 import { InterviewFilters } from '../components/interview/InterviewFilters';
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 
 const History: React.FC = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const { 
     interviews, 
@@ -28,11 +29,34 @@ const History: React.FC = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<InterviewDifficulty | 'All'>('All');
   const [typeFilter, setTypeFilter] = useState<InterviewType | 'All'>('All');
 
+  const [metrics, setMetrics] = useState<any>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+
   useEffect(() => {
     if (user?.id) {
       refreshInterviews(user.id);
+      
+      const fetchMetrics = async () => {
+        try {
+          setMetricsLoading(true);
+          const token = await getToken();
+          const res = await fetch('http://localhost:3001/api/career/metrics', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setMetrics(data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch metrics:', err);
+        } finally {
+          setMetricsLoading(false);
+        }
+      };
+      
+      fetchMetrics();
     }
-  }, [user?.id, refreshInterviews]);
+  }, [user?.id, refreshInterviews, getToken]);
 
   const filteredInterviews = useMemo(() => {
     return interviews.filter(interview => {
@@ -48,26 +72,6 @@ const History: React.FC = () => {
     });
   }, [interviews, searchQuery, statusFilter, difficultyFilter, typeFilter]);
 
-  // Dashboard Stats calculation
-  const stats = useMemo(() => {
-    const total = interviews.length;
-    const completed = interviews.filter(i => i.status === 'Completed').length;
-    const inProgress = interviews.filter(i => i.status === 'In Progress').length;
-    
-    const completedWithScore = interviews.filter(i => i.status === 'Completed' && i.score !== null);
-    
-    const avgScore = completedWithScore.length > 0 
-      ? `${Math.round(completedWithScore.reduce((acc, curr) => acc + (curr.score || 0), 0) / completedWithScore.length)}%`
-      : '—';
-
-    const completedWithDuration = interviews.filter(i => i.status === 'Completed' && i.duration);
-    const avgDuration = completedWithDuration.length > 0 
-      ? `${Math.round(completedWithDuration.reduce((acc, curr) => acc + curr.duration, 0) / completedWithDuration.length)}m`
-      : '—';
-
-    return { total, completed, inProgress, avgScore, avgDuration };
-  }, [interviews]);
-
   const handleDelete = async (id: string) => {
     if (user?.id) {
       await deleteInterview(user.id, id);
@@ -81,6 +85,9 @@ const History: React.FC = () => {
       navigate(`/interview/${slug}`);
     }
   };
+
+  const avgScoreStr = metrics?.averageScore !== null && metrics?.averageScore !== undefined ? `${Math.round(metrics.averageScore)}%` : '—';
+  const avgDurationStr = metrics?.averageDuration !== null && metrics?.averageDuration !== undefined ? `${Math.round(metrics.averageDuration)}m` : '—';
 
   return (
     <div className="pb-24 space-y-8">
@@ -102,24 +109,24 @@ const History: React.FC = () => {
           </div>
         )}
 
-        {!loading && interviews.length > 0 && (
+        {!loading && !metricsLoading && metrics && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
-             <StatCard title="Total" value={stats.total.toString()} icon={Target} delay={0.1} />
-             <StatCard title="Completed" value={stats.completed.toString()} icon={CheckCircle} delay={0.2} />
-             <StatCard title="In Progress" value={stats.inProgress.toString()} icon={Activity} delay={0.3} />
+             <StatCard title="Total" value={(metrics.totalInterviews || 0).toString()} icon={Target} delay={0.1} />
+             <StatCard title="Completed" value={(metrics.completedInterviews || 0).toString()} icon={CheckCircle} delay={0.2} />
+             <StatCard title="In Progress" value={(metrics.inProgressInterviews || 0).toString()} icon={Activity} delay={0.3} />
              <StatCard 
                title="Avg Score" 
-               value={stats.avgScore} 
+               value={avgScoreStr} 
                icon={TrendingUp} 
                delay={0.4} 
-               description={stats.avgScore === '—' ? 'No completed interviews' : undefined}
+               description={avgScoreStr === '—' ? 'No completed interviews' : undefined}
              />
              <StatCard 
                title="Avg Duration" 
-               value={stats.avgDuration} 
+               value={avgDurationStr} 
                icon={Clock} 
                delay={0.5} 
-               description={stats.avgDuration === '—' ? 'No completed interviews' : undefined}
+               description={avgDurationStr === '—' ? 'No completed interviews' : undefined}
              />
           </div>
         )}

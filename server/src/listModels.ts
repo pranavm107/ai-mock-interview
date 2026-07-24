@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,9 +7,7 @@ if (!apiKey) {
   console.error("GEMINI_API_KEY is not defined in the environment.");
   process.exit(1);
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
+// const genAI = new GoogleGenerativeAI(apiKey);
 async function listModels() {
   try {
     // Actually @google/generative-ai doesn't expose listModels directly easily, 

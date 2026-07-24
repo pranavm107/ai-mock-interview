@@ -26,6 +26,7 @@ import Settings from '../pages/Settings';
 import Resume from '../pages/Resume';
 import Analytics from '../pages/Analytics';
 import Achievements from '../pages/Achievements';
+import CareerDashboard from '../pages/CareerDashboard';
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
       { path: 'resume', element: <Resume /> },
       { path: 'analytics', element: <Analytics /> },
       { path: 'achievements', element: <Achievements /> },
+      { path: 'career', element: <CareerDashboard /> },
     ],
   },
   {

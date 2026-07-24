@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GeminiTimeoutError } from '../types/careerErrors';
 
 export const callGemini = async (prompt: string): Promise<string> => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -9,7 +10,13 @@ export const callGemini = async (prompt: string): Promise<string> => {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text();
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new GeminiTimeoutError("Gemini API call timed out after 15 seconds."));
+    }, 15000);
+  });
+
+  const generatePromise = model.generateContent(prompt).then(result => result.response.text());
+
+  return Promise.race([generatePromise, timeoutPromise]);
 };

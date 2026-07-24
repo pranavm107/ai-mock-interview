@@ -19,7 +19,7 @@ export const generateQuestions = async (input: PromptInput): Promise<InterviewQu
   let parsed: any;
   try {
     parsed = JSON.parse(jsonText);
-  } catch (error) {
+  } catch {
     throw new Error("Invalid Gemini Response: Could not parse JSON");
   }
 
