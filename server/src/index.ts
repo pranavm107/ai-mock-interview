@@ -12,7 +12,15 @@ import { clerkMiddleware } from '@clerk/express';
 import { setupDeepgramSocket } from './websocket/deepgramSocket';
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://preppilot-pi-sandy.vercel.app",
+      "http://localhost:5173"
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(clerkMiddleware());
 
