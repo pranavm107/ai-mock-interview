@@ -15,10 +15,10 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    let timeout1: NodeJS.Timeout;
-    let timeout2: NodeJS.Timeout;
-    let timeout3: NodeJS.Timeout;
-    let timeout4: NodeJS.Timeout;
+    let timeout1: ReturnType<typeof setTimeout>;
+    let timeout2: ReturnType<typeof setTimeout>;
+    let timeout3: ReturnType<typeof setTimeout>;
+    let timeout4: ReturnType<typeof setTimeout>;
 
     if (isUploading && status === 'uploading') {
       timeout1 = setTimeout(() => {

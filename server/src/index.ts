@@ -3,6 +3,8 @@ import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { setupVoiceSocket } from './websocket/voiceSocketHandler';
+import { setupDeepgramSocket } from './websocket/deepgramSocket';
+
 dotenv.config();
 
 const app = express();
@@ -29,8 +31,10 @@ const server = http.createServer(app);
 
 // Setup WebSockets
 setupVoiceSocket(server);
+setupDeepgramSocket(server);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Backend server listening on port ${PORT}`);
 });
+

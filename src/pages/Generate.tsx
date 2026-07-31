@@ -58,7 +58,6 @@ const Generate: React.FC = () => {
     try {
       setGenerating(true);
       
-      // 1. Generate real questions from the backend
       const response = await fetch('http://localhost:3001/api/interviews/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,6 +71,10 @@ const Generate: React.FC = () => {
           candidateExperienceLevel: formData.experienceLevel,
           language: formData.language,
           totalQuestions: formData.totalQuestions,
+          company: formData.company,
+          role: formData.role,
+          experience: formData.experienceLevel,
+          questionCount: formData.totalQuestions
         })
       });
 
@@ -81,28 +84,57 @@ const Generate: React.FC = () => {
       }
 
       const responseData = await response.json();
-      
-      const interviewId = responseData.id;
-      if (!interviewId) throw new Error('No interview ID returned from generation.');
 
-      // 2. Create Interview Session for this interview
-      const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          interviewId: interviewId
-        })
-      });
+      if (responseData.id) {
+        const interviewId = responseData.id;
+        const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            interviewId: interviewId
+          })
+        });
 
-      if (!sessionResponse.ok) {
-        throw new Error('Failed to create interview session.');
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          navigate(`/session/${sessionData.id}`);
+          return;
+        }
       }
 
-      const sessionData = await sessionResponse.json();
+      const questionsArray = Array.isArray(responseData) ? responseData : (responseData.interview?.questions || []);
+      const mockQuestions = questionsArray.map((q: any, index: number) => ({
+        order: index + 1,
+        question: q.question || q.title || 'Interview Question',
+        expectedAnswer: q.expectedAnswer || q.answer || '',
+        answer: '',
+        answerDuration: 0,
+        score: null,
+        feedback: null,
+        status: 'pending'
+      }));
 
-      // 3. Navigate to Interview Session Runtime
-      navigate(`/session/${sessionData.id}`);
+      const newInterview = await createInterview(
+        user.id,
+        {
+          resumeId: formData.resumeId || null,
+          title: `${formData.company} ${formData.role} Interview`,
+          company: formData.company,
+          role: formData.role,
+          interviewType: formData.interviewType,
+          difficulty: formData.difficulty,
+          experienceLevel: formData.experienceLevel,
+          language: formData.language,
+          totalQuestions: formData.totalQuestions,
+          duration: formData.duration || 30,
+          aiProvider: 'Gemini',
+          feedbackId: null
+        },
+        mockQuestions
+      );
+
+      navigate(`/interview/${generateInterviewSlug(newInterview)}`);
       
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview');
@@ -110,6 +142,7 @@ const Generate: React.FC = () => {
       setGenerating(false);
     }
   };
+
 
   return (
     <div className="pb-24">

@@ -8,7 +8,6 @@ import { InterviewList } from '../components/interview/InterviewList';
 import { InterviewFilters } from '../components/interview/InterviewFilters';
 import type { InterviewStatus, InterviewDifficulty, InterviewType } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { generateInterviewSlug } from '../utils/slugHelper';
 import { StatCard } from '../components/dashboard/StatCard';
 import { Button } from '@/components/ui/button';
 
@@ -171,7 +170,7 @@ const History: React.FC = () => {
             />
             
             <InterviewList 
-              interviews={filteredInterviews}
+              interviews={filteredInterviews as any[]}
               loading={loading}
               onDelete={handleDelete}
               onContinue={handleNavigation}
