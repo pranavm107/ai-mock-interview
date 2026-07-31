@@ -30,5 +30,7 @@ export type {
   InterviewDifficulty,
   ExperienceLevel,
   InterviewQuestion,
-  InterviewStatus
+  InterviewStatus,
+  QuestionStatus,
 } from './interview';
+

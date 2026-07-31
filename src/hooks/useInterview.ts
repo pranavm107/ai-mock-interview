@@ -24,7 +24,7 @@ export const useInterview = () => {
 
   const createInterview = useCallback(async (
     userId: string, 
-    data: Omit<Interview, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'startedAt' | 'completedAt' | 'status' | 'completedQuestions' | 'score'>,
+    data: Omit<Interview, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'startedAt' | 'completedAt' | 'status' | 'completedQuestions' | 'score' | 'currentQuestion' | 'elapsedSeconds'>,
     questions: Omit<InterviewQuestion, 'id' | 'createdAt' | 'interviewId'>[]
   ) => {
     setLoading(true);
@@ -127,13 +127,13 @@ export const useInterview = () => {
     }
   }, []);
 
-  const saveAnswer = useCallback(async (interviewId: string, questionId: string, userAnswer: string, duration: number) => {
+  const saveAnswer = useCallback(async (interviewId: string, questionId: string, answer: string, answerDuration: number) => {
     setLoading(true);
     setError(null);
     try {
-      await interviewService.saveAnswer(interviewId, questionId, userAnswer, duration);
+      await interviewService.saveAnswer(interviewId, questionId, answer, answerDuration);
       setCurrentQuestions(prev => prev.map(q => 
-        q.id === questionId ? { ...q, userAnswer, duration, answered: true } : q
+        q.id === questionId ? { ...q, answer, answerDuration, status: 'answered' } : q
       ));
       
       // Update completed questions count

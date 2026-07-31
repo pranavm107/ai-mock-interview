@@ -170,7 +170,7 @@ const History: React.FC = () => {
             />
             
             <InterviewList 
-              interviews={filteredInterviews}
+              interviews={filteredInterviews as any[]}
               loading={loading}
               onDelete={handleDelete}
               onContinue={handleNavigation}
