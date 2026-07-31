@@ -91,19 +91,23 @@ export const createResume = async (
     const newResume: Resume = {
       id: resumeId,
       userId,
-      title: title || file.name,
-      fileName: file.name,
-      fileUrl,
-      storagePath,
-      fileSize: file.size,
-      parsedText: "",
-      atsScore: 0,
-      aiSummary: "",
-      skills: [],
-      experience: [],
-      education: [],
-      projects: [],
+      version: 1,
+      source: 'upload',
       isDefault: isFirstResume,
+      metadata: {
+        title: title || file.name,
+        fileName: file.name,
+        fileUrl,
+        storagePath,
+        fileSize: file.size,
+        fileType: file.type || 'application/pdf',
+        uploadedAt: serverTimestamp(),
+      },
+      status: {
+        state: 'UPLOADED',
+        uploadedAt: serverTimestamp(),
+      },
+      analysis: {},
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -180,7 +184,7 @@ export const deleteResume = async (userId: string, resumeId: string): Promise<vo
     }
 
     // 1. Delete from Supabase Storage
-    const pathToDelete = resumeData.storagePath || `${userId}/${resumeId}.pdf`;
+    const pathToDelete = resumeData.metadata?.storagePath || (resumeData as any).storagePath || `${userId}/${resumeId}.pdf`;
     await deleteResumeFile(pathToDelete);
 
     const batch = writeBatch(db);
