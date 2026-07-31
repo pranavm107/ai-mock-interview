@@ -4,7 +4,7 @@ import { setupDeepgramService } from '../services/deepgramService';
 import { LiveTranscriptionEvents } from '@deepgram/sdk';
 
 export const setupDeepgramSocket = (server: HttpServer) => {
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ server, path: '/api/deepgram/socket' });
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('Client connected to websocket');

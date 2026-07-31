@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 export type SpeechState = 'idle' | 'connecting' | 'listening' | 'processing' | 'paused' | 'error';
 
@@ -21,7 +22,9 @@ export const useSpeechRecognition = (onTranscript: (text: string, isFinal: boole
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     
     setSpeechState('connecting');
-    const ws = new WebSocket('ws://localhost:3001');
+    const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss:' : 'ws:';
+    const wsHost = API_BASE_URL.replace(/^https?:\/\//, '');
+    const ws = new WebSocket(`${wsProtocol}//${wsHost}/api/deepgram/socket`);
 
     ws.onopen = () => {
       console.log('WebSocket OPEN');
