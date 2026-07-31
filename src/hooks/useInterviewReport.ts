@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { InterviewReport } from '../../server/src/types/interviewReport';
+import { API_BASE_URL } from '../config/api';
 
 export const useInterviewReport = (sessionId?: string) => {
   const [report, setReport] = useState<InterviewReport | null>(null);
@@ -10,7 +11,7 @@ export const useInterviewReport = (sessionId?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:3001/api/interview-reports/session/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/interview-reports/session/${id}`);
       if (!res.ok) {
         if (res.status === 404) {
           throw new Error('Report not found or still generating.');

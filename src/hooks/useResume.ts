@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import type { Resume } from '../types';
 import * as resumeService from '../services/resumeService';
+import { API_BASE_URL } from '../config/api';
 
 export const useResume = () => {
   const { user } = useUser();
@@ -43,8 +44,7 @@ export const useResume = () => {
       
       // 2. Ping backend for processing
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${apiUrl}/api/resumes/process`, {
+        const response = await fetch(`${API_BASE_URL}/api/resumes/process`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

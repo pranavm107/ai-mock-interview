@@ -13,8 +13,10 @@ import { ReplayLoading } from '../components/replay/ReplayLoading';
 import { ReplayError } from '../components/replay/ReplayError';
 import { ReplayEmpty } from '../components/replay/ReplayEmpty';
 
+import { API_BASE_URL } from '../config/api';
+
 const fetchReplaySession = async (sessionId: string, token: string): Promise<ReplaySession> => {
-  const response = await fetch(`http://localhost:3001/api/interview-sessions/${sessionId}/replay`, {
+  const response = await fetch(`${API_BASE_URL}/api/interview-sessions/${sessionId}/replay`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!response.ok) {
@@ -114,7 +116,7 @@ export default function InterviewReplay() {
     setBookmarkError('');
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api/interview-sessions/${sessionId}/bookmarks`, {
+      const response = await fetch(`${API_BASE_URL}/api/interview-sessions/${sessionId}/bookmarks`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -136,7 +138,7 @@ export default function InterviewReplay() {
     setBookmarkError('');
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api/interview-sessions/${sessionId}/bookmarks/${bookmarkId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/interview-sessions/${sessionId}/bookmarks/${bookmarkId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

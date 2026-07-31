@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useInterview } from '../hooks/useInterview';
 import { useResume } from '../hooks/useResume';
 import { generateInterviewSlug } from '../utils/slugHelper';
+import { API_BASE_URL } from '../config/api';
 import type { InterviewType, InterviewDifficulty, ExperienceLevel } from '../types';
 
 const Generate: React.FC = () => {
@@ -58,7 +59,7 @@ const Generate: React.FC = () => {
     try {
       setGenerating(true);
       
-      const response = await fetch('http://localhost:3001/api/interviews/generate', {
+      const response = await fetch(`${API_BASE_URL}/api/interviews/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,7 +88,7 @@ const Generate: React.FC = () => {
 
       if (responseData.id) {
         const interviewId = responseData.id;
-        const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
+        const sessionResponse = await fetch(`${API_BASE_URL}/api/interview-sessions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

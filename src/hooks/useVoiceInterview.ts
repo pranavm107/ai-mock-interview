@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 export type InterviewState = 'READY' | 'LISTENING' | 'PAUSED' | 'SUBMITTING' | 'SCORING' | 'SHOW_FEEDBACK' | 'NEXT_QUESTION' | 'GENERATING_REPORT' | 'REPORT_READY' | 'REPORT_PENDING' | 'COMPLETED';
 
@@ -65,7 +66,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
       if (!sessionId) return;
       
       // Start session on backend
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const backendUrl = API_BASE_URL;
       await fetch(`${backendUrl}/api/voice/session/${sessionId}/start`, { method: 'POST' });
 
       // Return a promise to wait for WS to connect
@@ -175,14 +176,14 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
     setState(prev => ({ ...prev, interviewState: 'READY', isSpeaking: false }));
     
     if (sessionId) {
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const backendUrl = API_BASE_URL;
       fetch(`${backendUrl}/api/voice/session/${sessionId}/stop`, { method: 'POST' }).catch(console.error);
     }
   }, [sessionId, disconnectWebSocket]);
 
   const startAnswer = async () => {
     if (!sessionId) return;
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const backendUrl = API_BASE_URL;
     await fetch(`${backendUrl}/api/voice/session/${sessionId}/start-answer`, { method: 'POST' }).catch(console.error);
     setState(prev => ({ ...prev, interviewState: 'LISTENING', transcript: '' }));
   };
@@ -190,7 +191,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
   const finishAnswer = async () => {
     if (!sessionId) return;
     setState(prev => ({ ...prev, interviewState: 'SUBMITTING' }));
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const backendUrl = API_BASE_URL;
     await fetch(`${backendUrl}/api/voice/session/${sessionId}/finish-answer`, { method: 'POST' }).catch(console.error);
     if (optionsRef.current?.onFinishAnswer) {
       optionsRef.current.onFinishAnswer(stateRef.current.transcript);
@@ -199,7 +200,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
 
   const restartAnswer = async () => {
     if (!sessionId) return;
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const backendUrl = API_BASE_URL;
     await fetch(`${backendUrl}/api/voice/session/${sessionId}/restart-answer`, { method: 'POST' }).catch(console.error);
     setState(prev => ({ ...prev, transcript: '', interviewState: 'LISTENING' }));
   };
@@ -207,7 +208,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
   const nextQuestion = async () => {
     if (!sessionId) return;
     setState(prev => ({ ...prev, interviewState: 'NEXT_QUESTION' }));
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const backendUrl = API_BASE_URL;
     await fetch(`${backendUrl}/api/voice/session/${sessionId}/next-question`, { method: 'POST' }).catch(console.error);
     if (optionsRef.current?.onNextQuestion) {
       optionsRef.current.onNextQuestion();
@@ -222,7 +223,7 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
   const replayQuestion = async (text: string) => {
     if (!sessionId) return;
     try {
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const backendUrl = API_BASE_URL;
       const response = await fetch(`${backendUrl}/api/voice/session/${sessionId}/replay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

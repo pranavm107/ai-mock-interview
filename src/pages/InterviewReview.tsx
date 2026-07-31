@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@clerk/react';
+import { API_BASE_URL } from '../config/api';
 import type { ReviewResponse } from '../types/review';
 import { ReviewSummaryCard } from '../components/review/ReviewSummaryCard';
 import { ReviewCategoryChart } from '../components/review/ReviewCategoryChart';
@@ -22,7 +23,7 @@ export default function InterviewReview() {
     try {
       setLoading(true);
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api/reviews/${sessionId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/${sessionId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -51,7 +52,7 @@ export default function InterviewReview() {
       setGenerating(true);
       setError(null);
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api/reviews/${sessionId}/generate`, {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/${sessionId}/generate`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

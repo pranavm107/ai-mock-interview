@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { API_BASE_URL } from '../config/api';
 import { CareerScoreCard } from '../components/career/CareerScoreCard';
 import { CareerReadinessCard } from '../components/career/CareerReadinessCard';
 import { WeeklyCoachingCard } from '../components/career/WeeklyCoachingCard';
@@ -25,7 +26,7 @@ export default function CareerDashboard() {
       setIsLoading(true);
       setError(null);
       const token = await getToken();
-      const res = await fetch('http://localhost:3001/api/career/dashboard', {
+      const res = await fetch(`${API_BASE_URL}/api/career/dashboard`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch dashboard');
@@ -54,7 +55,7 @@ export default function CareerDashboard() {
       setIsGenerating(true);
       setError(null);
       const token = await getToken();
-      const res = await fetch('http://localhost:3001/api/career/generate', {
+      const res = await fetch(`${API_BASE_URL}/api/career/generate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

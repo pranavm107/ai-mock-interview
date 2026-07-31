@@ -4,6 +4,7 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { motion } from 'framer-motion';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useInterviewHistory } from '../hooks/useInterviewHistory';
+import { API_BASE_URL } from '../config/api';
 import { InterviewList } from '../components/interview/InterviewList';
 import { InterviewFilters } from '../components/interview/InterviewFilters';
 import type { InterviewStatus, InterviewDifficulty, InterviewType } from '../types';
@@ -39,7 +40,7 @@ const History: React.FC = () => {
         try {
           setMetricsLoading(true);
           const token = await getToken();
-          const res = await fetch('http://localhost:3001/api/career/metrics', {
+          const res = await fetch(`${API_BASE_URL}/api/career/metrics`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (res.ok) {

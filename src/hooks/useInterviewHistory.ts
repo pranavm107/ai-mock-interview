@@ -30,6 +30,8 @@ export interface EnrichedInterviewSession {
 
 import type { Interview } from '../types';
 
+import { API_BASE_URL } from '../config/api';
+
 export const useInterviewHistory = () => {
   const [sessions, setSessions] = useState<Interview[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +41,7 @@ export const useInterviewHistory = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/user/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/user/${userId}`);
       if (!res.ok) throw new Error('Failed to load sessions');
       const data = await res.json();
       

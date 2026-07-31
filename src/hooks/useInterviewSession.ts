@@ -6,6 +6,7 @@ import type { DifficultyLevel, AdaptiveEvaluationResult } from '../types/adaptiv
 import type { CommunicationAnalytics, SpeechAnalyticsRecord } from '../types/speech';
 import * as interviewService from '../services/interviewService';
 import { useSpeechRecognition } from './useSpeechRecognition';
+import { API_BASE_URL } from '../config/api';
 
 type SaveStatus = 'saved' | 'saving' | 'offline' | 'error';
 
@@ -53,11 +54,11 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
       setLoading(true);
       setError(null);
       // Try backend session endpoint first
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${id}`);
       if (res.ok) {
         const data = await res.json();
         setSession(data);
-        const interviewRes = await fetch(`http://localhost:3001/api/interviews/${data.interviewId}`);
+        const interviewRes = await fetch(`${API_BASE_URL}/api/interviews/${data.interviewId}`);
         if (interviewRes.ok) {
           setInterview(await interviewRes.json());
         }
@@ -191,7 +192,7 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
     if (!session) return;
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/start`, { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${session.id}/start`, { method: 'POST' });
       if (!res.ok) throw new Error('Failed to start session');
       setSession(await res.json());
     } catch (err: any) {
@@ -222,7 +223,7 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
       const timeoutId = setTimeout(() => abortController.abort(), 35000);
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/next`, { 
+        const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${session.id}/next`, { 
           method: 'POST',
           signal: abortController.signal
         });
@@ -257,7 +258,7 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
       // We don't set global loading(true) here, only analytics loading
       // to prevent the main UI from blocking/showing global spinners.
       
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/adaptive-answer`, {
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${session.id}/adaptive-answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionId, answerText, startTime, wordCount })
@@ -307,7 +308,7 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
     const timeoutId = setTimeout(() => abortController.abort(), 35000);
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:3001/api/interview-sessions/${session.id}/skip`, { 
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${session.id}/skip`, { 
         method: 'POST',
         signal: abortController.signal
       });
