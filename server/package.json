@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@clerk/express": "^2.1.44",
@@ -32,3 +33,4 @@
     "typescript": "^5.7.3"
   }
 }
+

@@ -4,14 +4,14 @@ import { getReportBySessionId, listReportsByUser, deleteReport, getReport } from
 export const getSessionReport = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
-    const report = await getReportBySessionId(sessionId);
+    let report = await getReportBySessionId(sessionId);
     
     if (!report) {
       // Automatic recovery: If the report was not generated during session completion (e.g. due to rate limits), try to generate it now.
       const { getInterviewSessionById } = await import('../services/runtime/sessionStorageService');
       const session = await getInterviewSessionById(sessionId);
       
-      if (session && session.status === 'completed') {
+      if (session && (session.state === 'COMPLETED' || (session as any).status === 'completed')) {
         const { getInterviewById } = await import('../services/interview/interviewStorageService');
         const interview = await getInterviewById(session.interviewId);
         if (interview) {

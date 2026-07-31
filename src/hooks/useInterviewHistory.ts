@@ -66,6 +66,8 @@ export const useInterviewHistory = () => {
           totalQuestions: session.progress?.totalQuestions || 5,
           completedQuestions: session.metrics?.questionsAnswered || 0,
           duration: session.metrics?.totalDurationMs ? Math.round(session.metrics.totalDurationMs / 60000) : 30,
+          currentQuestion: session.progress?.currentQuestionIndex || 1,
+          elapsedSeconds: Math.round((session.metrics?.totalDurationMs || 0) / 1000),
           feedbackId: null,
           aiProvider: 'openai',
           startedAt: session.startedAt || null,

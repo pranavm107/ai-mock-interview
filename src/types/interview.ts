@@ -1,6 +1,10 @@
+import { Timestamp } from 'firebase/firestore';
+
 export type InterviewType = "Technical" | "HR" | "Behavioral" | "Mixed";
 export type InterviewDifficulty = "Easy" | "Medium" | "Hard" | "EASY" | "MEDIUM" | "HARD" | "MIXED";
 export type ExperienceLevel = "Fresher" | "Junior" | "Mid" | "Senior" | "Student" | "Lead";
+export type InterviewStatus = "Draft" | "Ready" | "In Progress" | "Completed" | "Cancelled" | "Paused";
+export type QuestionStatus = "pending" | "current" | "answered";
 
 export type InterviewSessionState =
   | 'CREATED'
@@ -33,12 +37,20 @@ export interface Interview {
   completedQuestions: number;
   score: number | null;
   feedbackId: string | null;
+  currentQuestion: number;
+  elapsedSeconds: number;
   aiProvider: string;
   status: InterviewStatus;
-  startedAt: any | null;
-  completedAt: any | null;
-  createdAt: any; 
-  updatedAt: any;
+  cameraEnabled?: boolean;
+  recordingStarted?: boolean;
+  recordingCompleted?: boolean;
+  videoUrl?: string | null;
+  videoSize?: number | null;
+  videoDuration?: number | null;
+  startedAt: Timestamp | any | null;
+  completedAt: Timestamp | any | null;
+  createdAt: Timestamp | any;
+  updatedAt: Timestamp | any;
   
   // Phase 5 specific fields
   settings?: any;
@@ -46,21 +58,24 @@ export interface Interview {
   questions?: any[]; // Generated questions
 }
 
-export type InterviewStatus = "Draft" | "Ready" | "In Progress" | "Completed" | "Cancelled";
-
 export interface InterviewQuestion {
   id: string;
   interviewId: string;
   order: number;
   question: string;
   expectedAnswer: string;
-  userAnswer: string;
-  aiFeedback: string;
-  aiScore: number;
-  answered: boolean;
-  skipped: boolean;
-  duration: number;
-  createdAt: any;
+  answer?: string;
+  answerDuration?: number;
+  score?: number | null;
+  feedback?: string | null;
+  status?: QuestionStatus;
+  userAnswer?: string;
+  aiFeedback?: string;
+  aiScore?: number;
+  answered?: boolean;
+  skipped?: boolean;
+  duration?: number;
+  createdAt?: Timestamp | any;
 }
 
 // The Stateful Runtime Session
@@ -107,3 +122,4 @@ export interface SessionAnswer {
   createdAt: string;
   updatedAt: string;
 }
+
