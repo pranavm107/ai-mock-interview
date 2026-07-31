@@ -269,8 +269,8 @@ const Interview: React.FC = () => {
                     <FileText size={20} />
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-sm font-semibold text-slate-900 truncate" title={resume.fileName}>
-                      {resume.fileName}
+                    <p className="text-sm font-semibold text-slate-900 truncate" title={resume.metadata?.fileName || (resume as any).fileName}>
+                      {resume.metadata?.fileName || (resume as any).fileName || 'Resume.pdf'}
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Uploaded {formatDate(resume.createdAt)}
@@ -281,10 +281,10 @@ const Interview: React.FC = () => {
                   </div>
                 </div>
                 <Button 
-                  onClick={() => window.open(resume.fileUrl, '_blank')}
+                  onClick={() => window.open(resume.metadata?.fileUrl || (resume as any).fileUrl, '_blank')}
                   className="w-full bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 shadow-sm rounded-xl h-10"
                   variant="outline"
-                  disabled={!resume.fileUrl}
+                  disabled={!(resume.metadata?.fileUrl || (resume as any).fileUrl)}
                 >
                   <Eye size={16} className="mr-2" /> Preview Resume
                 </Button>

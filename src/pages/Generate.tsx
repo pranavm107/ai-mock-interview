@@ -28,6 +28,7 @@ const Generate: React.FC = () => {
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const handleReset = () => {
     setFormData({
@@ -55,32 +56,58 @@ const Generate: React.FC = () => {
     }
 
     try {
-      // 1. Fetch questions from the backend
+      setGenerating(true);
+      
       const response = await fetch('http://localhost:3001/api/interviews/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId: user.id,
+          resumeId: formData.resumeId || null,
+          targetCompany: formData.company,
+          targetRole: formData.role,
+          interviewType: formData.interviewType,
+          difficulty: formData.difficulty,
+          candidateExperienceLevel: formData.experienceLevel,
+          language: formData.language,
+          totalQuestions: formData.totalQuestions,
           company: formData.company,
           role: formData.role,
           experience: formData.experienceLevel,
-          difficulty: formData.difficulty,
-          questionCount: formData.totalQuestions,
-        }),
+          questionCount: formData.totalQuestions
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate questions from server');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Failed to generate questions from AI.');
       }
 
-      const generatedQuestions = await response.json();
+      const responseData = await response.json();
 
-      const mockQuestions = generatedQuestions.map((q: any, index: number) => ({
+      if (responseData.id) {
+        const interviewId = responseData.id;
+        const sessionResponse = await fetch('http://localhost:3001/api/interview-sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            interviewId: interviewId
+          })
+        });
+
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          navigate(`/session/${sessionData.id}`);
+          return;
+        }
+      }
+
+      const questionsArray = Array.isArray(responseData) ? responseData : (responseData.interview?.questions || []);
+      const mockQuestions = questionsArray.map((q: any, index: number) => ({
         order: index + 1,
-        question: q.question,
-        expectedAnswer: q.expectedAnswer,
+        question: q.question || q.title || 'Interview Question',
+        expectedAnswer: q.expectedAnswer || q.answer || '',
         answer: '',
         answerDuration: 0,
         score: null,
@@ -92,29 +119,30 @@ const Generate: React.FC = () => {
         user.id,
         {
           resumeId: formData.resumeId || null,
-          title: `${formData.role} at ${formData.company}`,
+          title: `${formData.company} ${formData.role} Interview`,
           company: formData.company,
           role: formData.role,
           interviewType: formData.interviewType,
           difficulty: formData.difficulty,
           experienceLevel: formData.experienceLevel,
           language: formData.language,
-          duration: formData.duration,
           totalQuestions: formData.totalQuestions,
+          duration: formData.duration || 30,
           aiProvider: 'Gemini',
           feedbackId: null
         },
         mockQuestions
       );
 
-      // 2. Navigate to Interview Session using slug
-      const slug = generateInterviewSlug(newInterview);
-      navigate(`/interview/${slug}`);
+      navigate(`/interview/${generateInterviewSlug(newInterview)}`);
       
     } catch (err: any) {
       setError(err.message || 'Failed to generate interview');
+    } finally {
+      setGenerating(false);
     }
   };
+
 
   return (
     <div className="pb-24">
@@ -177,7 +205,7 @@ const Generate: React.FC = () => {
               >
                 <option value="">No Resume Context</option>
                 {resumes.map(r => (
-                  <option key={r.id} value={r.id}>{r.title || r.fileName}</option>
+                  <option key={r.id} value={r.id}>{r.metadata?.title || r.metadata?.fileName || r.id}</option>
                 ))}
               </select>
             </div>
@@ -275,13 +303,13 @@ const Generate: React.FC = () => {
             </button>
             <button 
               type="submit"
-              disabled={creatingInterview || !user?.id}
+              disabled={creatingInterview || generating || !user?.id}
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {creatingInterview ? (
+              {generating || creatingInterview ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Generating...
+                  {generating ? 'Generating AI Questions...' : 'Saving...'}
                 </>
               ) : (
                 <>

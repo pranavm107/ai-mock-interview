@@ -23,10 +23,14 @@ export interface User {
 export type { Resume, ResumeUploadMetadata } from './resume';
 export type {
   Interview,
-  InterviewQuestion,
+  InterviewSession,
+  SessionAnswer,
+  InterviewSessionState,
   InterviewType,
   InterviewDifficulty,
   ExperienceLevel,
+  InterviewQuestion,
   InterviewStatus,
   QuestionStatus,
 } from './interview';
+
