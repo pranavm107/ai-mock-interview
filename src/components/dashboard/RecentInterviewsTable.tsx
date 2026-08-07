@@ -19,14 +19,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const mockInterviews = [
-  { id: '1', role: 'Senior Frontend Engineer', date: 'Oct 24, 2026', score: 92, status: 'Completed' },
-  { id: '2', role: 'System Design', date: 'Oct 20, 2026', score: 85, status: 'Completed' },
-  { id: '3', role: 'Behavioral', date: 'Oct 18, 2026', score: 95, status: 'Completed' },
-  { id: '4', role: 'React Developer', date: 'Oct 15, 2026', score: null, status: 'In Progress' },
-];
 
-export const RecentInterviewsTable: React.FC = () => {
+
+export const RecentInterviewsTable: React.FC<{ interviews?: any[] }> = ({ interviews = [] }) => {
   return (
     <div className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-sm">
       <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
@@ -48,7 +43,14 @@ export const RecentInterviewsTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockInterviews.map((interview) => (
+            {interviews.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                  No recent interviews found. Generate one to get started!
+                </TableCell>
+              </TableRow>
+            )}
+            {interviews.map((interview) => (
               <TableRow 
                 key={interview.id} 
                 className="group border-slate-100 hover:bg-blue-50/50 transition-colors"
@@ -57,10 +59,10 @@ export const RecentInterviewsTable: React.FC = () => {
                   {interview.role}
                 </TableCell>
                 <TableCell className="text-slate-500 text-sm font-medium">
-                  {interview.date}
+                  {interview.createdAt ? new Date(interview.createdAt).toLocaleDateString() : 'N/A'}
                 </TableCell>
                 <TableCell className="text-center">
-                  {interview.score ? (
+                  {interview.score !== undefined && interview.score !== null ? (
                     <span className={`font-bold ${interview.score >= 90 ? 'text-emerald-600' : 'text-amber-500'}`}>
                       {interview.score}%
                     </span>

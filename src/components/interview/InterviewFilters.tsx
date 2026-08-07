@@ -11,6 +11,8 @@ interface Props {
   onDifficultyChange: (val: InterviewDifficulty | 'All') => void;
   typeFilter: InterviewType | 'All';
   onTypeChange: (val: InterviewType | 'All') => void;
+  sortFilter: string;
+  onSortChange: (val: string) => void;
 }
 
 export const InterviewFilters: React.FC<Props> = ({
@@ -21,7 +23,9 @@ export const InterviewFilters: React.FC<Props> = ({
   difficultyFilter,
   onDifficultyChange,
   typeFilter,
-  onTypeChange
+  onTypeChange,
+  sortFilter,
+  onSortChange
 }) => {
   return (
     <div className="flex flex-col xl:flex-row gap-4 mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -95,6 +99,28 @@ export const InterviewFilters: React.FC<Props> = ({
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+            <SlidersHorizontal size={16} />
+          </div>
+          <select
+            value={sortFilter}
+            onChange={(e) => onSortChange(e.target.value)}
+            className="pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl appearance-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-semibold text-slate-700 outline-none cursor-pointer hover:border-slate-300"
+          >
+            <option value="Newest">Newest First</option>
+            <option value="Oldest">Oldest First</option>
+            <option value="Highest Score">Highest Score</option>
+            <option value="Lowest Score">Lowest Score</option>
+            <option value="Longest Duration">Longest Duration</option>
+            <option value="Shortest Duration">Shortest Duration</option>
+            <option value="Most Recent Activity">Most Recent Activity</option>
           </select>
           <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
             <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
