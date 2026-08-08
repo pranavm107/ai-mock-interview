@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 import { CareerScoreCard } from '../components/career/CareerScoreCard';
 import { CareerReadinessCard } from '../components/career/CareerReadinessCard';
@@ -13,13 +13,22 @@ import { RecentInterviewCard } from '../components/career/RecentInterviewCard';
 import { CareerLoading } from '../components/career/CareerLoading';
 import { CareerError } from '../components/career/CareerError';
 import { CareerEmpty } from '../components/career/CareerEmpty';
+import { useInterviewHistory } from '../hooks/useInterviewHistory';
 
 export default function CareerDashboard() {
-  const { getToken } = useAuth();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  const { sessions, fetchUserSessions } = useInterviewHistory();
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserSessions(user.id);
+    }
+  }, [user?.id, fetchUserSessions]);
 
   const fetchDashboard = async () => {
     try {
@@ -62,7 +71,7 @@ export default function CareerDashboard() {
           Authorization: `Bearer ${token}` 
         },
         body: JSON.stringify({
-          interviewHistory: [], // Mock data
+          interviewHistory: sessions.map(s => ({ role: s.role, score: s.score, status: s.status, date: s.createdAt })),
           skillsMatrix: {},
           recentTrends: {}
         })
