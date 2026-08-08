@@ -5,6 +5,8 @@ import { buildReviewPrompt } from './promptBuilder';
 import { generateJson } from '../ai/geminiClient';
 import { validateAndCalculateScores } from './scoreCalculator';
 import { InterviewReview, QuestionReview } from '../../types/review';
+import { achievementRuleEngine } from '../achievementRuleEngine';
+import { AchievementEventType } from '../../types/achievement';
 
 export const generateInterviewReview = async (sessionId: string, userId: string): Promise<{ review: InterviewReview, questionReviews: QuestionReview[] }> => {
   // Idempotency check: if review already exists, return it
@@ -83,6 +85,22 @@ export const generateInterviewReview = async (sessionId: string, userId: string)
 
   // 6. Save to Database
   await saveInterviewReview(interviewReview, questionReviews);
+
+  // 7. Trigger Achievements (fire and forget to not block response)
+  Promise.resolve().then(() => {
+    achievementRuleEngine.evaluateAchievementEvent(userId, {
+      type: AchievementEventType.INTERVIEW_COMPLETED,
+      userId,
+      sourceId: sessionId
+    }).catch(console.error);
+
+    achievementRuleEngine.evaluateAchievementEvent(userId, {
+      type: AchievementEventType.INTERVIEW_SCORED,
+      userId,
+      sourceId: sessionId,
+      score: safeReviewData.overallScore
+    }).catch(console.error);
+  });
 
   return { review: interviewReview, questionReviews };
 };
