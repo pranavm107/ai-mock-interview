@@ -1,4 +1,4 @@
-import { db } from '../../config/firebaseAdmin';
+import { getEnrichedUserSessions } from '../interview/interviewAggregationService';
 
 export interface InterviewSession {
   id: string;
@@ -26,26 +26,28 @@ export interface CareerMetrics {
 }
 
 export const getCareerMetrics = async (userId: string): Promise<CareerMetrics> => {
-  if (!db) throw new Error("Firestore not initialized");
+  const enrichedSessions = await getEnrichedUserSessions(userId);
 
-  const interviewsRef = db.collection('interviews');
-  const snapshot = await interviewsRef
-    .where('userId', '==', userId)
-    .orderBy('createdAt', 'desc')
-    .get();
+  const sessions: InterviewSession[] = enrichedSessions.map(session => {
+    let status = 'Draft';
+    if (['CREATED', 'READY'].includes(session.state)) status = 'Draft';
+    else if (session.state === 'COMPLETED') status = 'Completed';
+    else if (session.state === 'CANCELLED') status = 'Cancelled';
+    else status = 'In Progress';
 
-  const sessions: InterviewSession[] = snapshot.docs.map(doc => {
-    const data = doc.data();
+    // Calculate duration in minutes from metrics
+    const durationMins = session.metrics?.totalDurationMs ? Math.round(session.metrics.totalDurationMs / 60000) : null;
+
     return {
-      id: doc.id,
-      userId: data.userId,
-      status: data.status,
-      score: data.score,
-      interviewType: data.interviewType,
-      duration: data.duration,
-      startedAt: data.startedAt?.toDate?.()?.toISOString() || null,
-      completedAt: data.completedAt?.toDate?.()?.toISOString() || null,
-      createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString()
+      id: session.id,
+      userId: session.userId,
+      status,
+      score: session.score,
+      interviewType: session.interviewType,
+      duration: durationMins || undefined,
+      startedAt: session.startedAt || null,
+      completedAt: session.completedAt || null,
+      createdAt: session.createdAt?.toDate?.()?.toISOString() || new Date(session.createdAt || 0).toISOString()
     };
   });
 

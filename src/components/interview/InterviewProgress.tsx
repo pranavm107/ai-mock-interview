@@ -4,13 +4,27 @@ import type { InterviewStatus } from '../../types';
 
 interface Props {
   totalQuestions: number;
-  completedQuestions: number;
+  currentQuestion: number;
   status: InterviewStatus;
   className?: string;
 }
 
-export const InterviewProgress: React.FC<Props> = ({ totalQuestions, completedQuestions, status, className = '' }) => {
-  const percentage = totalQuestions > 0 ? Math.round((completedQuestions / totalQuestions) * 100) : 0;
+export const InterviewProgress: React.FC<Props> = ({ totalQuestions, currentQuestion, status, className = '' }) => {
+  let percentage = 0;
+  let displayQuestion = currentQuestion;
+
+  if (status === 'Completed') {
+    percentage = 100;
+    displayQuestion = totalQuestions;
+  } else if (status === 'Draft' || status === 'Ready' || status === 'Cancelled') {
+    percentage = 0;
+    displayQuestion = 0;
+  } else {
+    // Treat currentQuestion as 1-indexed for display, or if it's 0-indexed, it might need +1. 
+    // Assuming currentQuestion is the exact current question number to display (1-based from backend).
+    percentage = totalQuestions > 0 ? Math.round((currentQuestion / totalQuestions) * 100) : 0;
+  }
+
   
   const getStatusText = () => {
     if (status === 'Draft' || status === 'Ready') return 'Ready';
@@ -25,7 +39,7 @@ export const InterviewProgress: React.FC<Props> = ({ totalQuestions, completedQu
         <div className="flex flex-col">
           <span className="text-slate-500 font-medium text-xs uppercase tracking-wider mb-0.5">{getStatusText()}</span>
           <span className="text-slate-900 font-bold">
-            Question {completedQuestions} / {totalQuestions}
+            Question {displayQuestion} / {totalQuestions}
           </span>
         </div>
         <span className="text-blue-600 font-bold">{percentage}% Completed</span>

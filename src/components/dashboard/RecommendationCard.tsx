@@ -4,7 +4,10 @@ import { Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-export const RecommendationCard: React.FC = () => {
+export const RecommendationCard: React.FC<{ recommendations?: string[] }> = ({ recommendations = [] }) => {
+  const displayRecs = recommendations.length > 0 ? recommendations : [
+    "Complete your first mock interview to get AI-powered recommendations."
+  ];
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,11 +26,7 @@ export const RecommendationCard: React.FC = () => {
           </div>
           
           <ul className="space-y-3 mb-6">
-            {[
-              "Improve your STAR method structuring.",
-              "Practice System Design concepts.",
-              "Behavioral Interview strongly recommended."
-            ].map((item, index) => (
+            {displayRecs.map((item, index) => (
               <motion.li 
                 key={index}
                 initial={{ opacity: 0, x: -10 }}

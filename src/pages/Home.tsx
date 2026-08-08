@@ -80,7 +80,7 @@ const Home: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Hero Visual Mockup */}
+          {/* Hero Visual Illustration */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -110,7 +110,7 @@ const Home: React.FC = () => {
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-gray-900">resume.pdf</div>
+                  <div className="text-sm font-bold text-gray-900">your-resume.pdf</div>
                   <div className="text-xs text-gray-500">Parsing complete</div>
                 </div>
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-2" />
@@ -385,7 +385,7 @@ const Home: React.FC = () => {
             </motion.div>
           </motion.div>
           
-          {/* Dashboard Mockup */}
+          {/* Dashboard Illustration */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
             className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-100 relative group"

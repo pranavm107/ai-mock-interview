@@ -84,14 +84,7 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
     }
   };
 
-  // Determine completed questions based on phase 3.3 data (if present) or mock
-  // For now, since we haven't implemented question tracking, we'll use a placeholder or logic
-  // based on status. If complete, it's totalQuestions. If draft/ready, it's 0. 
-  const getCompletedQuestions = () => {
-    if (interview.status === 'Completed') return interview.totalQuestions;
-    if (interview.status === 'Draft' || interview.status === 'Ready' || interview.status === 'Cancelled') return 0;
-    return Math.floor(interview.totalQuestions / 2); // Mock for In Progress
-  };
+  // Removed getCompletedQuestions since we directly use currentQuestion from backend
 
   return (
     <>
@@ -145,7 +138,7 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
         <div className="mb-6">
           <InterviewProgress 
             totalQuestions={interview.totalQuestions}
-            completedQuestions={getCompletedQuestions()}
+            currentQuestion={interview.currentQuestion}
             status={interview.status}
           />
         </div>
@@ -177,7 +170,7 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
 
           <div className="col-span-2 flex items-center gap-2 text-xs text-slate-500">
             <FileText size={14} className="opacity-70" />
-            <span>Resume: <span className="font-medium text-slate-700">{interview.resumeId ? 'Attached' : 'General'}</span></span>
+            <span>Resume: <span className="font-medium text-slate-700">{interview.resumeName ? interview.resumeName : (interview.resumeId ? 'Attached' : 'General')}</span></span>
           </div>
           
           <div className="col-span-2 flex items-center gap-2 text-xs text-slate-400">

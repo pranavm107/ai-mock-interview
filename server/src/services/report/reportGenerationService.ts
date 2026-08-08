@@ -124,8 +124,35 @@ export const generateInterviewReport = async (
     version: "1.0"
   };
 
-  // 8. Save Report
+  // 12. Save Report
   await saveReport(report);
+
+  // 13. Standardize and Update Interview Session Data Model
+  const updatedSessionData = {
+    duration: session.metrics.totalDurationMs,
+    overallScore: scores.overallEvaluation.overallScore,
+    technicalScore: scores.overallEvaluation.technicalScore,
+    communicationScore: scores.overallEvaluation.communicationScore,
+    behavioralScore: scores.overallEvaluation.behavioralScore,
+    confidenceScore: scores.overallEvaluation.confidenceScore,
+    problemSolvingScore: scores.overallEvaluation.problemSolvingScore,
+    timeManagementScore: scores.overallEvaluation.timeManagementScore,
+    questionsAnswered: session.metrics.questionsAnswered,
+    questionsSkipped: session.metrics.questionsSkipped,
+    totalQuestions: session.progress.totalQuestions,
+    difficulty: interview.difficulty,
+    speechMetrics: {
+      fillerWords: speechAnalytics?.averageFillers || 0,
+      fillerRatio: 0,
+      silenceDuration: speechAnalytics?.averagePauseDuration || 0,
+      silenceRatio: 0,
+      speakingSpeed: speechAnalytics?.averagePace || 0
+    },
+    skillScores: []
+  };
+
+  const { updateInterviewSession } = await import('../runtime/sessionStorageService');
+  await updateInterviewSession(session.id, updatedSessionData);
   
   return report;
 };
