@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Play, RotateCcw, AlertCircle, Loader2 } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { motion } from 'framer-motion';
@@ -16,16 +16,33 @@ const Generate: React.FC = () => {
   const { createInterview, loading: creatingInterview } = useInterview();
   const { resumes, loading: loadingResumes } = useResume();
 
+  const location = useLocation();
+  const recommendation = location.state?.recommendation;
+
+  const difficultyMap: Record<string, string> = {
+    EASY: 'Easy',
+    MEDIUM: 'Medium',
+    HARD: 'Hard',
+  };
+
+  const experienceMap: Record<string, string> = {
+    Student: 'Fresher',
+    Junior: 'Junior',
+    Mid: 'Mid',
+    Senior: 'Senior',
+    Lead: 'Senior',
+  };
+
   const [formData, setFormData] = useState({
     resumeId: '',
-    company: '',
-    role: '',
-    interviewType: 'Technical' as InterviewType,
-    difficulty: 'Medium' as InterviewDifficulty,
-    experienceLevel: 'Mid' as ExperienceLevel,
+    company: recommendation?.targetCompany || '',
+    role: recommendation?.targetRole || '',
+    interviewType: (recommendation?.interviewType || 'Technical') as InterviewType,
+    difficulty: (recommendation ? (difficultyMap[recommendation.difficulty] || 'Medium') : 'Medium') as InterviewDifficulty,
+    experienceLevel: (recommendation ? (experienceMap[recommendation.experienceLevel] || 'Mid') : 'Mid') as ExperienceLevel,
     language: 'English',
-    duration: 30,
-    totalQuestions: 5,
+    duration: recommendation?.durationMinutes || 30,
+    totalQuestions: recommendation?.questionCount || 5,
   });
   
   const [error, setError] = useState<string | null>(null);
@@ -163,6 +180,13 @@ const Generate: React.FC = () => {
           <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
             <AlertCircle className="shrink-0 mt-0.5" size={18} />
             <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
+
+        {recommendation && (
+          <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start gap-3 text-indigo-700">
+            <Sparkles className="shrink-0 mt-0.5" size={18} />
+            <p className="text-sm font-medium">Prefilled from your AI recommendation. You can customize any setting before starting.</p>
           </div>
         )}
 

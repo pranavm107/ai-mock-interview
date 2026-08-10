@@ -10,10 +10,12 @@ import { saveSpeechAnalytics, getSessionSpeechSummary, getSpeechTimeline } from 
 
 export const createNewSession = async (req: Request, res: Response) => {
   try {
-    const { interviewId, userId } = req.body;
+    const { interviewId } = req.body;
+    const authReq = req as any;
+    const userId = authReq.auth ? authReq.auth().userId : null;
     
     if (!interviewId || !userId) {
-      return res.status(400).json({ error: 'Missing interviewId or userId' });
+      return res.status(400).json({ error: 'Missing interviewId or unauthorized' });
     }
 
     const interview = await getInterviewById(interviewId);

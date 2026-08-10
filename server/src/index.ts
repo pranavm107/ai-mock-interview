@@ -10,6 +10,7 @@ console.log('2. Loading WebSockets & Middleware...');
 import { setupVoiceSocket } from './websocket/voiceSocketHandler';
 import { clerkMiddleware } from '@clerk/express';
 import { setupDeepgramSocket } from './websocket/deepgramSocket';
+import { requestIdMiddleware } from './middleware/requestId';
 
 const app = express();
 app.use(
@@ -22,6 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(requestIdMiddleware);
 app.use(clerkMiddleware());
 
 app.get('/health', (req, res) => {

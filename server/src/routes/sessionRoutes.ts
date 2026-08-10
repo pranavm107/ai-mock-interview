@@ -11,9 +11,11 @@ import {
   deleteSessionEndpoint
 } from '../controllers/interviewSessionController';
 
+import { requireAuth } from '@clerk/express';
+
 const router = Router();
 
-router.post('/', createNewSession);
+router.post('/', requireAuth(), createNewSession);
 router.get('/user/:userId', getUserSessions);
 router.get('/:id', getSession);
 router.delete('/:id', deleteSessionEndpoint);

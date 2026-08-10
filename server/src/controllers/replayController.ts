@@ -5,7 +5,9 @@ import { getInterviewSessionById } from '../services/runtime/sessionStorageServi
 
 const verifyOwnership = async (req: Request, res: Response, sessionId: string) => {
   // @ts-ignore - Clerk injects auth property
-  const userId = req.auth?.userId as string | undefined;
+  const authReq = req as any;
+  const auth = authReq.auth();
+  const userId = auth.userId as string | undefined;
   if (!userId) {
     res.status(401).json({ error: 'Unauthorized: Missing or invalid authentication token' });
     return false;
