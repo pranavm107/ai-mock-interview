@@ -78,4 +78,29 @@ export interface InterviewSession {
   updatedAt: string; // ISO String
   startedAt?: string; // ISO String
   completedAt?: string; // ISO String
+
+  // Standardized analytics fields
+  duration?: number;
+  overallScore?: number;
+  technicalScore?: number;
+  communicationScore?: number;
+  behavioralScore?: number;
+  confidenceScore?: number;
+  problemSolvingScore?: number;
+  timeManagementScore?: number;
+  questionsAnswered?: number;
+  questionsSkipped?: number;
+  totalQuestions?: number;
+  difficulty?: "EASY" | "MEDIUM" | "HARD" | "MIXED";
+  speechMetrics?: {
+    fillerWords: number;
+    fillerRatio: number;
+    silenceDuration: number;
+    silenceRatio: number;
+    speakingSpeed: number;
+  };
+  skillScores?: {
+    skill: string;
+    score: number;
+  }[];
 }

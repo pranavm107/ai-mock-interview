@@ -5,7 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 
-export const ContinueLearningCard: React.FC = () => {
+import type { DashboardData } from '../../store/useAppStore';
+
+interface ContinueLearningCardProps {
+  metadata?: DashboardData['metadata'];
+}
+
+export const ContinueLearningCard: React.FC<ContinueLearningCardProps> = ({ metadata }) => {
+  const latestInterview = metadata?.recentInterviews?.[0];
+  const activeResume = metadata?.activeResume;
+  const state = latestInterview.state || latestInterview.status;
+  
+  // Only show this card if there's an active/draft interview, otherwise hide or show something else
+  if (!latestInterview || (state !== 'IN_PROGRESS' && state !== 'In Progress' && state !== 'Draft' && state !== 'DRAFT')) {
+    return null;
+  }
+
+  const roleTitle = latestInterview.role || 'Mock Interview';
+  const resumeFilename = activeResume?.filename || 'No Resume Attached';
+  
+  // Optionally calculate progress if currentQuestion and totalQuestions exist in the document
+  const currentQ = latestInterview.currentQuestion || 1;
+  const totalQ = latestInterview.totalQuestions || 10;
+  const progressPercent = Math.round((currentQ / totalQ) * 100);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -21,24 +44,24 @@ export const ContinueLearningCard: React.FC = () => {
             <span>In Progress</span>
           </div>
           
-          <h2 className="text-2xl font-bold mb-2">Senior Frontend Engineer</h2>
+          <h2 className="text-2xl font-bold mb-2">{roleTitle}</h2>
           <div className="flex items-center gap-2 text-blue-100 text-sm mb-6">
             <FileText size={16} />
-            <span>John_Doe_Frontend_Resume.pdf</span>
+            <span>{resumeFilename}</span>
           </div>
           
           <div className="max-w-md w-full">
             <div className="flex items-center justify-between text-sm font-semibold mb-2">
-              <span className="text-blue-50">Question 3 of 10</span>
-              <span>30%</span>
+              <span className="text-blue-50">Question {currentQ} of {totalQ}</span>
+              <span>{progressPercent}%</span>
             </div>
-            <Progress value={30} className="h-2 bg-black/20" />
-            <p className="text-xs text-blue-100 mt-2 font-medium">Est. remaining time: ~15 mins</p>
+            <Progress value={progressPercent} className="h-2 bg-black/20" />
+            <p className="text-xs text-blue-100 mt-2 font-medium">Keep going!</p>
           </div>
         </div>
         
         <div className="shrink-0 w-full md:w-auto">
-          <Link to="/interview/active">
+          <Link to={`/session/${latestInterview.id}`}>
             <Button className="w-full bg-white text-blue-700 hover:bg-slate-50 shadow-lg px-8 h-12 text-sm font-bold rounded-xl flex items-center gap-2 transition-transform hover:scale-105">
               <PlayCircle size={20} />
               Continue Interview

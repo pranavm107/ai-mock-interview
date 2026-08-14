@@ -37,6 +37,8 @@ import voiceRoutes from './routes/voiceRoutes';
 import replayRoutes from './routes/replayRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import careerRoutes from './routes/careerRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -46,6 +48,8 @@ app.use('/api/interview-reports', reportRoutes);
 app.use('/api/voice', voiceRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/career', careerRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);

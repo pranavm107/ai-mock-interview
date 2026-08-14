@@ -27,7 +27,7 @@ export const VoiceVisualizer: React.FC<VoiceVisualizerProps> = ({ isSpeaking, is
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="w-1.5 bg-white rounded-full animate-wave" style={{
-                  height: `${Math.random() * 24 + 8}px`,
+                  height: `${(i * 4 % 12) + 8}px`,
                   animationDelay: `${i * 0.1}s`
                 }} />
               ))}

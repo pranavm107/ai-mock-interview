@@ -3,7 +3,11 @@ import { motion } from 'framer-motion';
 import { Award, Star, Target } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
-export const AchievementCard: React.FC = () => {
+export const AchievementCard: React.FC<{ achievements?: any[], stats?: any }> = ({ achievements = [], stats = {} }) => {
+  const topBadges = achievements.slice(0, 4);
+  const currentStreak = stats.currentStreak || 0;
+  const streakProgress = currentStreak > 0 ? ((currentStreak % 7) / 7) * 100 : 0;
+  const daysToNextStreak = 7 - (currentStreak % 7);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -22,31 +26,42 @@ export const AchievementCard: React.FC = () => {
               </div>
               <span className="font-semibold text-sm text-slate-700">Weekly Streak</span>
             </div>
-            <span className="text-sm font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">3 Days</span>
+            <span className="text-sm font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">{currentStreak} Days</span>
           </div>
-          <Progress value={40} className="h-2 bg-slate-100" />
-          <p className="text-xs text-slate-500 mt-2 font-medium">Practice 2 more days to maintain your streak.</p>
+          <Progress value={streakProgress} className="h-2 bg-slate-100" />
+          <p className="text-xs text-slate-500 mt-2 font-medium">Practice {daysToNextStreak} more days to maintain your streak.</p>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 flex flex-col items-center text-center justify-center cursor-pointer shadow-sm"
-          >
-            <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 text-indigo-600">
-              <Target size={20} />
+          {topBadges.length > 0 ? topBadges.map((badge: any, index: number) => (
+            badge.unlocked ? (
+              <motion.div 
+                key={badge.id || index}
+                whileHover={{ scale: 1.02 }}
+                className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 flex flex-col items-center text-center justify-center cursor-pointer shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 text-indigo-600">
+                  <Target size={20} />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900">{badge.title}</h4>
+                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mt-1">Unlocked</span>
+              </motion.div>
+            ) : (
+              <div key={badge.id || index} className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center justify-center opacity-80 grayscale">
+                <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
+                  <Award size={20} className="text-slate-400" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-600">{badge.title}</h4>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">
+                  {badge.progress !== undefined && badge.max !== undefined ? `${badge.progress}/${badge.max}` : 'Locked'}
+                </span>
+              </div>
+            )
+          )) : (
+            <div className="col-span-2 text-center text-slate-500 text-sm py-4">
+              Complete interviews to unlock achievements!
             </div>
-            <h4 className="text-sm font-bold text-slate-900">First Interview</h4>
-            <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mt-1">Unlocked</span>
-          </motion.div>
-          
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center justify-center opacity-80 grayscale">
-            <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
-              <Award size={20} className="text-slate-400" />
-            </div>
-            <h4 className="text-sm font-bold text-slate-600">10 Completed</h4>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">4/10</span>
-          </div>
+          )}
         </div>
       </div>
     </motion.div>

@@ -28,41 +28,23 @@ const History: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<InterviewStatus | 'All'>('All');
   const [difficultyFilter, setDifficultyFilter] = useState<InterviewDifficulty | 'All'>('All');
   const [typeFilter, setTypeFilter] = useState<InterviewType | 'All'>('All');
-
-  const [metrics, setMetrics] = useState<any>(null);
-  const [metricsLoading, setMetricsLoading] = useState(true);
+  const [sortFilter, setSortFilter] = useState<string>('Newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
     if (user?.id) {
       refreshInterviews(user.id);
-      
-      const fetchMetrics = async () => {
-        try {
-          setMetricsLoading(true);
-          const token = await getToken();
-          const res = await fetch(`${API_BASE_URL}/api/career/metrics`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setMetrics(data);
-          }
-        } catch (err) {
-          console.error('Failed to fetch metrics:', err);
-        } finally {
-          setMetricsLoading(false);
-        }
-      };
-      
-      fetchMetrics();
     }
-  }, [user?.id, refreshInterviews, getToken]);
+  }, [user?.id, refreshInterviews]);
 
   const filteredInterviews = useMemo(() => {
-    return interviews.filter(interview => {
+    const result = interviews.filter(interview => {
       const matchesSearch = 
         interview.role.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        interview.company.toLowerCase().includes(searchQuery.toLowerCase());
+        interview.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (interview.resumeName && interview.resumeName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        interview.interviewType.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesStatus = statusFilter === 'All' || 
         (statusFilter === 'Completed' && interview.status === 'Completed') ||
@@ -74,15 +56,38 @@ const History: React.FC = () => {
       
       return matchesSearch && matchesStatus && matchesDifficulty && matchesType;
     });
-  }, [interviews, searchQuery, statusFilter, difficultyFilter, typeFilter]);
+    
+    // Sort logic
+    result.sort((a, b) => {
+      if (sortFilter === 'Oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      if (sortFilter === 'Highest Score') return (b.score || 0) - (a.score || 0);
+      if (sortFilter === 'Lowest Score') return (a.score || 0) - (b.score || 0);
+      if (sortFilter === 'Longest Duration') return (b.duration || 0) - (a.duration || 0);
+      if (sortFilter === 'Shortest Duration') return (a.duration || 0) - (b.duration || 0);
+      if (sortFilter === 'Most Recent Activity') return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+      
+      // Default: Newest
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    
+    // Reset to page 1 on filter change
+    setCurrentPage(1);
+    
+    return result;
+  }, [interviews, searchQuery, statusFilter, difficultyFilter, typeFilter, sortFilter]);
 
-  // Dashboard Stats calculation
-  const _stats = useMemo(() => {
+  const paginatedInterviews = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredInterviews.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredInterviews, currentPage]);
+
+  // Dashboard Stats calculation (dynamically calculated for instantaneous UI updates)
+  const stats = useMemo(() => {
     const total = interviews.length;
     const completed = interviews.filter(i => i.status === 'Completed').length;
     const inProgress = interviews.filter(i => i.status === 'In Progress').length;
     
-    const completedWithScore = interviews.filter(i => i.status === 'Completed' && i.score !== null);
+    const completedWithScore = interviews.filter(i => i.status === 'Completed' && i.score !== null && i.score !== undefined);
     
     const avgScore = completedWithScore.length > 0 
       ? `${Math.round(completedWithScore.reduce((acc, curr) => acc + (curr.score || 0), 0) / completedWithScore.length)}%`
@@ -112,9 +117,6 @@ const History: React.FC = () => {
     }
   };
 
-  const avgScoreStr = metrics?.averageScore !== null && metrics?.averageScore !== undefined ? `${Math.round(metrics.averageScore)}%` : '—';
-  const avgDurationStr = metrics?.averageDuration !== null && metrics?.averageDuration !== undefined ? `${Math.round(metrics.averageDuration)}m` : '—';
-
   return (
     <div className="pb-24 space-y-8">
       <PageHeader 
@@ -135,24 +137,24 @@ const History: React.FC = () => {
           </div>
         )}
 
-        {!loading && !metricsLoading && metrics && (
+        {!loading && interviews.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
-             <StatCard title="Total" value={(metrics.totalInterviews || 0).toString()} icon={Target} delay={0.1} />
-             <StatCard title="Completed" value={(metrics.completedInterviews || 0).toString()} icon={CheckCircle} delay={0.2} />
-             <StatCard title="In Progress" value={(metrics.inProgressInterviews || 0).toString()} icon={Activity} delay={0.3} />
+             <StatCard title="Total" value={stats.total.toString()} icon={Target} delay={0.1} />
+             <StatCard title="Completed" value={stats.completed.toString()} icon={CheckCircle} delay={0.2} />
+             <StatCard title="In Progress" value={stats.inProgress.toString()} icon={Activity} delay={0.3} />
              <StatCard 
                title="Avg Score" 
-               value={avgScoreStr} 
+               value={stats.avgScore} 
                icon={TrendingUp} 
                delay={0.4} 
-               description={avgScoreStr === '—' ? 'No completed interviews' : undefined}
+               description={stats.avgScore === '—' ? 'No completed interviews' : undefined}
              />
              <StatCard 
                title="Avg Duration" 
-               value={avgDurationStr} 
+               value={stats.avgDuration} 
                icon={Clock} 
                delay={0.5} 
-               description={avgDurationStr === '—' ? 'No completed interviews' : undefined}
+               description={stats.avgDuration === '—' ? 'No completed interviews' : undefined}
              />
           </div>
         )}
@@ -194,15 +196,41 @@ const History: React.FC = () => {
               onDifficultyChange={setDifficultyFilter}
               typeFilter={typeFilter}
               onTypeChange={setTypeFilter}
+              sortFilter={sortFilter}
+              onSortChange={setSortFilter}
             />
             
             <InterviewList 
-              interviews={filteredInterviews as any[]}
+              interviews={paginatedInterviews as any[]}
               loading={loading}
               onDelete={handleDelete}
               onContinue={handleNavigation}
               onView={handleNavigation}
             />
+
+            {filteredInterviews.length > ITEMS_PER_PAGE && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <Button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  className="rounded-xl px-4"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm font-medium text-slate-600">
+                  Page {currentPage} of {Math.ceil(filteredInterviews.length / ITEMS_PER_PAGE)}
+                </span>
+                <Button 
+                  onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredInterviews.length / ITEMS_PER_PAGE), p + 1))}
+                  disabled={currentPage === Math.ceil(filteredInterviews.length / ITEMS_PER_PAGE)}
+                  variant="outline"
+                  className="rounded-xl px-4"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </>
         )}
       </motion.div>

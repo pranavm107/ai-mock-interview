@@ -270,7 +270,7 @@ const Interview: React.FC = () => {
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-sm font-semibold text-slate-900 truncate" title={resume.metadata?.fileName || (resume as any).fileName}>
-                      {resume.metadata?.fileName || (resume as any).fileName || 'Resume.pdf'}
+                      {resume.metadata?.fileName || (resume as any).fileName || 'Your_Resume.pdf'}
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Uploaded {formatDate(resume.createdAt)}
@@ -319,7 +319,7 @@ const Interview: React.FC = () => {
               </div>
             ) : (
               <p className="text-slate-500 px-4">
-                {/* Phase 3.3 placeholder */}
+                {/* Phase 3.3 UI Section */}
                 AI Interview Session Interface Goes Here
               </p>
             )}

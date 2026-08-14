@@ -355,10 +355,10 @@ export const useInterviewSession = (sessionIdOrInterviewId?: string) => {
 
     const durationMinutes = Math.ceil(elapsedSeconds / 60);
     const answeredCount = questions.filter(q => (q.answer && q.answer.trim().length > 0) || (q.id === questions[currentQuestionIndex]?.id && currentAnswerRef.current.trim().length > 0)).length;
-    const mockScore = Math.round((answeredCount / (questions.length || 1)) * 100);
+    const interimScore = Math.round((answeredCount / (questions.length || 1)) * 100);
 
-    await interviewService.finishInterview(interview.id, durationMinutes, mockScore);
-    setInterview(prev => prev ? { ...prev, status: 'Completed', score: mockScore, duration: durationMinutes } : prev);
+    await interviewService.finishInterview(interview.id, durationMinutes, interimScore);
+    setInterview(prev => prev ? { ...prev, status: 'Completed', score: interimScore, duration: durationMinutes } : prev);
   };
 
   const prevQuestion = () => changeQuestion(currentQuestionIndex - 1);

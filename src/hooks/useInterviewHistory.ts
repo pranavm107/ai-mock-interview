@@ -26,7 +26,11 @@ export interface EnrichedInterviewSession {
   interviewType: string;
   difficulty: string;
   score: number | null;
+  resumeName: string | null;
+  estimatedTime: number | null;
 }
+
+import { useAuth } from '@clerk/clerk-react';
 
 import type { Interview } from '../types';
 
@@ -37,11 +41,16 @@ export const useInterviewHistory = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { getToken } = useAuth();
+
   const fetchUserSessions = useCallback(async (userId: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/user/${userId}`);
+      const token = await getToken();
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to load sessions');
       const data = await res.json();
       
@@ -55,20 +64,21 @@ export const useInterviewHistory = () => {
         return {
           id: session.id,
           userId: session.userId,
-          resumeId: null,
+          resumeId: session.resumeName ? session.resumeName : null, // keep this for legacy checks
+          resumeName: session.resumeName,
           title: `${session.role} Interview`,
           company: session.company,
           role: session.role,
           difficulty: session.difficulty as any,
           interviewType: session.interviewType as any,
-          experienceLevel: 'Mid' as any,
+          experienceLevel: 'Mid' as any, // Not strictly used in card UI, but kept for type compat
           language: 'English',
           status: status as any,
           score: session.score,
-          totalQuestions: session.progress?.totalQuestions || 5,
+          totalQuestions: session.progress?.totalQuestions || 0,
           completedQuestions: session.metrics?.questionsAnswered || 0,
-          duration: session.metrics?.totalDurationMs ? Math.round(session.metrics.totalDurationMs / 60000) : 30,
-          currentQuestion: session.progress?.currentQuestionIndex || 1,
+          duration: session.estimatedTime ? Math.round(session.estimatedTime / 60000) : (session.metrics?.totalDurationMs ? Math.round(session.metrics.totalDurationMs / 60000) : 0),
+          currentQuestion: session.progress?.currentQuestionIndex || 0,
           elapsedSeconds: Math.round((session.metrics?.totalDurationMs || 0) / 1000),
           feedbackId: null,
           aiProvider: 'openai',
@@ -88,9 +98,20 @@ export const useInterviewHistory = () => {
   }, []);
 
   const deleteSession = useCallback(async (sessionId: string) => {
-    // Local state removal for now since DELETE /api/interview-sessions/:id is not implemented yet in this phase
-    setSessions(prev => prev.filter(s => s.id !== sessionId));
-  }, []);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE_URL}/api/interview-sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to delete session');
+      
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+    } catch (err: any) {
+      console.error('Error deleting session:', err);
+      setError(err.message || 'Failed to delete interview session');
+    }
+  }, [getToken]);
 
   return {
     sessions,

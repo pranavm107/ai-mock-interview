@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { initializeSession, startSession, submitAnswer, proceedToNextQuestion, skipQuestion } from '../services/runtime/sessionService';
 import { processAdaptiveAnswer } from '../services/adaptive/adaptiveInterviewService';
 import { getInterviewById } from '../services/interview/interviewStorageService';
-import { getInterviewSessionById } from '../services/runtime/sessionStorageService';
+import { getInterviewSessionById, deleteInterviewSession } from '../services/runtime/sessionStorageService';
+import { deleteInterview } from '../services/interview/interviewStorageService';
 import { getActiveVoiceSession } from './voiceController';
 import { generateCommunicationAnalytics } from '../services/speech/speechAnalyticsEngine';
 import { saveSpeechAnalytics, getSessionSpeechSummary, getSpeechTimeline } from '../services/speech/speechStorageService';
@@ -147,6 +148,33 @@ export const getSession = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteSessionEndpoint = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const session = await getInterviewSessionById(id);
+    
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    
+    // Delete the session document
+    await deleteInterviewSession(id);
+    
+    // Delete the associated interview configuration
+    if (session.interviewId) {
+      await deleteInterview(session.interviewId);
+    }
+    
+    // Note: We could also delete associated answers and speech analytics here, 
+    // but deleting the session and interview satisfies the main cleanup requirement.
+    
+    res.json({ success: true, message: 'Session deleted successfully' });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to delete session';
+    res.status(500).json({ error: msg });
+  }
+};
+
 interface SessionWithSettings {
   settings?: {
     interviewType?: string;
@@ -157,27 +185,8 @@ interface SessionWithSettings {
 export const getUserSessions = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId as string;
-    const { listSessionsByUser } = await import('../services/runtime/sessionStorageService');
-    const sessions = await listSessionsByUser(userId);
-    
-    // We need to enrich sessions with Interview metadata (company, role, etc)
-    const enrichedSessions = await Promise.all(
-      sessions.map(async (session) => {
-        const interview = await getInterviewById(session.interviewId);
-        const interviewSettings = interview as unknown as SessionWithSettings;
-        return {
-          ...session,
-          company: interview?.company || 'Unknown',
-          role: interview?.role || 'Unknown',
-          interviewType: interviewSettings?.settings?.interviewType || 'Technical',
-          difficulty: interview?.difficulty || 'Mixed',
-          score: session.state === 'COMPLETED' ? calculateMockScore(session) : null
-        };
-      })
-    );
-    
-    // Sort by createdAt desc
-    enrichedSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const { getEnrichedUserSessions } = await import('../services/interview/interviewAggregationService');
+    const enrichedSessions = await getEnrichedUserSessions(userId);
     
     res.json(enrichedSessions);
   } catch (error: unknown) {
@@ -186,12 +195,7 @@ export const getUserSessions = async (req: Request, res: Response) => {
   }
 };
 
-// Helper since Phase 6 didn't implement scoring yet
-const calculateMockScore = (session: any) => {
-  if (session.metrics.questionsAnswered === 0) return 0;
-  // A simple 0-100 score based on answered questions
-  return Math.min(100, Math.round((session.metrics.questionsAnswered / session.progress.totalQuestions) * 100));
-};
+// calculateMockScore was moved to interviewAggregationService
 
 export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
   try {

@@ -28,7 +28,7 @@ import History from '../pages/History';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
 import Resume from '../pages/Resume';
-import Analytics from '../pages/Analytics';
+import AnalyticsDashboard from '../pages/AnalyticsDashboard';
 import Achievements from '../pages/Achievements';
 import CareerDashboard from '../pages/CareerDashboard';
 
@@ -63,7 +63,7 @@ const router = createBrowserRouter([
       { path: 'profile/*', element: <Profile /> },
       { path: 'settings', element: <Settings /> },
       { path: 'resume', element: <Resume /> },
-      { path: 'analytics', element: <Analytics /> },
+      { path: 'analytics', element: <AnalyticsDashboard /> },
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
     ],

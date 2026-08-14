@@ -19,7 +19,7 @@ export const UploadProgress: React.FC<Props> = ({ onComplete }) => {
   useEffect(() => {
     let currentProgress = 0;
     const interval = setInterval(() => {
-      currentProgress += Math.random() * 8; // Random increments
+      currentProgress += 5; // Deterministic increment
       if (currentProgress > 100) {
         currentProgress = 100;
         clearInterval(interval);

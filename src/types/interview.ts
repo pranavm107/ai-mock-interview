@@ -56,6 +56,7 @@ export interface Interview {
   settings?: any;
   metadata?: any;
   questions?: any[]; // Generated questions
+  resumeName?: string | null;
 }
 
 export interface InterviewQuestion {

@@ -7,7 +7,8 @@ import {
   advanceSession, 
   skipSessionQuestion, 
   getSession,
-  getUserSessions
+  getUserSessions,
+  deleteSessionEndpoint
 } from '../controllers/interviewSessionController';
 
 const router = Router();
@@ -15,6 +16,7 @@ const router = Router();
 router.post('/', createNewSession);
 router.get('/user/:userId', getUserSessions);
 router.get('/:id', getSession);
+router.delete('/:id', deleteSessionEndpoint);
 router.post('/:id/start', startSessionEndpoint);
 router.post('/:id/answer', submitSessionAnswer);
 router.post('/:sessionId/adaptive-answer', submitAdaptiveAnswer);
