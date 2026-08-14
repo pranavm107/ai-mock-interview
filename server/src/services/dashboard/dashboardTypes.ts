@@ -70,4 +70,7 @@ export interface DashboardStateResult {
     company: string;
   }[];
   recommendations: string[];
+  rawProfile?: any;
+  rawReports?: any[];
+  rawResumes?: any[];
 }

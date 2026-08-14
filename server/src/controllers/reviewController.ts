@@ -7,7 +7,9 @@ export const generateReview = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
     // @ts-ignore - Clerk injects auth property
-    const userId = req.auth?.userId as string | undefined;
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -33,7 +35,9 @@ export const getReview = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
     // @ts-ignore - Clerk injects auth property
-    const userId = req.auth?.userId as string | undefined;
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -62,7 +66,9 @@ export const getReview = async (req: Request, res: Response) => {
 export const listReviews = async (req: Request, res: Response) => {
   try {
     // @ts-ignore - Clerk injects auth property
-    const userId = req.auth?.userId as string | undefined;
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -79,7 +85,9 @@ export const deleteReview = async (req: Request, res: Response) => {
   try {
     const reviewId = req.params.reviewId as string;
     // @ts-ignore - Clerk injects auth property
-    const userId = req.auth?.userId as string | undefined;
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });

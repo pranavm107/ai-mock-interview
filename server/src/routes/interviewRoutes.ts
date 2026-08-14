@@ -4,13 +4,16 @@ import {
   getInterview, 
   regenerateInterview, 
   deleteInterviewEndpoint,
-  generateInterviewQuestions
+  generateInterviewQuestions,
+  getSuggestedInterviewController
 } from '../controllers/interviewController';
 import { callGemini } from '../services/geminiService';
+import { requireAuth } from '@clerk/express';
 
 const router = Router();
 
-router.post('/generate', generateNewInterview);
+router.post('/generate', requireAuth(), generateNewInterview);
+router.post('/suggest', requireAuth(), getSuggestedInterviewController);
 router.post('/generate-questions', generateInterviewQuestions);
 router.get('/test-gemini', async (req, res) => {
   try {

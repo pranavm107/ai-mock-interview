@@ -4,6 +4,9 @@ import { downloadResume } from '../utils/downloadResume';
 import { parsePdf } from './pdfParserService';
 import { normalizeResumeText } from './resumeNormalizerService';
 import crypto from 'crypto';
+import { getDoc } from 'firebase/firestore';
+import { achievementRuleEngine } from './achievementRuleEngine';
+import { AchievementEventType } from '../types/achievement';
 
 export interface ProcessResumeResult {
   success: boolean;
@@ -128,6 +131,31 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
         'status.state': 'AI_COMPLETED',
         'status.lastAnalysisAt': serverTimestamp()
       });
+
+      // 10. Trigger Achievements (fire and forget)
+      Promise.resolve().then(async () => {
+        const snap = await getDoc(resumeRef);
+        if (snap.exists()) {
+          const userId = snap.data().userId;
+          if (userId) {
+            achievementRuleEngine.evaluateAchievementEvent(userId, {
+              type: AchievementEventType.RESUME_ADDED,
+              userId,
+              sourceId: resumeId
+            }).catch(console.error);
+
+            if (aiAnalysis?.atsScore) {
+              achievementRuleEngine.evaluateAchievementEvent(userId, {
+                type: AchievementEventType.RESUME_ATS_SCORED,
+                userId,
+                sourceId: resumeId,
+                score: aiAnalysis.atsScore
+              }).catch(console.error);
+            }
+          }
+        }
+      }).catch(console.error);
+
     } catch (aiError: any) {
       console.error(`[Gemini Request Failed] Failed to analyze resume ${resumeId}:`, aiError.message);
       

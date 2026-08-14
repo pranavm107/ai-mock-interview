@@ -10,6 +10,7 @@ console.log('2. Loading WebSockets & Middleware...');
 import { setupVoiceSocket } from './websocket/voiceSocketHandler';
 import { clerkMiddleware } from '@clerk/express';
 import { setupDeepgramSocket } from './websocket/deepgramSocket';
+import { requestIdMiddleware } from './middleware/requestId';
 
 const app = express();
 app.use(
@@ -22,6 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(requestIdMiddleware);
 app.use(clerkMiddleware());
 
 app.get('/health', (req, res) => {
@@ -39,6 +41,7 @@ import reviewRoutes from './routes/reviewRoutes';
 import careerRoutes from './routes/careerRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
+import achievementRoutes from './routes/achievementRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -50,6 +53,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/career', careerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);

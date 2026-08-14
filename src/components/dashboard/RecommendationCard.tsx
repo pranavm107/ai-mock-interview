@@ -41,10 +41,9 @@ export const RecommendationCard: React.FC<{ recommendations?: string[] }> = ({ r
           </ul>
         </div>
         
-        <Link to="/generate" className="w-full">
+        <Link to="/generate/suggested" className="w-full">
           <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 font-semibold rounded-xl h-12 flex items-center justify-center gap-2 group transition-all shadow-sm">
-            Generate Suggested Interview
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            Generate Suggested Interview →
           </Button>
         </Link>
       </div>

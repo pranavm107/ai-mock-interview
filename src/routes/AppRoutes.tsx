@@ -19,6 +19,7 @@ import NotFound from '../pages/NotFound';
 // Protected Pages
 import Dashboard from '../pages/Dashboard';
 import Generate from '../pages/Generate';
+import SuggestedInterviewPage from '../pages/SuggestedInterview';
 import Interview from '../pages/Interview';
 import InterviewRuntime from '../pages/InterviewRuntime';
 import InterviewReportPage from '../pages/InterviewReport';
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'generate', element: <Generate /> },
+      { path: 'generate/suggested', element: <SuggestedInterviewPage /> },
       { path: 'interview/:id', element: <Interview /> },
       { path: 'session/:sessionId', element: <InterviewRuntime /> },
       { path: 'report/:sessionId', element: <InterviewReportPage /> },

@@ -16,19 +16,24 @@ export interface EnrichedSession {
   [key: string]: any;
 }
 
-export const getEnrichedUserSessions = async (userId: string): Promise<EnrichedSession[]> => {
+export const getEnrichedUserSessions = async (
+  userId: string,
+  preloadedSessionsSnapshot?: any,
+  preloadedInterviewsSnapshot?: any,
+  preloadedResumesSnapshot?: any
+): Promise<EnrichedSession[]> => {
   if (!db) {
     throw new Error("Firestore Admin not initialized");
   }
 
   // Fetch all sessions for this user using Admin SDK
-  const sessionsSnapshot = await db.collection('interviewSessions').where('userId', '==', userId).get();
+  const sessionsSnapshot = preloadedSessionsSnapshot || await db.collection('interviewSessions').where('userId', '==', userId).get();
   
   if (sessionsSnapshot.empty) {
     return [];
   }
 
-  const sessions = sessionsSnapshot.docs.map(doc => ({
+  const sessions = sessionsSnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data()
   })) as any[];
@@ -37,20 +42,20 @@ export const getEnrichedUserSessions = async (userId: string): Promise<EnrichedS
   // Note: For a user with many sessions, doing a get() per interview might be slow, 
   // but since an interview has 1 session currently, it's manageable. 
   // We can optimize by fetching all interviews for the user at once and mapping them.
-  const interviewsSnapshot = await db.collection('interviews').where('userId', '==', userId).get();
+  const interviewsSnapshot = preloadedInterviewsSnapshot || await db.collection('interviews').where('userId', '==', userId).get();
   const interviewsMap = new Map();
   
   if (!interviewsSnapshot.empty) {
-    interviewsSnapshot.docs.forEach(doc => {
+    interviewsSnapshot.docs.forEach((doc: any) => {
       interviewsMap.set(doc.id, doc.data());
     });
   }
 
   // Fetch all user resumes to map resume names efficiently
-  const resumesSnapshot = await db.collection('resumes').where('userId', '==', userId).get();
+  const resumesSnapshot = preloadedResumesSnapshot || await db.collection('resumes').where('userId', '==', userId).get();
   const resumesMap = new Map();
   if (!resumesSnapshot.empty) {
-    resumesSnapshot.docs.forEach(doc => {
+    resumesSnapshot.docs.forEach((doc: any) => {
       resumesMap.set(doc.id, doc.data());
     });
   }

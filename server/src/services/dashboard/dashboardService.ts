@@ -10,41 +10,33 @@ export const getDashboardMetadata = async (userId: string): Promise<DashboardSta
 
   console.log('Dashboard Query');
   let resumesSnapshot;
-  let interviewsSnapshot;
   let careerProfileDoc;
   let reportsSnapshot;
-
-  try {
-    resumesSnapshot = await db.collection('resumes').where('userId', '==', userId).get();
-    console.log('✓ Resumes loaded');
-  } catch (error) {
-    console.error('Failed to load resumes:', error);
-    throw error;
-  }
-
+  let sessionsSnapshot;
+  let interviewsSnapshot;
   let enrichedSessions: any[] = [];
+
   try {
+    [
+      resumesSnapshot,
+      careerProfileDoc,
+      reportsSnapshot,
+      sessionsSnapshot,
+      interviewsSnapshot
+    ] = await Promise.all([
+      db.collection('resumes').where('userId', '==', userId).get(),
+      db.collection('careerProfiles').doc(userId).get(),
+      db.collection('interviewReports').where('userId', '==', userId).get(),
+      db.collection('interviewSessions').where('userId', '==', userId).get(),
+      db.collection('interviews').where('userId', '==', userId).get()
+    ]);
+    console.log('✓ All dashboard data loaded in parallel');
+
     const { getEnrichedUserSessions } = await import('../interview/interviewAggregationService');
-    enrichedSessions = await getEnrichedUserSessions(userId);
-    console.log('✓ Enriched Sessions loaded');
+    enrichedSessions = await getEnrichedUserSessions(userId, sessionsSnapshot, interviewsSnapshot, resumesSnapshot);
+    console.log('✓ Enriched Sessions constructed');
   } catch (error) {
-    console.error('Failed to load enriched sessions:', error);
-    throw error;
-  }
-
-  try {
-    careerProfileDoc = await db.collection('careerProfiles').doc(userId).get();
-    console.log('✓ Career Profile loaded');
-  } catch (error) {
-    console.error('Failed to load career profile:', error);
-    throw error;
-  }
-
-  try {
-    reportsSnapshot = await db.collection('interviewReports').where('userId', '==', userId).get();
-    console.log('✓ Reports loaded');
-  } catch (error) {
-    console.error('Failed to load reports:', error);
+    console.error('Failed to load dashboard data:', error);
     throw error;
   }
 
@@ -381,7 +373,10 @@ export const getDashboardMetadata = async (userId: string): Promise<DashboardSta
     },
     achievements,
     performanceData,
-    recommendations
+    recommendations,
+    rawProfile: careerProfileDoc.exists ? careerProfileDoc.data() : null,
+    rawReports: reportsSnapshot && !reportsSnapshot.empty ? reportsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [],
+    rawResumes: resumesSnapshot && !resumesSnapshot.empty ? resumesSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : []
   };
 
   // Log only in non-production environments
