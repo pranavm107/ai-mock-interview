@@ -1,5 +1,5 @@
 import { db } from '../config/firebaseAdmin';
-import { Assessment, AssessmentQuestion, AssessmentStatus, AssessmentQuestionForUser } from '../types/assessment';
+import { Assessment, AssessmentQuestion, AssessmentStatus, AssessmentQuestionForUser, AssessmentResult } from '../types/assessment';
 
 const ASSESSMENTS_COLLECTION = 'assessments';
 
@@ -43,6 +43,21 @@ export const updateAssessmentStatus = async (assessmentId: string, status: Asses
 
 export const markAssessmentFailed = async (assessmentId: string): Promise<void> => {
   await updateAssessmentStatus(assessmentId, 'FAILED');
+};
+
+export const updateAssessmentCompletion = async (assessmentId: string, answeredCount: number): Promise<void> => {
+  await db.collection(ASSESSMENTS_COLLECTION).doc(assessmentId).update({
+    status: 'COMPLETED',
+    answeredCount,
+    completedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+export const saveAssessmentResult = async (result: AssessmentResult): Promise<void> => {
+  // Store the authoritative result in a subcollection to prevent massive parent document inflation
+  const resultRef = db.collection(ASSESSMENTS_COLLECTION).doc(result.assessmentId).collection('results').doc('final');
+  await resultRef.set(result);
 };
 
 export const toUserSafeQuestion = (question: AssessmentQuestion): AssessmentQuestionForUser => {

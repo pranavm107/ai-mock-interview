@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { generateResumeAssessment } from '../services/resumeAssessmentGenerationService';
-import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion } from '../services/assessmentService';
+import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentCompletion, saveAssessmentResult } from '../services/assessmentService';
+import { evaluateSubmission } from '../services/assessmentEvaluationService';
 
 const GenerateAssessmentRequestSchema = z.object({
   resumeId: z.string().min(1, "resumeId is required")
@@ -103,5 +104,70 @@ export const getAssessmentHandler = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Assessment retrieval failed:', error);
     return res.status(500).json({ error: 'Failed to retrieve assessment' });
+  }
+};
+
+const AssessmentAnswerSubmissionSchema = z.object({
+  questionId: z.string().min(1),
+  selectedOptionId: z.string().min(1)
+});
+
+const SubmitAssessmentRequestSchema = z.object({
+  answers: z.array(AssessmentAnswerSubmissionSchema)
+});
+
+export const submitAssessmentHandler = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const auth = typeof authReq.auth === 'function' ? authReq.auth() : authReq.auth;
+    const userId = auth?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: Missing user identity' });
+    }
+
+    const paramParse = GetAssessmentRequestParamsSchema.safeParse(req.params);
+    if (!paramParse.success) {
+      return res.status(400).json({ error: 'Invalid assessment ID', details: paramParse.error.issues });
+    }
+    const { assessmentId } = paramParse.data;
+
+    const bodyParse = SubmitAssessmentRequestSchema.safeParse(req.body);
+    if (!bodyParse.success) {
+      return res.status(400).json({ error: 'Invalid submission payload', details: bodyParse.error.issues });
+    }
+    const submission = bodyParse.data;
+
+    const assessment = await getAssessmentById(assessmentId);
+    if (!assessment) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+
+    if (assessment.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden: Assessment does not belong to the user' });
+    }
+
+    if (assessment.status === 'COMPLETED' || assessment.status === 'FAILED' || assessment.status === 'GENERATING') {
+      return res.status(400).json({ error: `Cannot submit assessment in status: ${assessment.status}` });
+    }
+
+    // Retrieve backend questions to evaluate
+    const backendQuestions = await getAssessmentQuestions(assessmentId);
+
+    // Evaluate
+    const result = evaluateSubmission(assessment, backendQuestions, submission);
+
+    // Save Results and Update Status
+    await updateAssessmentCompletion(assessmentId, result.answeredQuestions);
+    await saveAssessmentResult(result);
+
+    return res.status(200).json({
+      success: true,
+      result
+    });
+
+  } catch (error: any) {
+    console.error('Assessment submission failed:', error);
+    return res.status(500).json({ error: 'Failed to submit assessment' });
   }
 };

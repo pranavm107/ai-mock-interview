@@ -277,6 +277,28 @@ Status:
 
 ---
 
+# Phase D4: Assessment Submission and Backend Evaluation
+
+Build:
+- Answer selection
+- Progress tracking
+- Submission confirmation
+- Backend answer submission
+
+The frontend must not calculate official scores.
+
+Status:
+
+[x] Completed
+
+## Phase D4 Implementation Details
+- **Endpoint**: Added `POST /api/assessments/:assessmentId/submit` which handles secure answer payloads.
+- **Evaluation Engine**: Created `assessmentEvaluationService.ts` to logically compute total scores, map correct answers, and derive `skillPerformance` aggregations centrally on the backend.
+- **Storage Layer**: Results are efficiently stored in Firestore under `assessments/{assessmentId}/results/final` to ensure `Assessment` core documents remain lightweight and easily iterable. Parent documents receive aggregate metrics and timestamp updates.
+- **Verification**: Verified logical calculations by sending an end-to-end API trace payload mimicking frontend behavior.
+
+---
+
 # Phase D5: Resume Assessment Frontend
 
 Build:
