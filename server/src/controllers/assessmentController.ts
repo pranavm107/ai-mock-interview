@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { generateResumeAssessment } from '../services/resumeAssessmentGenerationService';
-import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentCompletion, saveAssessmentResult } from '../services/assessmentService';
+import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentCompletion, saveAssessmentResult, getAssessmentResult } from '../services/assessmentService';
 import { evaluateSubmission } from '../services/assessmentEvaluationService';
 
 const GenerateAssessmentRequestSchema = z.object({
@@ -96,10 +96,16 @@ export const getAssessmentHandler = async (req: Request, res: Response) => {
     const backendQuestions = await getAssessmentQuestions(assessmentId);
     const safeQuestions = backendQuestions.map(toUserSafeQuestion);
 
+    let result = undefined;
+    if (assessment.status === 'COMPLETED') {
+      result = await getAssessmentResult(assessmentId);
+    }
+
     return res.status(200).json({
       success: true,
       assessment,
-      questions: safeQuestions
+      questions: safeQuestions,
+      result
     });
   } catch (error: any) {
     console.error('Assessment retrieval failed:', error);

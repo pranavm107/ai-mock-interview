@@ -32,6 +32,7 @@ import Resume from '../pages/Resume';
 import AnalyticsDashboard from '../pages/AnalyticsDashboard';
 import Achievements from '../pages/Achievements';
 import CareerDashboard from '../pages/CareerDashboard';
+import AssessmentPage from '../pages/AssessmentPage';
 
 const router = createBrowserRouter([
   {
@@ -68,6 +69,7 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <AnalyticsDashboard /> },
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
+      { path: 'assessment/:assessmentId', element: <AssessmentPage /> },
     ],
   },
   {

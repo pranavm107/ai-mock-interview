@@ -302,15 +302,22 @@ Status:
 # Phase D5: Resume Assessment Frontend
 
 Build:
-- Assessment generation page
-- Loading state
-- Error state
-- Empty state
-- Question UI
+- Assessment generation page trigger
+- Loading state via polling
+- Question UI with paginated rendering
+- Error and Empty states
+- Results rendering
 
 Status:
 
-[ ] Pending
+[x] Completed
+
+## Phase D5 Implementation Details
+- **Trigger**: Integrated `generateResumeAssessment` directly into the `ResumeCard` so users can instantly generate an assessment for a specific uploaded resume.
+- **Hook Layer**: Created `useAssessment.ts` to manage API communication and centralized fetching states, including generating, fetching, and submitting.
+- **View Layer**: Created `AssessmentPage.tsx` protected route capable of interpreting the backend state transitions (`GENERATING` -> `READY` -> `COMPLETED`).
+- **Interactive Component**: Designed `AssessmentQuestionViewer.tsx` as a sleek, motion-animated paginated layout preventing visual overload.
+- **Results Engine**: Built `AssessmentResultViewer.tsx` to visually break down scores, map `skillPerformance` to cards, and outline correct options against the user's answers alongside AI explanations.
 
 ---
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FileText, Star, Trash2, Calendar, HardDrive, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAssessment } from '../../hooks/useAssessment';
 import type { Resume } from '../../types';
 
 interface ResumeCardProps {
@@ -25,6 +27,9 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSettingDefault, setIsSettingDefault] = useState(false);
+  
+  const navigate = useNavigate();
+  const { generateResumeAssessment, loading: generatingAssessment } = useAssessment();
 
   const handleDelete = async () => {
     try {
@@ -44,6 +49,16 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({
       console.error(error);
     } finally {
       setIsSettingDefault(false);
+    }
+  };
+
+  const handleTakeAssessment = async () => {
+    try {
+      const { id } = await generateResumeAssessment(resume.id);
+      navigate(`/assessment/${id}`);
+    } catch (error) {
+      console.error('Assessment generation failed', error);
+      // Let the hook handle the error state if we want, or we could pass an error handler
     }
   };
 
@@ -125,6 +140,21 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({
           ) : (
              <Trash2 className="w-4 h-4" />
           )}
+        </button>
+      </div>
+
+      <div className="mt-3">
+        <button
+          onClick={handleTakeAssessment}
+          disabled={generatingAssessment || isDeleting || isSettingDefault}
+          className="w-full py-2 bg-gradient-to-r from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30 text-primary border border-primary/20 hover:border-primary/40 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
+        >
+          {generatingAssessment ? (
+             <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+             <Star className="w-4 h-4" />
+          )}
+          {generatingAssessment ? 'Generating Assessment...' : 'Take Skill Assessment'}
         </button>
       </div>
     </motion.div>

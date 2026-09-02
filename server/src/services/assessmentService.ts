@@ -55,9 +55,14 @@ export const updateAssessmentCompletion = async (assessmentId: string, answeredC
 };
 
 export const saveAssessmentResult = async (result: AssessmentResult): Promise<void> => {
-  // Store the authoritative result in a subcollection to prevent massive parent document inflation
   const resultRef = db.collection(ASSESSMENTS_COLLECTION).doc(result.assessmentId).collection('results').doc('final');
   await resultRef.set(result);
+};
+
+export const getAssessmentResult = async (assessmentId: string): Promise<AssessmentResult | null> => {
+  const doc = await db.collection(ASSESSMENTS_COLLECTION).doc(assessmentId).collection('results').doc('final').get();
+  if (!doc.exists) return null;
+  return doc.data() as AssessmentResult;
 };
 
 export const toUserSafeQuestion = (question: AssessmentQuestion): AssessmentQuestionForUser => {
