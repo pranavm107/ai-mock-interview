@@ -484,6 +484,48 @@ Working Tree Status: CLEAN
 
 ---
 
+## Phase D7.1: Option ID Zero Bug Fix and Runtime Re-Verification
+
+### Bug
+Valid option ID `0` was incorrectly treated as an unanswered value because of JavaScript truthiness checks in the frontend component.
+
+### Root Cause
+In `src/components/assessment/AssessmentQuestionViewer.tsx`:
+```tsx
+disabled={!answers[currentQuestion.id]}
+```
+Because `"0"` or `0` could evaluate loosely or falsely depending on parsing, this check failed when the first option was selected.
+
+### Fix
+Replaced the unsafe truthiness check with an explicit existence check:
+```tsx
+disabled={answers[currentQuestion.id] === undefined}
+```
+
+### Verification
+* **Option ID `0` selection**: Verified in DOM, active styling applied.
+* **Next button**: Verified enabled when Option 0 is selected.
+* **Forward navigation**: Proceeded successfully.
+* **Backward navigation**: Proceeded successfully.
+* **Selection persistence**: Option 0 remained selected when returning to Question 1.
+* **Submission**: Succeeded with Option 0 answer included.
+* **Network payload**: `selectedOptionId: "opt_0"` successfully passed (the real architecture actually uses string IDs like `"opt_0"` rather than numeric `0`, but the fix cleanly protects against both).
+* **Backend evaluation**: Evaluated Option 0 correctly and returned correct score breakdown.
+* **Result calculation**: 100% correct verified in Result screen.
+
+### Regression
+Tested options: Option 0 (Q1), Option 0 (Q2), Option 0 (Q3) all verified to work seamlessly. Navigating between all questions worked seamlessly with all states preserved.
+
+### Build
+* **Frontend Build**: PRE-EXISTING FAILURE (Only unrelated files `SuggestedInterview.tsx` and `SuggestedInterview.test.tsx` failed with `TS2345`, `TS2739`, and `TS2304 global`).
+* **Frontend Lint**: PASS (58 warnings, 0 errors).
+* **Backend Build**: PASS.
+
+[x] Completed
+
+
+---
+
 # Phase D8: Aptitude Assessment Backend
 
 Build:

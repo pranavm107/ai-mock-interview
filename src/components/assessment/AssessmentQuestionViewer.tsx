@@ -149,7 +149,7 @@ export const AssessmentQuestionViewer: React.FC<AssessmentQuestionViewerProps> =
         ) : (
           <button
             onClick={handleNext}
-            disabled={!answers[currentQuestion.id]}
+            disabled={answers[currentQuestion.id] === undefined}
             className="w-full sm:w-auto px-8 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
           >
             Next
