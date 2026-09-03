@@ -45,18 +45,32 @@ export const markAssessmentFailed = async (assessmentId: string): Promise<void> 
   await updateAssessmentStatus(assessmentId, 'FAILED');
 };
 
-export const updateAssessmentCompletion = async (assessmentId: string, answeredCount: number): Promise<void> => {
-  await db.collection(ASSESSMENTS_COLLECTION).doc(assessmentId).update({
-    status: 'COMPLETED',
-    answeredCount,
-    completedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
-};
+export const saveAssessmentResultAtomically = async (assessmentId: string, answeredCount: number, result: AssessmentResult): Promise<boolean> => {
+  return await db.runTransaction(async (transaction) => {
+    const assessmentRef = db.collection(ASSESSMENTS_COLLECTION).doc(assessmentId);
+    const assessmentDoc = await transaction.get(assessmentRef);
+    
+    if (!assessmentDoc.exists) {
+      throw new Error('Assessment not found');
+    }
 
-export const saveAssessmentResult = async (result: AssessmentResult): Promise<void> => {
-  const resultRef = db.collection(ASSESSMENTS_COLLECTION).doc(result.assessmentId).collection('results').doc('final');
-  await resultRef.set(result);
+    const currentStatus = assessmentDoc.data()?.status;
+    if (currentStatus === 'COMPLETED') {
+      return false; // Safely abort without throwing if already completed
+    }
+
+    const resultRef = assessmentRef.collection('results').doc('final');
+
+    transaction.update(assessmentRef, {
+      status: 'COMPLETED',
+      answeredCount,
+      completedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    transaction.set(resultRef, result);
+    return true;
+  });
 };
 
 export const getAssessmentResult = async (assessmentId: string): Promise<AssessmentResult | null> => {

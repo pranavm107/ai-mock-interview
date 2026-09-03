@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { generateResumeAssessment } from '../services/resumeAssessmentGenerationService';
-import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentCompletion, saveAssessmentResult, getAssessmentResult } from '../services/assessmentService';
+import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, saveAssessmentResultAtomically, getAssessmentResult } from '../services/assessmentService';
 import { evaluateSubmission } from '../services/assessmentEvaluationService';
 
 const GenerateAssessmentRequestSchema = z.object({
@@ -163,9 +163,12 @@ export const submitAssessmentHandler = async (req: Request, res: Response) => {
     // Evaluate
     const result = evaluateSubmission(assessment, backendQuestions, submission);
 
-    // Save Results and Update Status
-    await updateAssessmentCompletion(assessmentId, result.answeredQuestions);
-    await saveAssessmentResult(result);
+    // Save Results and Update Status Atomically
+    const success = await saveAssessmentResultAtomically(assessmentId, result.answeredQuestions, result);
+    
+    if (!success) {
+      return res.status(400).json({ error: 'Cannot submit assessment in status: COMPLETED' });
+    }
 
     return res.status(200).json({
       success: true,
