@@ -69,6 +69,7 @@ export interface Assessment {
   
   questionCount: number;
   answeredCount?: number;
+  score?: number;
   
   createdAt: string;
   startedAt?: string;

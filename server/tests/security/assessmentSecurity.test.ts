@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getAssessmentHandler, submitAssessmentHandler } from '../../src/controllers/assessmentController';
+import { getAssessmentHandler, submitAssessmentHandler, getAssessmentResultHandler, getAssessmentHistoryHandler } from '../../src/controllers/assessmentController';
 import * as assessmentService from '../../src/services/assessmentService';
 import { Request, Response } from 'express';
 
@@ -12,7 +12,8 @@ vi.mock('../../src/services/assessmentService', () => ({
   }),
   updateAssessmentCompletion: vi.fn(),
   saveAssessmentResultAtomically: vi.fn().mockResolvedValue(true),
-  getAssessmentResult: vi.fn()
+  getAssessmentResult: vi.fn(),
+  getUserAssessments: vi.fn()
 }));
 
 describe('Assessment Security Verification', () => {
@@ -108,6 +109,67 @@ describe('Assessment Security Verification', () => {
       
       expect(statusMock).toHaveBeenCalledWith(400);
       expect(jsonMock).toHaveBeenCalledWith({ error: 'Cannot submit assessment in status: COMPLETED' });
+    });
+  });
+
+  describe('Result Retrieval Security', () => {
+    it('should reject GET /api/assessments/:id/result if user is not the owner', async () => {
+      vi.mocked(assessmentService.getAssessmentById).mockResolvedValue({
+        id: 'test-123',
+        userId: 'different-user-456',
+        status: 'COMPLETED'
+      } as any);
+
+      await getAssessmentResultHandler(req as Request, res as Response);
+      
+      expect(statusMock).toHaveBeenCalledWith(403);
+    });
+
+    it('should reject GET /api/assessments/:id/result if assessment is not COMPLETED', async () => {
+      vi.mocked(assessmentService.getAssessmentById).mockResolvedValue({
+        id: 'test-123',
+        userId: 'valid-user-123',
+        status: 'READY'
+      } as any);
+
+      await getAssessmentResultHandler(req as Request, res as Response);
+      
+      expect(statusMock).toHaveBeenCalledWith(409);
+    });
+
+    it('should return result if user is owner and assessment is COMPLETED', async () => {
+      vi.mocked(assessmentService.getAssessmentById).mockResolvedValue({
+        id: 'test-123',
+        userId: 'valid-user-123',
+        status: 'COMPLETED'
+      } as any);
+      vi.mocked(assessmentService.getAssessmentResult).mockResolvedValue({
+        score: 100
+      } as any);
+
+      await getAssessmentResultHandler(req as Request, res as Response);
+      
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: true,
+        assessmentId: 'test-123',
+        result: { score: 100 }
+      });
+    });
+  });
+
+  describe('History Retrieval Security', () => {
+    it('should fetch history for the authenticated user only', async () => {
+      req.query = { limit: '5' };
+      vi.mocked(assessmentService.getUserAssessments).mockResolvedValue({
+        assessments: [],
+        nextCursor: null
+      });
+
+      await getAssessmentHistoryHandler(req as Request, res as Response);
+
+      expect(assessmentService.getUserAssessments).toHaveBeenCalledWith('valid-user-123', expect.objectContaining({ limit: 5 }));
+      expect(statusMock).toHaveBeenCalledWith(200);
     });
   });
 });

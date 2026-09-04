@@ -26,13 +26,14 @@ import InterviewReportPage from '../pages/InterviewReport';
 import InterviewReplay from '../pages/InterviewReplay';
 import InterviewReview from '../pages/InterviewReview';
 import History from '../pages/History';
+import AssessmentPage from '../pages/AssessmentPage';
+import AssessmentHistoryPage from '../pages/AssessmentHistoryPage';
 import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
 import Resume from '../pages/Resume';
 import AnalyticsDashboard from '../pages/AnalyticsDashboard';
 import Achievements from '../pages/Achievements';
 import CareerDashboard from '../pages/CareerDashboard';
-import AssessmentPage from '../pages/AssessmentPage';
 
 const router = createBrowserRouter([
   {
@@ -69,6 +70,7 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <AnalyticsDashboard /> },
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
+      { path: 'assessments', element: <AssessmentHistoryPage /> },
       { path: 'assessment/:assessmentId', element: <AssessmentPage /> },
     ],
   },

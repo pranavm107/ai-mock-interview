@@ -10,7 +10,7 @@ import type { Assessment, AssessmentQuestionForUser, AssessmentResult } from '..
 const AssessmentPage: React.FC = () => {
   const { assessmentId } = useParams<{ assessmentId: string }>();
   const navigate = useNavigate();
-  const { fetchAssessment, loading, error } = useAssessment();
+  const { fetchAssessment, fetchAssessmentResult, loading, error } = useAssessment();
   const [assessment, setAssessment] = React.useState<Assessment | null>(null);
   const [questions, setQuestions] = React.useState<AssessmentQuestionForUser[]>([]);
   const [result, setResult] = React.useState<AssessmentResult | null>(null);
@@ -28,6 +28,14 @@ const AssessmentPage: React.FC = () => {
         }
         if (data.result) {
           setResult(data.result);
+        } else if (data.assessment.status === 'COMPLETED') {
+          // Refresh-Safe Result Fetching
+          try {
+            const resultData = await fetchAssessmentResult(assessmentId);
+            setResult(resultData.result);
+          } catch (resultErr) {
+            console.error('Failed to fetch result:', resultErr);
+          }
         }
         
         // If generating, poll every 5 seconds
@@ -44,7 +52,7 @@ const AssessmentPage: React.FC = () => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [assessmentId, fetchAssessment]);
+  }, [assessmentId, fetchAssessment, fetchAssessmentResult]);
 
   if (error) {
     return (

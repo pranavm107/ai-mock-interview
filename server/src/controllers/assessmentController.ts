@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { generateResumeAssessment } from '../services/resumeAssessmentGenerationService';
-import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, saveAssessmentResultAtomically, getAssessmentResult } from '../services/assessmentService';
+import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, saveAssessmentResultAtomically, getAssessmentResult, getUserAssessments } from '../services/assessmentService';
 import { evaluateSubmission } from '../services/assessmentEvaluationService';
 
 const GenerateAssessmentRequestSchema = z.object({
@@ -96,16 +96,10 @@ export const getAssessmentHandler = async (req: Request, res: Response) => {
     const backendQuestions = await getAssessmentQuestions(assessmentId);
     const safeQuestions = backendQuestions.map(toUserSafeQuestion);
 
-    let result = undefined;
-    if (assessment.status === 'COMPLETED') {
-      result = await getAssessmentResult(assessmentId);
-    }
-
     return res.status(200).json({
       success: true,
       assessment,
-      questions: safeQuestions,
-      result
+      questions: safeQuestions
     });
   } catch (error: any) {
     console.error('Assessment retrieval failed:', error);
@@ -178,5 +172,97 @@ export const submitAssessmentHandler = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Assessment submission failed:', error);
     return res.status(500).json({ error: 'Failed to submit assessment' });
+  }
+};
+
+export const getAssessmentResultHandler = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const auth = typeof authReq.auth === 'function' ? authReq.auth() : authReq.auth;
+    const userId = auth?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: Missing user identity' });
+    }
+
+    const parseResult = GetAssessmentRequestParamsSchema.safeParse(req.params);
+    if (!parseResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid request', 
+        details: parseResult.error.issues 
+      });
+    }
+
+    const { assessmentId } = parseResult.data;
+
+    const assessment = await getAssessmentById(assessmentId);
+
+    if (!assessment) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+
+    if (assessment.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden: Assessment does not belong to the user' });
+    }
+
+    if (assessment.status !== 'COMPLETED') {
+      return res.status(409).json({ error: 'Conflict: Assessment is not completed' });
+    }
+
+    const result = await getAssessmentResult(assessmentId);
+    if (!result) {
+      return res.status(404).json({ error: 'Result not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      assessmentId,
+      result
+    });
+  } catch (error: any) {
+    console.error('Result retrieval failed:', error);
+    return res.status(500).json({ error: 'Failed to retrieve assessment result' });
+  }
+};
+
+const GetAssessmentHistoryQuerySchema = z.object({
+  limit: z.coerce.number().min(1).max(50).optional(),
+  cursor: z.string().optional(),
+  type: z.string().optional(),
+  resumeId: z.string().optional()
+});
+
+export const getAssessmentHistoryHandler = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const auth = typeof authReq.auth === 'function' ? authReq.auth() : authReq.auth;
+    const userId = auth?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: Missing user identity' });
+    }
+
+    const parseResult = GetAssessmentHistoryQuerySchema.safeParse(req.query);
+    if (!parseResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid query parameters', 
+        details: parseResult.error.issues 
+      });
+    }
+
+    const { limit, cursor, type, resumeId } = parseResult.data;
+
+    const { assessments, nextCursor } = await getUserAssessments(userId, {
+      limit, cursor, type, resumeId
+    });
+
+    return res.status(200).json({
+      success: true,
+      assessments,
+      nextCursor
+    });
+  } catch (error: any) {
+    console.error('History retrieval failed:', error);
+    return res.status(500).json({ error: 'Failed to retrieve assessment history' });
   }
 };

@@ -64,6 +64,7 @@ export const saveAssessmentResultAtomically = async (assessmentId: string, answe
     transaction.update(assessmentRef, {
       status: 'COMPLETED',
       answeredCount,
+      score: result.score,
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -82,4 +83,40 @@ export const getAssessmentResult = async (assessmentId: string): Promise<Assessm
 export const toUserSafeQuestion = (question: AssessmentQuestion): AssessmentQuestionForUser => {
   const { correctOptionId, explanation, ...safeQuestion } = question;
   return safeQuestion;
+};
+
+export const getUserAssessments = async (
+  userId: string,
+  options?: { limit?: number; cursor?: string; type?: string; resumeId?: string }
+): Promise<{ assessments: Assessment[]; nextCursor: string | null }> => {
+  let query: FirebaseFirestore.Query = db.collection(ASSESSMENTS_COLLECTION)
+    .where('userId', '==', userId);
+
+  if (options?.type) {
+    query = query.where('type', '==', options.type);
+  }
+
+  if (options?.resumeId) {
+    query = query.where('resumeId', '==', options.resumeId);
+  }
+
+  query = query.orderBy('createdAt', 'desc');
+
+  if (options?.cursor) {
+    // Determine how we use startAfter with createdAt (which is an ISO string)
+    query = query.startAfter(options.cursor);
+  }
+
+  const limitNum = options?.limit || 10;
+  query = query.limit(limitNum);
+
+  const snapshot = await query.get();
+  const assessments = snapshot.docs.map(doc => doc.data() as Assessment);
+
+  let nextCursor = null;
+  if (assessments.length === limitNum && limitNum > 0) {
+    nextCursor = assessments[assessments.length - 1].createdAt;
+  }
+
+  return { assessments, nextCursor };
 };
