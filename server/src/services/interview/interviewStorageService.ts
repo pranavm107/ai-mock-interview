@@ -1,5 +1,4 @@
-import { db } from "../../config/firebase.config";
-import { doc, setDoc, getDoc, deleteDoc, query, collection, where, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebaseAdmin";
 import { Interview } from "../../types/interview";
 
 export const generateCacheKey = (
@@ -13,8 +12,7 @@ export const generateCacheKey = (
 };
 
 export const findCachedInterview = async (cacheKey: string): Promise<Interview | null> => {
-  const q = query(collection(db, "interviews"), where("cacheKey", "==", cacheKey));
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await db.collection("interviews").where("cacheKey", "==", cacheKey).get();
   if (!querySnapshot.empty) {
     return querySnapshot.docs[0].data() as Interview;
   }
@@ -37,17 +35,17 @@ export const saveInterview = async (interview: Interview): Promise<string> => {
 
   const dataToSave = { ...interview, cacheKey };
 
-  const docRef = doc(db, "interviews", interviewId);
-  await setDoc(docRef, dataToSave);
+  const docRef = db.collection("interviews").doc(interviewId);
+  await docRef.set(dataToSave);
   
   return interviewId;
 };
 
 export const getInterviewById = async (interviewId: string): Promise<Interview | null> => {
-  const docRef = doc(db, "interviews", interviewId);
-  const snap = await getDoc(docRef);
+  const docRef = db.collection("interviews").doc(interviewId);
+  const snap = await docRef.get();
   
-  if (snap.exists()) {
+  if (snap.exists) {
     return snap.data() as Interview;
   }
   
@@ -55,7 +53,7 @@ export const getInterviewById = async (interviewId: string): Promise<Interview |
 };
 
 export const deleteInterview = async (interviewId: string): Promise<void> => {
-  const docRef = doc(db, "interviews", interviewId);
-  await deleteDoc(docRef);
+  const docRef = db.collection("interviews").doc(interviewId);
+  await docRef.delete();
 };
 

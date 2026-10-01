@@ -1,6 +1,5 @@
 import { generateJson } from '../ai/geminiClient';
-import { db } from '../../config/firebase.config';
-import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebaseAdmin';
 import { Interview, InterviewSettings, InterviewQuestion, InterviewMetadata } from '../../types/interview';
 import { planInterview } from './questionPlanner';
 import { validateGeneratedInterview } from './interviewValidator';
@@ -17,10 +16,10 @@ export const generateInterview = async (
   // 1. Fetch Resume
   let structuredResume = null;
   if (resumeId) {
-    const resumeDocRef = doc(db, 'resumes', resumeId);
-    const resumeSnap = await getDoc(resumeDocRef);
-    if (resumeSnap.exists()) {
-      structuredResume = resumeSnap.data().structuredResume;
+    const resumeDocRef = db.collection('resumes').doc(resumeId);
+    const resumeSnap = await resumeDocRef.get();
+    if (resumeSnap.exists) {
+      structuredResume = resumeSnap.data()?.structuredResume;
     }
   }
   
