@@ -1,6 +1,6 @@
 import { db } from '../config/firebaseAdmin';
 import { z } from 'zod';
-import { callGemini } from './geminiService';
+import { callGroq } from './groqService';
 import { buildResumeAssessmentPrompt } from '../prompts/resumeAssessmentPrompt';
 import { buildResumeAssessmentContext } from './resumeAssessmentContextService';
 import { 
@@ -81,7 +81,7 @@ export const generateResumeAssessment = async (
   while (attempts < 2 && !aiOutput) {
     attempts++;
     try {
-      const rawText = await callGemini(prompt);
+      const rawText = await callGroq(prompt);
       
       // Clean up potential markdown formatting from Gemini
       let jsonText = rawText.trim();

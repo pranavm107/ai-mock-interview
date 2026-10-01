@@ -192,7 +192,7 @@ Build:
 
 Reuse:
 Existing Resume Analysis
-Existing Gemini Service
+Groq Service for MCQ generation (migrated from Gemini)
 
 Status:
 
@@ -201,9 +201,9 @@ Status:
 ## Phase D2 Implementation Details
 
 ### Architecture Implemented
-- **Services**: `assessmentService` (Firestore wrapper), `resumeAssessmentContextService` (context builder), and `resumeAssessmentGenerationService` (Gemini orchestrator).
+- **Services**: `assessmentService` (Firestore wrapper), `resumeAssessmentContextService` (context builder), and `resumeAssessmentGenerationService` (Groq orchestrator).
 - **Controllers**: `assessmentController` handling `/api/assessments/resume/generate`.
-- **Validation**: Strict Zod validation applied to Gemini output ensuring exactly 4 options and valid correct answer mapping.
+- **Validation**: Strict Zod validation applied to Groq output ensuring exactly 4 options and valid correct answer mapping.
 
 ### Files Created
 - `server/src/services/assessmentService.ts`
