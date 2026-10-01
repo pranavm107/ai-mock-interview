@@ -50,6 +50,16 @@ export const getPublicResumeUrl = (storagePath: string): string => {
   return data.publicUrl;
 };
 
+export const getSignedResumeUrl = async (storagePath: string): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from('resumes')
+    .createSignedUrl(storagePath, 3600); // 1 hour expiry
+  if (error || !data?.signedUrl) {
+    throw new Error('Failed to create signed URL for resume');
+  }
+  return data.signedUrl;
+};
+
 export const deleteResumeFile = async (storagePath: string): Promise<void> => {
   const { error } = await supabase.storage
     .from('resumes')

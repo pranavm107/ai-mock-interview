@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Play, RotateCcw, AlertCircle, Loader2 } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
@@ -12,6 +12,7 @@ import type { InterviewType, InterviewDifficulty, ExperienceLevel } from '../typ
 
 const Generate: React.FC = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const { createInterview, loading: creatingInterview } = useInterview();
   const { resumes, loading: loadingResumes } = useResume();
@@ -76,9 +77,14 @@ const Generate: React.FC = () => {
     try {
       setGenerating(true);
       
+      const token = await getToken();
+      
       const response = await fetch(`${API_BASE_URL}/api/interviews/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({
           userId: user.id,
           resumeId: formData.resumeId || null,
@@ -107,7 +113,10 @@ const Generate: React.FC = () => {
         const interviewId = responseData.id;
         const sessionResponse = await fetch(`${API_BASE_URL}/api/interview-sessions`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
           body: JSON.stringify({
             userId: user.id,
             interviewId: interviewId

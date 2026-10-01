@@ -44,6 +44,7 @@ export const useResume = () => {
       
       // 2. Ping backend for processing
       try {
+        const signedUrl = await resumeService.getSignedResumeUrl(newResume.metadata.storagePath!);
         const response = await fetch(`${API_BASE_URL}/api/resumes/process`, {
           method: 'POST',
           headers: {
@@ -51,7 +52,7 @@ export const useResume = () => {
           },
           body: JSON.stringify({
             resumeId: newResume.id,
-            fileUrl: newResume.metadata.fileUrl
+            fileUrl: signedUrl
           })
         });
         
