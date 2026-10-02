@@ -10,7 +10,7 @@ export const AIRecommendationEnhancementSchema = z.object({
   questionEmphasis: z.array(z.string()).max(5).optional(),
   suggestedAdjustments: z.object({
     difficulty: z.enum(["EASY", "MEDIUM", "HARD"]).optional(),
-    interviewType: z.enum(["Technical", "HR", "Behavioral", "Mixed"]).optional(),
+    interviewType: z.enum(["Technical", "HR", "Behavioral", "Mixed", "MCQ"]).optional(),
     focusAreas: z.array(z.string()).max(3).optional(),
     questionCount: z.number().min(3).max(10).optional(),
     durationMinutes: z.number().min(15).max(60).optional(),

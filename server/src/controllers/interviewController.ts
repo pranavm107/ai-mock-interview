@@ -75,7 +75,7 @@ export const generateNewInterview = async (req: Request, res: Response) => {
     }
 
     if (interviewType) {
-      const allowedTypes = ['Technical', 'HR', 'Behavioral', 'Mixed'];
+      const allowedTypes = ['Technical', 'HR', 'Behavioral', 'Mixed', 'MCQ'];
       if (!allowedTypes.includes(interviewType)) {
         return res.status(400).json({ error: 'Invalid interview type.' });
       }
@@ -105,6 +105,7 @@ export const generateNewInterview = async (req: Request, res: Response) => {
       targetCompany: finalCompany,
       targetRole: finalRole,
       candidateExperienceLevel: finalExperience as any,
+      interviewType: (interviewType || 'Mixed') as any,
       ...(atsScore !== undefined && { atsScore })
     };
 

@@ -25,7 +25,7 @@ export const buildFinalPrompt = (
     buildRolePrompt(roleProfile, settings.targetRole),
     buildCompanyPrompt(companyProfile, settings.targetCompany),
     buildResumePrompt(structuredResume),
-    buildSchemaPrompt(title, blueprint.duration)
+    buildSchemaPrompt(title, blueprint.duration, settings.interviewType)
   ];
 
   return parts.join("\n\n");

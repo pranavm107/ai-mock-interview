@@ -13,7 +13,7 @@ export type RecommendationSource =
 export interface SuggestedInterview {
   targetRole: string; 
   targetCompany: string; 
-  interviewType: "Technical" | "HR" | "Behavioral" | "Mixed"; 
+  interviewType: "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ"; 
   difficulty: "EASY" | "MEDIUM" | "HARD"; 
   experienceLevel: "Student" | "Junior" | "Mid" | "Senior" | "Lead"; 
   questionCount: number; 
@@ -35,7 +35,7 @@ export const SuggestedInterviewRequestSchema = z.object({
 export const SuggestedInterviewValidationSchema = z.object({
   targetRole: z.string().trim().min(1),
   targetCompany: z.string().trim().min(1).nullable().optional(),
-  interviewType: z.enum(["Technical", "HR", "Behavioral", "Mixed"]),
+  interviewType: z.enum(["Technical", "HR", "Behavioral", "Mixed", "MCQ"]),
   difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
   experienceLevel: z.enum(["Student", "Junior", "Mid", "Senior", "Lead"]),
   questionCount: z.number().int().min(3).max(10),

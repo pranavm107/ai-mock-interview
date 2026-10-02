@@ -1,7 +1,7 @@
 import { RecommendationContext, RecommendationSource } from '../types/recommendation';
 
 export interface RecommendationDecision {
-  interviewType: "Technical" | "HR" | "Behavioral" | "Mixed";
+  interviewType: "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ";
   difficulty: "EASY" | "MEDIUM" | "HARD";
   focusAreas: string[];
   questionCount: number;
@@ -72,7 +72,7 @@ export const recommendInterview = (context: RecommendationContext): Recommendati
   }
 
   // Interview Type determination
-  let interviewType: "Technical" | "HR" | "Behavioral" | "Mixed" = "Technical";
+  let interviewType: "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ" = "Technical";
   let focusAreas: string[] = [];
 
   const behavioralKeywords = ["communication", "leadership", "conflict", "behavioral", "teamwork", "soft skills"];

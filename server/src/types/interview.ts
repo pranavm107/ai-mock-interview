@@ -25,6 +25,9 @@ export interface InterviewQuestion {
   expectedTopics: string[];
   skillsEvaluated: string[];
   followUps: string[];
+  options?: { id: string; text: string }[];
+  correctOptionId?: string;
+  explanation?: string;
   estimatedTime?: number; // in minutes
   source?: InterviewQuestionSource;
 }
@@ -35,6 +38,7 @@ export interface InterviewSettings {
   targetRole: string;
   targetCompany: string;
   candidateExperienceLevel: "Student" | "Junior" | "Mid" | "Senior" | "Lead";
+  interviewType?: "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ";
   atsScore?: number; // Optional
 }
 

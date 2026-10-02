@@ -1,6 +1,6 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type InterviewType = "Technical" | "HR" | "Behavioral" | "Mixed";
+export type InterviewType = "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ";
 export type InterviewDifficulty = "Easy" | "Medium" | "Hard" | "EASY" | "MEDIUM" | "HARD" | "MIXED";
 export type ExperienceLevel = "Fresher" | "Junior" | "Mid" | "Senior" | "Student" | "Lead";
 export type InterviewStatus = "Draft" | "Ready" | "In Progress" | "Completed" | "Cancelled" | "Paused";
@@ -65,6 +65,9 @@ export interface InterviewQuestion {
   order: number;
   question: string;
   expectedAnswer: string;
+  options?: { id: string; text: string }[];
+  correctOptionId?: string;
+  explanation?: string;
   answer?: string;
   answerDuration?: number;
   score?: number | null;

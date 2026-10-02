@@ -46,7 +46,7 @@ export const generateInterview = async (
   }
   
   // 5. Validation, Quality Filters, Hallucination Guard
-  const validInterview = validateGeneratedInterview(parsedResponse, blueprint);
+  const validInterview = validateGeneratedInterview(parsedResponse, blueprint, settings);
   
   // 6. Format Output
   const questions: InterviewQuestion[] = validInterview.questions.map((q, i) => ({

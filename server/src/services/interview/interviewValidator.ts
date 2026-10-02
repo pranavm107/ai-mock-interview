@@ -12,7 +12,8 @@ export class InterviewValidationError extends Error {
 
 export const validateGeneratedInterview = (
   response: any,
-  blueprint: InterviewBlueprint
+  blueprint: InterviewBlueprint,
+  settings?: any
 ): InterviewGenerationResponse => {
   if (!response || typeof response !== "object") {
     throw new InterviewValidationError("Response is not a valid JSON object.");
@@ -54,6 +55,18 @@ export const validateGeneratedInterview = (
       throw new InterviewValidationError(`Invalid or missing difficulty for question at index ${i}.`);
     }
     difficultyCounts[q.difficulty]++;
+
+    if (settings?.interviewType === 'MCQ') {
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        throw new InterviewValidationError(`MCQ must have exactly 4 options for question at index ${i}.`);
+      }
+      if (!q.correctOptionId || !q.options.some((o: any) => o.id === q.correctOptionId)) {
+        throw new InterviewValidationError(`Invalid correctOptionId for question at index ${i}.`);
+      }
+      if (!q.explanation || q.explanation.trim() === '') {
+        throw new InterviewValidationError(`Missing explanation for question at index ${i}.`);
+      }
+    }
   }
 
   // Enforce section distribution

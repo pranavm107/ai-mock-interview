@@ -292,6 +292,27 @@ Status:
 
 ---
 
+# Phase D4: Mock Interview MCQ Generation
+
+Implemented `MCQ` as an interview type in the `Generate Mock Interview` workflow.
+
+Architecture Limitations Identified:
+- The existing `InterviewSession` workflow heavily relies on step-by-step AI evaluation (`adaptive-answer` endpoint) and instant state transitions.
+- Client fetching interviews directly from Firestore natively exposes all fields, including `correctOptionId` and `explanation`, breaking answer secrecy for MCQs.
+- To safely support secure MCQ evaluation, a separate runtime component and a bulk-submit API must be constructed, integrating with the new Assessment framework rather than the legacy `InterviewSession` framework.
+
+Completed for this phase:
+- Backend generation of MCQs via Groq using the `generateNewInterview` API.
+- Strict Zod and logic validation ensuring exactly 4 options, a correct option mapping, and an explanation.
+- Frontend schema types expanded to include `MCQ`.
+- Test suites covering valid and invalid AI outputs for MCQs.
+
+Status:
+[x] Generation & Validation Completed
+[ ] Taking / Evaluation UI (Deferred due to architectural constraints described above)
+
+---
+
 # Phase D6: Assessment Answer and Submission
 
 Build:
