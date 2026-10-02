@@ -121,7 +121,16 @@ export const generateNewInterview = async (req: Request, res: Response) => {
       success: true
     });
 
-    res.status(201).json({ id: interviewId, interview });
+    let responseInterview = interview;
+    if (interview.settings?.interviewType === 'MCQ') {
+      const safeQuestions = interview.questions?.map((q: any) => {
+        const { correctOptionId, explanation, ...safeQ } = q;
+        return safeQ;
+      });
+      responseInterview = { ...interview, questions: safeQuestions } as any;
+    }
+
+    res.status(201).json({ id: interviewId, interview: responseInterview });
   } catch (error: any) {
     logger.error({
       event: 'interview.generation.failed',
@@ -149,6 +158,13 @@ export const getInterview = async (req: Request, res: Response) => {
     if (!interview) {
       return res.status(404).json({ error: 'Interview not found' });
     }
+    if (interview.settings?.interviewType === 'MCQ') {
+      const safeQuestions = interview.questions?.map(q => {
+        const { correctOptionId, explanation, ...safeQ } = q;
+        return safeQ;
+      });
+      return res.json({ ...interview, questions: safeQuestions });
+    }
     
     res.json(interview);
   } catch (error: any) {
@@ -173,7 +189,16 @@ export const regenerateInterview = async (req: Request, res: Response) => {
     );
     
     const interviewId = await saveInterview(newInterview);
-    res.status(201).json({ id: interviewId, interview: newInterview });
+    let responseInterview = newInterview;
+    if (newInterview.settings?.interviewType === 'MCQ') {
+      const safeQuestions = newInterview.questions?.map((q: any) => {
+        const { correctOptionId, explanation, ...safeQ } = q;
+        return safeQ;
+      });
+      responseInterview = { ...newInterview, questions: safeQuestions } as any;
+    }
+
+    res.status(201).json({ id: interviewId, interview: responseInterview });
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to regenerate interview' });
   }

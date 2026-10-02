@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { getSuggestedInterviewController, generateNewInterview, getMcqInterview, submitMcqInterview } from '../../src/controllers/interviewController';
+import { getSuggestedInterviewController, generateNewInterview, getMcqInterview, submitMcqInterview, getInterview, regenerateInterview } from '../../src/controllers/interviewController';
 import * as recommendationService from '../../src/services/interviewRecommendationService';
 import * as generationService from '../../src/services/interview/interviewGenerationService';
 import * as logger from '../../src/utils/logger';
@@ -52,6 +52,8 @@ app.post('/api/interviews/suggest', getSuggestedInterviewController);
 app.post('/api/interviews/generate', generateNewInterview);
 app.get('/api/interviews/:id/mcq', getMcqInterview);
 app.post('/api/interviews/:id/mcq/submit', submitMcqInterview);
+app.get('/api/interviews/:id', getInterview);
+app.post('/api/interviews/:id/regenerate', regenerateInterview);
 
 describe('interviewController', () => {
   beforeEach(() => {
@@ -183,6 +185,30 @@ describe('interviewController', () => {
         expect.objectContaining({ event: 'interview.generation.failed' })
       );
     });
+
+    it('strips correctOptionId and explanation for MCQ interviews', async () => {
+      vi.mocked(generationService.generateInterview).mockResolvedValue({
+        id: 'test',
+        settings: { interviewType: 'MCQ' },
+        questions: [{ id: 'q1', correctOptionId: 'A', explanation: 'exp' }]
+      } as any);
+
+      const { saveInterview } = await import('../../src/services/interview/interviewStorageService');
+      vi.mocked(saveInterview).mockResolvedValue('test');
+
+      const response = await request(app)
+        .post('/api/interviews/generate')
+        .set('Authorization', 'Bearer valid-token')
+        .send({
+          targetRole: 'SWE',
+          interviewType: 'MCQ',
+          questionCount: 3
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.interview.questions[0].correctOptionId).toBeUndefined();
+      expect(response.body.interview.questions[0].explanation).toBeUndefined();
+    });
   });
 
   describe('GET /api/interviews/:id/mcq', () => {
@@ -231,6 +257,65 @@ describe('interviewController', () => {
         .set('Authorization', 'Bearer valid-token');
 
       expect(response.status).toBe(403);
+    });
+  });
+
+  describe('GET /api/interviews/:id', () => {
+    it('strips correctOptionId and explanation for MCQ interviews', async () => {
+      const mockInterview = {
+        id: 'mcq-123',
+        userId: 'user-123',
+        settings: { interviewType: 'MCQ' },
+        questions: [{ id: 'q1', correctOptionId: 'A', explanation: 'Because A' }]
+      };
+
+      const { getInterviewById } = await import('../../src/services/interview/interviewStorageService');
+      vi.mocked(getInterviewById).mockResolvedValue(mockInterview as any);
+
+      const response = await request(app).get('/api/interviews/mcq-123');
+
+      expect(response.status).toBe(200);
+      expect(response.body.questions[0].correctOptionId).toBeUndefined();
+      expect(response.body.questions[0].explanation).toBeUndefined();
+    });
+
+    it('does not strip answers for non-MCQ interviews', async () => {
+      const mockInterview = {
+        id: 'tech-123',
+        userId: 'user-123',
+        settings: { interviewType: 'Technical' },
+        questions: [{ id: 'q1', expectedAnswer: 'A specific answer', explanation: 'exp' }]
+      };
+
+      const { getInterviewById } = await import('../../src/services/interview/interviewStorageService');
+      vi.mocked(getInterviewById).mockResolvedValue(mockInterview as any);
+
+      const response = await request(app).get('/api/interviews/tech-123');
+
+      expect(response.status).toBe(200);
+      expect(response.body.questions[0].expectedAnswer).toBeDefined();
+      expect(response.body.questions[0].explanation).toBeDefined();
+    });
+  });
+
+  describe('POST /api/interviews/:id/regenerate', () => {
+    it('strips correctOptionId and explanation for MCQ interviews', async () => {
+      const mockExisting = { id: 'mcq-123', userId: 'user-123', settings: { interviewType: 'MCQ' } };
+      const { getInterviewById, saveInterview } = await import('../../src/services/interview/interviewStorageService');
+      vi.mocked(getInterviewById).mockResolvedValue(mockExisting as any);
+      vi.mocked(saveInterview).mockResolvedValue('mcq-123');
+
+      vi.mocked(generationService.generateInterview).mockResolvedValue({
+        id: 'mcq-123',
+        settings: { interviewType: 'MCQ' },
+        questions: [{ id: 'q1', correctOptionId: 'B', explanation: 'exp' }]
+      } as any);
+
+      const response = await request(app).post('/api/interviews/mcq-123/regenerate');
+
+      expect(response.status).toBe(201);
+      expect(response.body.interview.questions[0].correctOptionId).toBeUndefined();
+      expect(response.body.interview.questions[0].explanation).toBeUndefined();
     });
   });
 
