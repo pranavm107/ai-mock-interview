@@ -318,3 +318,133 @@ export const getSuggestedInterviewController = async (req: Request, res: Respons
   }
 };
 
+export const getMcqInterview = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const id = req.params.id as string;
+    const interview = await getInterviewById(id);
+    
+    if (!interview) {
+      return res.status(404).json({ error: 'Interview not found' });
+    }
+
+    if (interview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (interview.settings?.interviewType !== 'MCQ') {
+      return res.status(400).json({ error: 'Not an MCQ interview' });
+    }
+
+    // Strip correctOptionId and explanation
+    const safeQuestions = interview.questions?.map(q => {
+      const { correctOptionId, explanation, ...safeQ } = q;
+      return safeQ;
+    });
+
+    res.json({ ...interview, questions: safeQuestions });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to retrieve interview' });
+  }
+};
+
+export const submitMcqInterview = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const id = req.params.id as string;
+    const { answers } = req.body; 
+
+    if (!answers || typeof answers !== 'object') {
+      return res.status(400).json({ error: 'Invalid answers payload' });
+    }
+
+    const interviewRef = db.collection('interviews').doc(id);
+    
+    const result = await db.runTransaction(async (transaction) => {
+      const doc = await transaction.get(interviewRef);
+      if (!doc.exists) {
+        throw new Error('NOT_FOUND');
+      }
+
+      const interview = doc.data() as any;
+
+      if (interview.userId !== userId) {
+        throw new Error('FORBIDDEN');
+      }
+
+      if (interview.settings?.interviewType !== 'MCQ') {
+        throw new Error('NOT_MCQ');
+      }
+
+      if (interview.status === 'Completed') {
+        throw new Error('ALREADY_COMPLETED');
+      }
+
+      let correctCount = 0;
+      let incorrectCount = 0;
+      let unansweredCount = 0;
+      const totalQuestions = interview.questions?.length || 0;
+
+      const results = interview.questions?.map((q: any) => {
+        const selectedOptionId = answers[q.id];
+        const isCorrect = selectedOptionId === q.correctOptionId;
+        
+        if (!selectedOptionId) {
+          unansweredCount++;
+        } else if (isCorrect) {
+          correctCount++;
+        } else {
+          incorrectCount++;
+        }
+
+        return {
+          questionId: q.id,
+          selectedOptionId: selectedOptionId || null,
+          correctOptionId: q.correctOptionId,
+          explanation: q.explanation,
+          isCorrect
+        };
+      }) || [];
+
+      const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+      const updateData = {
+        status: 'Completed',
+        score,
+        mcqResult: {
+          correctCount,
+          incorrectCount,
+          unansweredCount,
+          totalQuestions,
+          score,
+          results
+        },
+        completedAt: new Date().toISOString()
+      };
+
+      transaction.update(interviewRef, updateData);
+
+      return updateData;
+    });
+
+    res.json({ success: true, result });
+  } catch (error: any) {
+    if (error.message === 'NOT_FOUND') return res.status(404).json({ error: 'Interview not found' });
+    if (error.message === 'FORBIDDEN') return res.status(403).json({ error: 'Forbidden' });
+    if (error.message === 'NOT_MCQ') return res.status(400).json({ error: 'Not an MCQ interview' });
+    if (error.message === 'ALREADY_COMPLETED') return res.status(400).json({ error: 'Already completed' });
+    
+    res.status(500).json({ error: error.message || 'Failed to submit MCQ interview' });
+  }
+};
+

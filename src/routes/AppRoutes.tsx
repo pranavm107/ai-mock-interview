@@ -22,6 +22,7 @@ import Generate from '../pages/Generate';
 import SuggestedInterviewPage from '../pages/SuggestedInterview';
 import Interview from '../pages/Interview';
 import InterviewRuntime from '../pages/InterviewRuntime';
+import MCQRuntime from '../pages/MCQRuntime';
 import InterviewReportPage from '../pages/InterviewReport';
 import InterviewReplay from '../pages/InterviewReplay';
 import InterviewReview from '../pages/InterviewReview';
@@ -58,6 +59,7 @@ const router = createBrowserRouter([
       { path: 'generate/suggested', element: <SuggestedInterviewPage /> },
       { path: 'interview/:id', element: <Interview /> },
       { path: 'session/:sessionId', element: <InterviewRuntime /> },
+      { path: 'mcq/:id', element: <MCQRuntime /> },
       { path: 'report/:sessionId', element: <InterviewReportPage /> },
       { path: 'replay/:sessionId', element: <InterviewReplay /> },
       { path: 'review/:sessionId', element: <InterviewReview /> },

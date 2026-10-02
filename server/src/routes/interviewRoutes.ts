@@ -5,7 +5,9 @@ import {
   regenerateInterview, 
   deleteInterviewEndpoint,
   generateInterviewQuestions,
-  getSuggestedInterviewController
+  getSuggestedInterviewController,
+  getMcqInterview,
+  submitMcqInterview
 } from '../controllers/interviewController';
 import { callGroq } from '../services/groqService';
 import { requireAuth } from '@clerk/express';
@@ -23,6 +25,8 @@ router.get('/test-groq', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+router.get('/:id/mcq', requireAuth(), getMcqInterview);
+router.post('/:id/mcq/submit', requireAuth(), submitMcqInterview);
 router.get('/:id', getInterview);
 router.post('/:id/regenerate', regenerateInterview);
 router.delete('/:id', deleteInterviewEndpoint);

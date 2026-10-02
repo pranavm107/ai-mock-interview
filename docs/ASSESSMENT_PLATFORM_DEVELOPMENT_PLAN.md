@@ -309,7 +309,15 @@ Completed for this phase:
 
 Status:
 [x] Generation & Validation Completed
-[ ] Taking / Evaluation UI (Deferred due to architectural constraints described above)
+[x] Taking / Evaluation UI (Implemented via Secure MCQ Runtime)
+
+## MCQ Runtime Implementation Details
+- **Architecture**: Separated from `InterviewSession` entirely. `InterviewSession` is for step-by-step AI evaluated mock interviews. MCQs are evaluated bulk on the server.
+- **Endpoints**:
+  - `GET /api/interviews/:id/mcq`: Retrieves interview with `correctOptionId` and `explanation` stripped securely on the server. Ownership validated.
+  - `POST /api/interviews/:id/mcq/submit`: Receives answers, evaluates score on the server inside a Firestore transaction to prevent duplicate submissions, and returns explanations.
+- **Frontend UI**: Built `MCQRuntime.tsx` to handle question navigation, answer selection, and submission. Also handles result visualization post-submission.
+- **Testing**: Added tests covering `getMcqInterview` and `submitMcqInterview` controllers, mocking Firestore transactions and validating that sensitive data is stripped.
 
 ---
 

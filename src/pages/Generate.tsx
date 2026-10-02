@@ -111,6 +111,12 @@ const Generate: React.FC = () => {
 
       if (responseData.id) {
         const interviewId = responseData.id;
+        
+        if (formData.interviewType === 'MCQ') {
+          navigate(`/mcq/${interviewId}`);
+          return;
+        }
+
         const sessionResponse = await fetch(`${API_BASE_URL}/api/interview-sessions`, {
           method: 'POST',
           headers: { 
