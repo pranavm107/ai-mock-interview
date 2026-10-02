@@ -6,7 +6,7 @@ import {
   CandidateProject,
   CandidateSkill
 } from '../../types/conversationMemory';
-import { generateText } from '../ai/geminiClient';
+import { generateText } from '../ai/groqClient';
 import crypto from 'crypto';
 
 export const initializeMemory = async (sessionId: string, initialTopics: string[] = [], profile?: { targetRole?: string, level?: string }): Promise<ConversationMemory> => {

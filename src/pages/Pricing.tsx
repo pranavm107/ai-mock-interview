@@ -143,7 +143,7 @@ const Pricing: React.FC = () => {
                     <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Behavioral & Technical</span></li>
                     <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Coding Interviews</span></li>
                     <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Performance Analytics</span></li>
-                    <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Gemini AI Powered</span></li>
+                    <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Groq AI Powered</span></li>
                     <li className="flex items-start gap-3"><Check className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" /><span className="text-gray-700 font-medium">Priority Support</span></li>
                   </ul>
                   <Link to="/sign-up">
@@ -291,7 +291,7 @@ const Pricing: React.FC = () => {
             { icon: Zap, title: "Instant Activation" },
             { icon: FileText, title: "No Hidden Charges" },
             { icon: Globe, title: "Built for Indian Devs" },
-            { icon: Brain, title: "Powered by Gemini AI" },
+            { icon: Brain, title: "Powered by Groq AI" },
             { icon: Database, title: "Firebase Cloud Storage" }
           ].map((t, i) => (
             <div key={i} className="flex flex-col items-center justify-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">

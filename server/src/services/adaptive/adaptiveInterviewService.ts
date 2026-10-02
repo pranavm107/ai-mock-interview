@@ -72,7 +72,7 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
     expectedSkills
   };
 
-  // 2. Evaluate Answer via Gemini for Follow-ups and Score
+  // 2. Evaluate Answer via Groq for Follow-ups and Score
   const evalResult = await evaluateAnswerAndGenerateFollowUp(followUpContext);
   const score = evalResult.followUp.score;
 
@@ -91,7 +91,7 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
   };
   const flowEvaluation = evaluateInterviewFlow(flowInput);
 
-  // 5. Update follow-up queue if Gemini suggested one
+  // 5. Update follow-up queue if Groq suggested one
   let isFollowUpRequestedByEngine = false;
   if (evalResult.followUp.shouldGenerate && evalResult.followUp.question) {
     isFollowUpRequestedByEngine = true;

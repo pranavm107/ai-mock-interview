@@ -1,5 +1,5 @@
 import Groq from 'groq-sdk';
-import { GeminiTimeoutError } from '../types/careerErrors';
+import { GroqTimeoutError } from '../types/careerErrors';
 
 export const callGroq = async (prompt: string): Promise<string> => {
   const apiKey = process.env.GROQ_API_KEY;
@@ -8,15 +8,17 @@ export const callGroq = async (prompt: string): Promise<string> => {
   }
 
   const groq = new Groq({ apiKey });
-  const modelId = process.env.GROQ_MODEL || 'llama3-70b-8192';
+  const modelId = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
       // Reusing GeminiTimeoutError for compatibility with existing error handling logic
-      reject(new GeminiTimeoutError("Groq API call timed out after 15 seconds."));
+      reject(new GroqTimeoutError("Groq API call timed out after 15 seconds."));
     }, 15000);
   });
 
+  const isJsonMode = prompt.toLowerCase().includes('json');
+  
   const generatePromise = groq.chat.completions.create({
     messages: [
       {
@@ -25,7 +27,7 @@ export const callGroq = async (prompt: string): Promise<string> => {
       },
     ],
     model: modelId,
-    response_format: { type: "json_object" },
+    ...(isJsonMode && { response_format: { type: "json_object" } }),
   }).then(chatCompletion => {
     const content = chatCompletion.choices[0]?.message?.content;
     if (!content) {

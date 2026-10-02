@@ -12,10 +12,10 @@ export class CareerValidationError extends Error {
   }
 }
 
-export class GeminiTimeoutError extends Error {
+export class GroqTimeoutError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'GeminiTimeoutError';
+    this.name = 'GroqTimeoutError';
   }
 }
 

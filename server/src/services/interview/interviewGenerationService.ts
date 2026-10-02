@@ -1,4 +1,4 @@
-import { generateJson } from '../ai/geminiClient';
+import { generateJson } from '../ai/groqClient';
 import { db } from '../../config/firebaseAdmin';
 import { Interview, InterviewSettings, InterviewQuestion, InterviewMetadata } from '../../types/interview';
 import { planInterview } from './questionPlanner';
@@ -29,7 +29,7 @@ export const generateInterview = async (
   // 3. Build Modular Prompt
   const prompt = buildFinalPrompt(settings, blueprint, structuredResume);
   
-  // 4. Generate via Gemini
+  // 4. Generate via Groq
   const rawResponse = await generateJson(prompt);
   let parsedResponse;
   try {
@@ -62,7 +62,7 @@ export const generateInterview = async (
     plannerVersion: blueprint.metadata.plannerVersion,
     validatorVersion: "2.0.0",
     profileVersion: "2.0.0",
-    model: "gemini-2.5-pro",
+    model: "llama3-70b-8192",
     generationTimeMs: Date.now() - startTime,
     questionDistribution: {
       resume: blueprint.sections.find(b => b.category === "RESUME")?.questions || 0,

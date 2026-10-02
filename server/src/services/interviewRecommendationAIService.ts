@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { RecommendationContext } from '../types/recommendation';
 import { RecommendationDecision } from './interviewRecommendationEngine';
-import { callGemini } from './geminiService';
+import { callGroq } from './groqService';
 
 export const AIRecommendationEnhancementSchema = z.object({
   coachingMessage: z.string().max(300).optional(),
@@ -81,7 +81,7 @@ Return ONLY valid JSON matching this schema:
 Context:
 ${JSON.stringify(aiInput, null, 2)}`;
 
-    const responseText = await callGemini(prompt);
+    const responseText = await callGroq(prompt);
     
     // Clean up potential markdown code block wrappers
     let cleanJson = responseText.trim();

@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { generateReplayPayload } from '../replay/replayEngine';
 import { getInterviewReviewBySessionId, saveInterviewReview } from './reviewRepository';
 import { buildReviewPrompt } from './promptBuilder';
-import { generateJson } from '../ai/geminiClient';
+import { generateJson } from '../ai/groqClient';
 import { validateAndCalculateScores } from './scoreCalculator';
 import { InterviewReview, QuestionReview } from '../../types/review';
 import { achievementRuleEngine } from '../achievementRuleEngine';

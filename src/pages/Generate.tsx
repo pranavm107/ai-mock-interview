@@ -155,7 +155,7 @@ const Generate: React.FC = () => {
           language: formData.language,
           totalQuestions: formData.totalQuestions,
           duration: formData.duration || 30,
-          aiProvider: 'Gemini',
+          aiProvider: 'Groq',
           feedbackId: null
         },
         mockQuestions

@@ -1,5 +1,5 @@
 import { HiringRecommendation } from "../../types/interviewReport";
-import { generateJson } from "../ai/geminiClient";
+import { generateJson } from "../ai/groqClient";
 
 const SUMMARY_PROMPT = `You are a Senior Engineering Manager and expert Recruiter.
 Analyze the following interview scores, strengths, and weaknesses for a candidate applying for a {role} role at the {experience_level} level.

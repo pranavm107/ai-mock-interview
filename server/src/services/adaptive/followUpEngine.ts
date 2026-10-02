@@ -1,4 +1,4 @@
-import { getGeminiModel, generateText } from '../ai/geminiClient';
+import { getGroqClient, generateText } from '../ai/groqClient';
 import { 
   FollowUpContext, 
   FollowUpEvaluation, 

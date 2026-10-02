@@ -64,8 +64,8 @@ export const useResume = () => {
         }
 
         if (!responseData.aiSuccess) {
-          if (responseData.aiError?.code === 'GEMINI_QUOTA_EXCEEDED') {
-            setWarning('Resume uploaded successfully. AI analysis is temporarily unavailable because the Gemini API daily quota has been exhausted. You can retry the AI analysis later without uploading the resume again.');
+          if (responseData.aiError?.code === 'GROQ_QUOTA_EXCEEDED') {
+            setWarning('Resume uploaded successfully. AI analysis is temporarily unavailable because the Groq API daily quota has been exhausted. You can retry the AI analysis later without uploading the resume again.');
           } else {
             setWarning(`Resume uploaded successfully, but AI analysis failed: ${responseData.aiError?.message || 'Unknown error'}`);
           }

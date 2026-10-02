@@ -10,7 +10,7 @@ import {
 import { MemoryUpdate } from '../../../types/conversationMemory';
 import crypto from 'crypto';
 
-// A mock to bypass actual gemini calls during this unit test
+// A mock to bypass actual groq calls during this unit test
 const mockExtractEntities = async (question: string, answer: string): Promise<MemoryUpdate> => {
   if (answer.includes('React and FastAPI')) {
     return {

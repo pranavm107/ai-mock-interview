@@ -210,7 +210,7 @@ const Home: React.FC = () => {
             { name: 'TypeScript', color: 'bg-blue-50 text-blue-600 border-blue-100', icon: FileText, desc: 'Language' },
             { name: 'Clerk', color: 'bg-purple-50 text-purple-600 border-purple-100', icon: ShieldCheck, desc: 'Auth' },
             { name: 'Firebase', color: 'bg-amber-50 text-amber-600 border-amber-100', icon: Database, desc: 'Database' },
-            { name: 'Gemini AI', color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: Brain, desc: 'Intelligence' },
+            { name: 'Groq AI', color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: Brain, desc: 'Intelligence' },
             { name: 'Tailwind CSS', color: 'bg-cyan-50 text-cyan-600 border-cyan-100', icon: Layout, desc: 'Styling' },
             { name: 'Vite', color: 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100', icon: Zap, desc: 'Bundler' },
           ].map((tech) => (
@@ -584,7 +584,7 @@ const Home: React.FC = () => {
           <div className="space-y-4">
             {[
               { q: "Can I upload my resume?", a: "Yes! Our platform parses your PDF resume and generates custom interview questions directly related to your past experience and listed skills." },
-              { q: "How are questions generated?", a: "We use Google's Gemini AI, trained on thousands of real interview questions from top tech companies, to dynamically generate relevant scenarios." },
+              { q: "How are questions generated?", a: "We use Google's Groq AI, trained on thousands of real interview questions from top tech companies, to dynamically generate relevant scenarios." },
               { q: "Can I practice multiple interviews?", a: "Absolutely. You can generate unlimited mock interviews across various categories to perfect your skills." },
               { q: "Does AI provide feedback?", a: "Yes, you receive instant, highly detailed feedback on technical accuracy, communication, and confidence immediately after finishing." }
             ].map((faq, i) => (

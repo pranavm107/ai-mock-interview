@@ -93,7 +93,7 @@ const HowItWorks: React.FC = () => {
               
               <motion.div animate={{ y: [0, 12, 0] }} transition={{ repeat: Infinity, duration: 5.5, delay: 1.5 }} className="absolute bottom-1/3 left-10 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4 z-10">
                 <div className="bg-indigo-100 p-2 rounded-lg"><Bot className="w-6 h-6 text-indigo-600" /></div>
-                <div><div className="text-sm font-bold">Gemini AI</div></div>
+                <div><div className="text-sm font-bold">Groq AI</div></div>
               </motion.div>
             </div>
           </motion.div>
@@ -116,10 +116,10 @@ const HowItWorks: React.FC = () => {
               { num: 1, icon: UserCircle, title: "Create Your Account", desc: "Sign up using Google or email and create your personalized interview workspace. Securely powered by Clerk Authentication." },
               { num: 2, icon: Briefcase, title: "Complete Your Profile", desc: "Add career information including preferred interview roles, experience level, targeted skills, and dream companies." },
               { num: 3, icon: FileUp, title: "Upload Your Resume", desc: "Upload your latest resume PDF. Our AI automatically extracts your projects, skills, education, and achievements." },
-              { num: 4, icon: Brain, title: "AI Resume Analysis", desc: "Gemini AI deeply understands your background, extracting keywords, analyzing experience, and mapping you to target roles." },
+              { num: 4, icon: Brain, title: "AI Resume Analysis", desc: "Groq AI deeply understands your background, extracting keywords, analyzing experience, and mapping you to target roles." },
               { num: 5, icon: FileSearch, title: "Generate Personalized Interview", desc: "The AI crafts a bespoke interview script matching your resume, chosen difficulty, and specific job role." },
               { num: 6, icon: Mic, title: "Take AI Mock Interview", desc: "Step into a professional interview interface featuring voice-ready support, question timers, and progress tracking." },
-              { num: 7, icon: Cpu, title: "AI Evaluation", desc: "Gemini AI instantly evaluates your responses for technical accuracy, communication, confidence, and STAR method usage." },
+              { num: 7, icon: Cpu, title: "AI Evaluation", desc: "Groq AI instantly evaluates your responses for technical accuracy, communication, confidence, and STAR method usage." },
               { num: 8, icon: Activity, title: "Detailed Report", desc: "Receive a comprehensive report with your overall score, strengths, weaknesses, and question-by-question improvement suggestions." },
               { num: 9, icon: BarChart, title: "Track Progress", desc: "Save your history to Firebase. View your dashboard to track average scores, past interviews, and performance analytics over time." },
             ].map((step, idx) => (
@@ -207,7 +207,7 @@ const HowItWorks: React.FC = () => {
             </motion.div>
             <motion.div variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:-translate-y-2 transition-transform">
               <Brain className="w-10 h-10 text-purple-600 mb-4" />
-              <h3 className="font-bold text-gray-900 text-xl mb-3">Gemini AI</h3>
+              <h3 className="font-bold text-gray-900 text-xl mb-3">Groq AI</h3>
               <p className="text-gray-600 text-sm">Google's advanced LLM processes contextual resume data to generate ultra-personalized interview questions.</p>
             </motion.div>
             <motion.div variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:-translate-y-2 transition-transform">
@@ -259,7 +259,7 @@ const HowItWorks: React.FC = () => {
              {[
                { icon: Target, title: "Personalized", desc: "Resume-based interviews instead of generic questions." },
                { icon: RefreshCw, title: "Adaptive", desc: "Questions evolve based on your profile and skills." },
-               { icon: Sparkles, title: "Accurate", desc: "Powered by highly contextualized Gemini AI." },
+               { icon: Sparkles, title: "Accurate", desc: "Powered by highly contextualized Groq AI." },
                { icon: LineChart, title: "Insightful", desc: "Detailed feedback generated after every interview." },
                { icon: Activity, title: "Trackable", desc: "Monitor your improvement over time natively." }
              ].map((item, i) => (
@@ -283,7 +283,7 @@ const HowItWorks: React.FC = () => {
           </div>
           <div className="space-y-4">
             {[
-              { q: "How does the AI generate interview questions?", a: "Gemini AI parses your uploaded resume, extracts your core skills and projects, and formulates relevant questions that directly test your claimed experience." },
+              { q: "How does the AI generate interview questions?", a: "Groq AI parses your uploaded resume, extracts your core skills and projects, and formulates relevant questions that directly test your claimed experience." },
               { q: "Can I upload multiple resumes?", a: "Yes, you can upload a new resume for each interview if you are applying for different types of roles." },
               { q: "How secure is my data?", a: "Highly secure. We use Clerk for auth and Firebase with strict security rules to ensure no one else can access your history or resume." },
               { q: "Can I retry interviews?", a: "Absolutely. You can generate unlimited interviews to continually practice and improve your scores." },

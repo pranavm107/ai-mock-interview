@@ -78,8 +78,8 @@ const runTests = async () => {
   ]);
 
   result = await evaluateAnswerAndGenerateFollowUp(context);
-  // It should try to generate a new one via Gemini, but if we force a fallback it would block it.
-  // We can't easily force a fallback without breaking Gemini, but we can see if Gemini avoids duplicating it.
+  // It should try to generate a new one via Groq, but if we force a fallback it would block it.
+  // We can't easily force a fallback without breaking Groq, but we can see if Groq avoids duplicating it.
   console.log('3. Duplicate prevention:', result.followUp.question !== 'Why did you choose React over other frontend libraries?' ? '(Correct)' : '(Duplicated!)');
 
   console.log('--- Tests Completed ---');

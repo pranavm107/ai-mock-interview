@@ -11,7 +11,7 @@ import {
 import {
   CareerGenerationError,
   CareerValidationError,
-  GeminiTimeoutError,
+  GroqTimeoutError,
   FirestoreError
 } from '../types/careerErrors';
 import { aggregateCareerData } from '../services/career/careerAggregationService';
@@ -142,7 +142,7 @@ export const generateCoaching = async (req: AuthRequest, res: Response) => {
     console.error('Error generating coaching:', error);
     if (error instanceof CareerValidationError) {
       res.status(400).json({ error: error.message, code: 'VALIDATION_ERROR' });
-    } else if (error instanceof GeminiTimeoutError) {
+    } else if (error instanceof GroqTimeoutError) {
       res.status(408).json({ error: error.message, code: 'TIMEOUT_ERROR' });
     } else if (error instanceof CareerGenerationError) {
       res.status(500).json({ error: error.message, code: 'GENERATION_ERROR' });

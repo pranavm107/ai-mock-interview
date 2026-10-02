@@ -1,6 +1,6 @@
 import { StructuredResume, ResumeAIAnalysis } from '../../types/resume';
 import { buildResumeAnalysisPrompt, PROMPT_VERSION } from './promptBuilder';
-import { generateJson } from './geminiClient';
+import { generateJson } from './groqClient';
 import { validateAIAnalysis } from './responseValidator';
 import { executeWithRetry } from './retryStrategy';
 
@@ -8,7 +8,7 @@ export const analyzeStructuredResume = async (structuredResume: StructuredResume
   const prompt = buildResumeAnalysisPrompt(structuredResume);
   
   const operation = async () => {
-    // 1. Generate JSON using Gemini
+    // 1. Generate JSON using Groq
     const jsonString = await generateJson(prompt);
     
     // 2. Validate strict schema

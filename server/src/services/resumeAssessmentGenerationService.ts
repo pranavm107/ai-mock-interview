@@ -83,7 +83,7 @@ export const generateResumeAssessment = async (
     try {
       const rawText = await callGroq(prompt);
       
-      // Clean up potential markdown formatting from Gemini
+      // Clean up potential markdown formatting from Groq
       let jsonText = rawText.trim();
       if (jsonText.startsWith('\`\`\`json')) {
         jsonText = jsonText.substring(7);

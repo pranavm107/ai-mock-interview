@@ -110,7 +110,7 @@ const Features: React.FC = () => {
               
               <motion.div animate={{ y: [0, 12, 0] }} transition={{ repeat: Infinity, duration: 5.5, delay: 1.5 }} className="absolute bottom-1/3 left-10 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4 z-10">
                 <div className="bg-indigo-100 p-2 rounded-lg"><Bot className="w-6 h-6 text-indigo-600" /></div>
-                <div><div className="text-sm font-bold">Gemini AI</div><div className="text-xs text-gray-500">Engine Active</div></div>
+                <div><div className="text-sm font-bold">Groq AI</div><div className="text-xs text-gray-500">Engine Active</div></div>
               </motion.div>
             </div>
           </motion.div>
@@ -127,7 +127,7 @@ const Features: React.FC = () => {
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: FileText, title: "Resume-Based Interviews", desc: "AI deeply analyzes your resume to tailor highly specific questions to your experience." },
-              { icon: Brain, title: "Gemini AI Generator", desc: "Powered by state-of-the-art LLMs trained on actual interviews." },
+              { icon: Brain, title: "Groq AI Generator", desc: "Powered by state-of-the-art LLMs trained on actual interviews." },
               { icon: MessageSquare, title: "Adaptive Follow-ups", desc: "AI asks dynamic follow-up questions based on your previous answers." },
               { icon: Users, title: "Behavioral Practice", desc: "Master the STAR method with behavioral mock scenarios." },
               { icon: Code, title: "Technical Practice", desc: "Deep dive into language-specific concepts and architecture." },
@@ -379,7 +379,7 @@ const Features: React.FC = () => {
               { name: "Shadcn UI", icon: Layers, desc: "Accessible Components" },
               { name: "Firebase", icon: Database, desc: "Realtime Database" },
               { name: "Clerk", icon: ShieldCheck, desc: "Secure Auth" },
-              { name: "Gemini AI", icon: Brain, desc: "Intelligence Layer" },
+              { name: "Groq AI", icon: Brain, desc: "Intelligence Layer" },
               { name: "React Router", icon: Network, desc: "Client-side Routing" },
               { name: "Framer Motion", icon: Zap, desc: "Smooth Animations" },
               { name: "Vite", icon: FastForward, desc: "Lightning Build Tool" }
@@ -490,7 +490,7 @@ const Features: React.FC = () => {
               { q: "How does PrepPilot AI work?", a: "We use AI to parse your resume, map your skills, and generate a dynamic interview scenario tailored to your background." },
               { q: "Is my resume secure?", a: "Yes. Resumes are processed securely, stored privately on Firebase Cloud Storage, and only accessible by you via Clerk Authentication." },
               { q: "Can I practice unlimited interviews?", a: "Yes, you can generate and practice as many interviews as you like across any category." },
-              { q: "Which AI model is used?", a: "We leverage Google's Gemini AI for lightning-fast, highly accurate context processing and natural language generation." },
+              { q: "Which AI model is used?", a: "We leverage Google's Groq AI for lightning-fast, highly accurate context processing and natural language generation." },
               { q: "Can I track previous interviews?", a: "Absolutely. The dashboard stores your complete interview history and tracks performance metrics over time." },
               { q: "Is coding interview support available?", a: "Yes, we simulate technical and coding interviews, asking algorithm and architecture questions." }
             ].map((faq, i) => (

@@ -12,19 +12,19 @@ export class AIError extends Error {
 }
 
 export class QuotaExceededError extends AIError {
-  constructor(message: string = 'Gemini daily API quota exceeded.') {
-    super('GEMINI_QUOTA_EXCEEDED', message, false);
+  constructor(message: string = 'Groq daily API quota exceeded.') {
+    super('GROQ_QUOTA_EXCEEDED', message, false);
   }
 }
 
 export class InvalidApiKeyError extends AIError {
-  constructor(message: string = 'Invalid Gemini API Key.') {
+  constructor(message: string = 'Invalid Groq API Key.') {
     super('INVALID_API_KEY', message, false);
   }
 }
 
 export class ModelUnavailableError extends AIError {
-  constructor(message: string = 'Gemini model is currently unavailable.') {
+  constructor(message: string = 'Groq model is currently unavailable.') {
     super('MODEL_UNAVAILABLE', message, true);
   }
 }

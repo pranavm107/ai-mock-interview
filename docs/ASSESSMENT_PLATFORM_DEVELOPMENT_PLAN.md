@@ -13,7 +13,7 @@ Document:
 - Authentication
 - Firestore
 - Resume Processing
-- Gemini
+- Groq
 - Interviews
 - Voice System
 - Analytics
@@ -34,7 +34,7 @@ List:
 - Clerk
 - Resume Processing
 - Resume AI Analysis
-- Gemini
+- Groq
 - Firestore
 - Analytics
 - Achievements
@@ -192,7 +192,7 @@ Build:
 
 Reuse:
 Existing Resume Analysis
-Groq Service for MCQ generation (migrated from Gemini)
+Groq Service for MCQ generation (migrated from Groq)
 
 Status:
 

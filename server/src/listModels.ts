@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = process.env.GROQ_API_KEY;
 if (!apiKey) {
-  console.error("GEMINI_API_KEY is not defined in the environment.");
+  console.error("GROQ_API_KEY is not defined in the environment.");
   process.exit(1);
 }
 

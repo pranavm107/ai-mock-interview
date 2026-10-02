@@ -1,4 +1,4 @@
-import { generateJson } from "../ai/geminiClient";
+import { generateJson } from "../ai/groqClient";
 import { QuestionEvaluation } from "../../types/interviewReport";
 import { InterviewQuestion } from "../../types/interview";
 import { SessionAnswer } from "../../types/interviewSession";

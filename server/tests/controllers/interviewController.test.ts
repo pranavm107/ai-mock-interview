@@ -156,7 +156,7 @@ describe('interviewController', () => {
     });
 
     it('returns 500 when AI generation fails safely', async () => {
-      vi.mocked(generationService.generateInterview).mockRejectedValue(new Error('Gemini quota exceeded'));
+      vi.mocked(generationService.generateInterview).mockRejectedValue(new Error('Groq quota exceeded'));
       
       const response = await request(app)
         .post('/api/interviews/generate')

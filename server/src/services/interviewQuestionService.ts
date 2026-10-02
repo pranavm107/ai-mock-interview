@@ -1,11 +1,11 @@
-import { callGemini } from './geminiService';
+import { callGroq } from './groqService';
 import { buildInterviewPrompt, PromptInput } from '../prompts/interviewPrompt';
 import { InterviewQuestion } from '../types/InterviewQuestion';
 
 export const generateQuestions = async (input: PromptInput): Promise<InterviewQuestion[]> => {
   const prompt = buildInterviewPrompt(input);
   
-  const rawResponse = await callGemini(prompt);
+  const rawResponse = await callGroq(prompt);
   
   let jsonText = rawResponse.trim();
   
@@ -20,16 +20,16 @@ export const generateQuestions = async (input: PromptInput): Promise<InterviewQu
   try {
     parsed = JSON.parse(jsonText);
   } catch {
-    throw new Error("Invalid Gemini Response: Could not parse JSON");
+    throw new Error("Invalid Groq Response: Could not parse JSON");
   }
 
   if (!Array.isArray(parsed)) {
-    throw new Error("Invalid Gemini Response: Expected an array");
+    throw new Error("Invalid Groq Response: Expected an array");
   }
 
   const questions: InterviewQuestion[] = parsed.map((item: any, index: number) => {
     if (!item.question || !item.difficulty || !item.category || !item.expectedAnswer) {
-      throw new Error(`Invalid Gemini Response: Missing required fields in question at index ${index}`);
+      throw new Error(`Invalid Groq Response: Missing required fields in question at index ${index}`);
     }
 
     return {

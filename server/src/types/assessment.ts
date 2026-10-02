@@ -131,7 +131,7 @@ export interface AssessmentResult {
 }
 
 /**
- * Expected JSON output schema from Gemini during generation.
+ * Expected JSON output schema from Groq during generation.
  */
 export interface AssessmentGenerationAIOutput {
   questions: Omit<AssessmentQuestion, 'id' | 'assessmentId'>[];

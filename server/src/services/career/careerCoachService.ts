@@ -1,4 +1,4 @@
-import { callGemini } from '../geminiService';
+import { callGroq } from '../groqService';
 import { buildCareerPrompt } from './careerPromptBuilder';
 import { AICareerResponse } from '../../types/career.types';
 import {
@@ -29,7 +29,7 @@ export const generateCareerCoaching = async (
   while (attempts < maxAttempts) {
     attempts++;
     try {
-      const aiText = await callGemini(prompt);
+      const aiText = await callGroq(prompt);
 
       // Parse JSON response. Strip out markdown if present
       let jsonString = aiText.trim();

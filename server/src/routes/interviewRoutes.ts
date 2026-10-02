@@ -7,7 +7,7 @@ import {
   generateInterviewQuestions,
   getSuggestedInterviewController
 } from '../controllers/interviewController';
-import { callGemini } from '../services/geminiService';
+import { callGroq } from '../services/groqService';
 import { requireAuth } from '@clerk/express';
 
 const router = Router();
@@ -15,9 +15,9 @@ const router = Router();
 router.post('/generate', requireAuth(), generateNewInterview);
 router.post('/suggest', requireAuth(), getSuggestedInterviewController);
 router.post('/generate-questions', generateInterviewQuestions);
-router.get('/test-gemini', async (req, res) => {
+router.get('/test-groq', async (req, res) => {
   try {
-    const response = await callGemini("Say Hello");
+    const response = await callGroq("Say Hello");
     res.send(response);
   } catch (error: any) {
     res.status(500).send(error.message);

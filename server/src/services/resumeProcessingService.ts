@@ -114,7 +114,7 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
         console.log(`[AI Cache Hit] Reusing AI analysis for hash ${textHash}`);
         aiAnalysis = querySnapshot.docs[0].data().analysis.aiAnalysis;
       } else {
-        console.log(`[AI Cache Miss] Calling Gemini for hash ${textHash}`);
+        console.log(`[AI Cache Miss] Calling Groq for hash ${textHash}`);
         const { analyzeStructuredResume } = require('./ai/resumeAnalysisService');
         aiAnalysis = await analyzeStructuredResume(structuredResume);
       }
@@ -157,7 +157,7 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
       }).catch(console.error);
 
     } catch (aiError: any) {
-      console.error(`[Gemini Request Failed] Failed to analyze resume ${resumeId}:`, aiError.message);
+      console.error(`[Groq Request Failed] Failed to analyze resume ${resumeId}:`, aiError.message);
       
       // Extract specific AI error code if available, otherwise generic
       const errorCode = aiError.code || 'AI_ANALYSIS_ERROR';

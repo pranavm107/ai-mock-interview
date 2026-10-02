@@ -1,5 +1,5 @@
 import { Recommendation, ImprovementPlan, SkillAnalysis } from "../../types/interviewReport";
-import { generateJson } from "../ai/geminiClient";
+import { generateJson } from "../ai/groqClient";
 
 const RECOMMENDATION_PROMPT = `You are an expert career coach and technical interviewer.
 Analyze the following interview performance and provide a structured improvement plan.
