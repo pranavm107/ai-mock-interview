@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAuth } from '@clerk/express';
 import { 
   generateNewInterview, 
   getInterview, 
@@ -7,12 +8,14 @@ import {
   generateInterviewQuestions,
   getSuggestedInterviewController,
   getMcqInterview,
-  submitMcqInterview
+  submitMcqInterview,
+  analyzeSmartSetupController
 } from '../controllers/interviewController';
 import { callGroq } from '../services/groqService';
-import { requireAuth } from '@clerk/express';
 
 const router = Router();
+
+router.post('/smart-setup', requireAuth(), analyzeSmartSetupController);
 
 router.post('/generate', requireAuth(), generateNewInterview);
 router.post('/suggest', requireAuth(), getSuggestedInterviewController);

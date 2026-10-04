@@ -473,3 +473,47 @@ export const submitMcqInterview = async (req: Request, res: Response) => {
   }
 };
 
+import { analyzeSmartSetup } from '../services/interview/smartSetupService';
+
+export const analyzeSmartSetupController = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { resumeId, jobDescription } = req.body;
+    let resumeText: string | null = null;
+    
+    if (resumeId) {
+      const resumeDoc = await db.collection('resumes').doc(resumeId).get();
+      if (resumeDoc.exists && resumeDoc.data()?.userId === userId) {
+        // Find text content, inside analysis.parsedText or analysis.normalizedText
+        const data = resumeDoc.data();
+        resumeText = data?.analysis?.parsedText || data?.analysis?.normalizedText || null;
+      }
+    }
+    
+    if (!resumeText && !jobDescription) {
+      return res.status(400).json({ error: 'Must provide either a valid resume ID or job description.' });
+    }
+
+    const result = await analyzeSmartSetup(resumeText, jobDescription || null);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    console.error('Smart Setup Analysis failed:', error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SMART_SETUP_FAILED',
+        message: error.message || 'Failed to analyze smart setup.'
+      }
+    });
+  }
+};
+

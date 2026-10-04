@@ -400,3 +400,14 @@ Status: [x] Completed
 - Preserved existing I1 features: The professional header, "Question X of Y", visual progress bar, Text/Voice controls, voice fallback mechanisms, and Live Analytics structure remain intact.
 - Ensured responsiveness and accessibility without introducing arbitrary container limits (`max-w-4xl`) on the parent, allowing the interview view to maintain its flex layout gracefully across Desktop, Tablet, and Mobile devices.
 - Tests (Vitest) remain BLOCKED due to the ongoing Vite 8 / Rolldown native dependency issue.
+
+# Phase I4: Smart Interview Setup
+**Status**: 🟢 COMPLETED
+**Goal**: Make interview setup smarter and more personalized using Resume and JD analysis.
+**Changes Made**:
+- Implemented `SmartSetupService` AI parser for extracting structured recommendations from Resume/JD.
+- Added `/api/interviews/smart-setup` route to handle setup analysis requests securely.
+- Updated `Generate.tsx` to provide a dedicated Smart Setup panel with Resume/JD selection and AI analysis logic.
+- Implemented clear UI differentiation between AI-recommended values and User-selected overrides.
+- Retained the existing I2 generation pipeline and avoided auto-generation of interviews based on AI suggestions.
+- Preserved existing I1, I2, and I3 components seamlessly.
