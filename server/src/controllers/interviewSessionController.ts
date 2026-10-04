@@ -33,10 +33,15 @@ export const createNewSession = async (req: Request, res: Response) => {
 
 export const startSessionEndpoint = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     
     const session = await getInterviewSessionById(id);
     if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     const interview = await getInterviewById(session.interviewId);
     if (!interview) return res.status(404).json({ error: 'Interview not found' });
@@ -51,11 +56,30 @@ export const startSessionEndpoint = async (req: Request, res: Response) => {
 
 export const submitSessionAnswer = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     const { questionId, answerText, startTime, wordCount } = req.body;
     
     if (!questionId || !answerText || !startTime) {
       return res.status(400).json({ error: 'Missing answer details' });
+    }
+    if (typeof answerText !== 'string' || answerText.length > 10000) {
+      return res.status(400).json({ error: 'Answer is invalid or too long' });
+    }
+
+    const session = await getInterviewSessionById(id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
+
+    const { getAnswersBySession } = await import('../services/runtime/answerStorageService');
+    const existingAnswers = await getAnswersBySession(id);
+    const existingAnswer = existingAnswers.find(a => a.questionId === questionId && a.answerText === answerText);
+    
+    if (existingAnswer) {
+      return res.json(session);
     }
 
     const { session: updatedSession } = await submitAnswer(id, questionId, answerText, startTime, wordCount || 0);
@@ -68,10 +92,15 @@ export const submitSessionAnswer = async (req: Request, res: Response) => {
 
 export const advanceSession = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     
     const session = await getInterviewSessionById(id);
     if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     const interview = await getInterviewById(session.interviewId);
     if (!interview) return res.status(404).json({ error: 'Interview not found' });
@@ -102,10 +131,15 @@ export const advanceSession = async (req: Request, res: Response) => {
 
 export const skipSessionQuestion = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     
     const session = await getInterviewSessionById(id);
     if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     const interview = await getInterviewById(session.interviewId);
     if (!interview) return res.status(404).json({ error: 'Interview not found' });
@@ -136,12 +170,17 @@ export const skipSessionQuestion = async (req: Request, res: Response) => {
 
 export const getSession = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     const session = await getInterviewSessionById(id);
     
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     res.json(session);
   } catch (error: unknown) {
@@ -152,12 +191,17 @@ export const getSession = async (req: Request, res: Response) => {
 
 export const deleteSessionEndpoint = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const id = req.params.id as string;
     const session = await getInterviewSessionById(id);
     
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
+    if (session.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     // Delete the session document
     await deleteInterviewSession(id);
@@ -186,7 +230,13 @@ interface SessionWithSettings {
 
 export const getUserSessions = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const authUserId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!authUserId) return res.status(401).json({ error: 'Unauthorized' });
+
     const userId = req.params.userId as string;
+    if (userId !== authUserId) return res.status(403).json({ error: 'Forbidden' });
+
     const { getEnrichedUserSessions } = await import('../services/interview/interviewAggregationService');
     const enrichedSessions = await getEnrichedUserSessions(userId);
     
@@ -201,12 +251,23 @@ export const getUserSessions = async (req: Request, res: Response) => {
 
 export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const sessionId = req.params.sessionId as string;
     const { questionId, answerText, startTime, wordCount } = req.body;
     
     if (!questionId || !answerText || !startTime) {
       return res.status(400).json({ error: 'Missing answer details' });
     }
+    if (typeof answerText !== 'string' || answerText.length > 10000) {
+      return res.status(400).json({ error: 'Answer is invalid or too long' });
+    }
+
+    const sessionCheck = await getInterviewSessionById(sessionId);
+    if (!sessionCheck) return res.status(404).json({ error: 'Session not found' });
+    if (sessionCheck.userId !== userId) return res.status(403).json({ error: 'Forbidden' });
 
     // --- IDEMPOTENCY CHECK (I6 FEATURE 17) ---
     const { getAnswersBySession } = await import('../services/runtime/answerStorageService');

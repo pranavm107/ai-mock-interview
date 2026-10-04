@@ -19,7 +19,7 @@ router.post('/smart-setup', requireAuth(), analyzeSmartSetupController);
 
 router.post('/generate', requireAuth(), generateNewInterview);
 router.post('/suggest', requireAuth(), getSuggestedInterviewController);
-router.post('/generate-questions', generateInterviewQuestions);
+router.post('/generate-questions', requireAuth(), generateInterviewQuestions);
 router.get('/test-groq', async (req, res) => {
   try {
     const response = await callGroq("Say Hello");
@@ -30,9 +30,9 @@ router.get('/test-groq', async (req, res) => {
 });
 router.get('/:id/mcq', requireAuth(), getMcqInterview);
 router.post('/:id/mcq/submit', requireAuth(), submitMcqInterview);
-router.get('/:id', getInterview);
-router.post('/:id/regenerate', regenerateInterview);
-router.delete('/:id', deleteInterviewEndpoint);
+router.get('/:id', requireAuth(), getInterview);
+router.post('/:id/regenerate', requireAuth(), regenerateInterview);
+router.delete('/:id', requireAuth(), deleteInterviewEndpoint);
 
 export default router;
 

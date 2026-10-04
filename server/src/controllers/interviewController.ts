@@ -152,11 +152,20 @@ export const generateNewInterview = async (req: Request, res: Response) => {
 
 export const getInterview = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
     const interview = await getInterviewById(id);
     
     if (!interview) {
       return res.status(404).json({ error: 'Interview not found' });
+    }
+    if (interview.userId && interview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     if (interview.settings?.interviewType === 'MCQ') {
       const safeQuestions = interview.questions?.map(q => {
@@ -174,11 +183,20 @@ export const getInterview = async (req: Request, res: Response) => {
 
 export const regenerateInterview = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
     const existingInterview = await getInterviewById(id);
     
     if (!existingInterview) {
       return res.status(404).json({ error: 'Interview not found' });
+    }
+    if (existingInterview.userId && existingInterview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     
     // Regenerate using the same settings
@@ -206,7 +224,18 @@ export const regenerateInterview = async (req: Request, res: Response) => {
 
 export const deleteInterviewEndpoint = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
+    const interview = await getInterviewById(id);
+    if (interview && interview.userId && interview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     await deleteInterview(id);
     res.status(204).send();
   } catch (error: any) {
