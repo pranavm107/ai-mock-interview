@@ -123,7 +123,7 @@ export const PreparationAnalytics: React.FC = () => {
           <p className="text-slate-500 max-w-md mb-8">
             Complete your first preparation assessment to unlock detailed performance analytics, topic strengths, and progress trends.
           </p>
-          <Link to="/preparation" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+          <Link to="/preparation/practice" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
             Start Practising
           </Link>
         </div>

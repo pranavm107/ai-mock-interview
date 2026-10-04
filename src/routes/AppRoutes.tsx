@@ -40,6 +40,7 @@ import { PreparationResult } from '../pages/PreparationResult';
 import { PreparationHistory } from '../pages/PreparationHistory';
 import { PreparationAnalytics } from '../pages/PreparationAnalytics';
 import { PreparationRecommendations } from '../pages/PreparationRecommendations';
+import { PreparationPractice } from '../pages/PreparationPractice';
 
 const router = createBrowserRouter([
   {
@@ -78,6 +79,7 @@ const router = createBrowserRouter([
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
       { path: 'preparation', element: <PreparationLanding /> },
+      { path: 'preparation/practice', element: <PreparationPractice /> },
       { path: 'preparation/history', element: <PreparationHistory /> },
       { path: 'preparation/analytics', element: <PreparationAnalytics /> },
       { path: 'preparation/recommendations', element: <PreparationRecommendations /> },

@@ -10,12 +10,12 @@ export const PreparationNavigation: React.FC = () => {
   const isHistory = pathname.startsWith('/preparation/history');
   const isAnalytics = pathname.startsWith('/preparation/analytics');
   const isRecommendations = pathname.startsWith('/preparation/recommendations');
-  // Practice is active if we are in preparation but NOT in any of the specific tabs above, and NOT exactly on the overview page.
-  const isPractice = pathname.startsWith('/preparation') && !isOverview && !isHistory && !isAnalytics && !isRecommendations;
+  // Practice is active if we are in preparation but NOT in any of the specific tabs above, and NOT exactly on the overview page, and NOT on assessment runtime/result pages.
+  const isPractice = pathname.startsWith('/preparation') && !isOverview && !isHistory && !isAnalytics && !isRecommendations && !pathname.startsWith('/preparation/assessment') && !pathname.startsWith('/preparation/results');
 
   const navItems = [
     { name: 'Overview', path: '/preparation', icon: LayoutDashboard, isActive: isOverview },
-    { name: 'Practice', path: '/preparation', icon: BookOpen, isActive: isPractice },
+    { name: 'Practice', path: '/preparation/practice', icon: BookOpen, isActive: isPractice },
     { name: 'History', path: '/preparation/history', icon: History, isActive: isHistory },
     { name: 'Analytics', path: '/preparation/analytics', icon: BarChart3, isActive: isAnalytics },
     { name: 'AI Recommendations', path: '/preparation/recommendations', icon: Sparkles, isActive: isRecommendations },

@@ -279,3 +279,60 @@ Status: [x] Completed
 - Sidebar remained intact without overcrowding.
 - Navigating back from an assessment result works seamlessly through the breadcrumbs.
 - Browser limitation acknowledged: Playwright 404 driver error prevented local browser subagent UI testing. Validated manually at the code-level.
+
+---
+
+# Phase P8.2: Preparation Dashboard
+Status: [x] Completed
+
+## P8.2 Implementation Details
+- Transformed `/preparation` from a simple category selector into a fully personalized dashboard.
+- Maintained a non-intrusive presentation layer that reuses verified P5, P6, and P7 APIs (`GET /api/assessments/analytics`, `GET /api/assessments/recommendations`, and `GET /api/assessments`).
+- Displayed high-level summary cards (Completed, Average Score, Best Score, Accuracy) directly using P6 metrics without recalculating.
+- Introduced prominent Quick Actions connecting Practice, Analytics, and AI Recommendations.
+- Displayed AI Recommendations ("Recommended for You") natively on the dashboard using P7's response format, ensuring it remains robust in both missing-data and error scenarios.
+- Preserved the existing Practice Categories selector flow.
+- Showed a Recent Activity feed, dynamically pulling the 5 most recent assessments using P5 history endpoints, with seamless redirection to corresponding assessment runtimes or results.
+- Added comprehensive empty states (Zero Completed Assessments) with strong calls to action encouraging new users to take their first assessment.
+- Verified desktop, tablet, and mobile responsiveness via native Tailwind CSS grids and flexbox stacking.
+- Verified backward-compatibility and zero changes to underlying backend APIs.
+
+---
+
+# Phase P8.3: Recommendation → Practice Deep-Linking
+Status: [x] Completed
+
+## P8.3 Implementation Details
+- Transformed the "Start Practice" CTA buttons in both the Dashboard (`PreparationLanding.tsx`) and the standalone Recommendations page (`PreparationRecommendations.tsx`) to deeply link to `PreparationCategory.tsx`.
+- Constructed URL query parameters strictly based on AI recommendation output (`category`, `topic`, `difficulty`), translating textual category names into route slugs.
+- Modified `PreparationCategory.tsx` to read `useSearchParams`, verifying requested parameters against hardcoded whitelist arrays (like `TOPIC_MAP`) to prevent unsupported UI states.
+- Implemented a graceful fallback mechanism where if a deep-linked parameter is invalid or missing, it seamlessly defaults to the first available category topic.
+- Maintained the principle of non-automatic generation: deep-links populate the user's initial configuration state without immediately launching an assessment via the POST endpoint.
+- Introduced a helpful visual indicator ("Pre-configured based on your AI preparation recommendation...") inside `PreparationCategory.tsx` whenever a deep-linked initialization occurs.
+- Assured full compatibility with browser refreshes by relying entirely on React Router URL query parameter state.
+- Checked types and successfully compiled via Vite build step.
+
+### P8.3 Follow-up: Practice Navigation
+- Created `/preparation/practice` as a dedicated entry point for category selection, cleanly extracting it from the Dashboard.
+- Fixed the top-level Preparation → Practice navigation to point to this new route.
+- Ensured the "Practice" navigation item remains visually active across all category configuration paths (e.g. `/preparation/technical-mcqs`) while disabling itself correctly when taking or reviewing an assessment.
+- Migrated generic "Start Practice" buttons across the empty states and Quick Actions to use strict React Router `<Link>` tags pointing to the new Practice route instead of fragile `#categories` anchors.
+- Verified that AI recommendation deep-links (`?topic=&difficulty=`) remain completely intact and unaffected.
+
+---
+
+# Phase P8.4: Complete Preparation Loop
+Status: [x] Completed
+
+## P8.4 Implementation Details
+- Conducted end-to-end integration hardening for the entire Preparation journey.
+- **Assessment → Result**: Verified the Assessment Runtime correctly routes users to `/preparation/results/:id` upon submission.
+- **Result Next Actions**: Added contextual CTAs at the bottom of `PreparationResult.tsx` allowing the user to smoothly navigate to "Continue Practice", "View Analytics", or "View History".
+- **History Integration**: Verified `PreparationHistory.tsx` accurately displays assessment history, and updated the empty state "Start Practising" link to safely route to `/preparation/practice`.
+- **Analytics & Recommendations Integration**: Verified `PreparationAnalytics.tsx` accurately loads data, and updated its empty state link to point to `/preparation/practice`.
+- **Navigation Consistency**: Standardized `PreparationBreadcrumb.tsx` across `PreparationCategory.tsx` to include the `Practice` route. Verified `PreparationNavigation.tsx` highlights correctly for each step of the journey, detaching appropriately during assessment runtime.
+- **Validation**: Performed full TS and Vite build validation.
+
+## Known Limitations
+- Automated browser tests remain blocked due to the ongoing Vite 8/Rolldown environment mismatch with Playwright. Requires manual browser verification of the full loop.
+

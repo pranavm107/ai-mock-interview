@@ -45,6 +45,17 @@ interface RecommendationResponse {
   recommendation: PreparationRecommendation | null;
 }
 
+const getCategorySlug = (categoryName: string): string => {
+  if (!categoryName) return 'technical-mcqs';
+  const name = categoryName.toLowerCase();
+  if (name.includes('technical')) return 'technical-mcqs';
+  if (name.includes('aptitude')) return 'aptitude';
+  if (name.includes('verbal')) return 'verbal-ability';
+  if (name.includes('logical')) return 'logical-reasoning';
+  if (name.includes('resume')) return 'resume-based-mcqs';
+  return 'technical-mcqs';
+};
+
 export const PreparationRecommendations: React.FC = () => {
   const { getToken } = useAuth();
   const [data, setData] = useState<RecommendationResponse | null>(null);
@@ -133,7 +144,7 @@ export const PreparationRecommendations: React.FC = () => {
           <p className="text-slate-500 max-w-md mb-8">
             Complete your first preparation assessment to unlock an AI-powered personalized study plan and verified performance feedback.
           </p>
-          <Link to="/preparation" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+          <Link to="/preparation/practice" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
             Start Practising
           </Link>
         </div>
@@ -246,7 +257,10 @@ export const PreparationRecommendations: React.FC = () => {
                 </p>
               </div>
             </div>
-            <Link to="/preparation" className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto justify-center">
+            <Link 
+              to={`/preparation/${getCategorySlug(rec.nextAssessment.category)}?topic=${encodeURIComponent(rec.nextAssessment.topic)}&difficulty=${encodeURIComponent(rec.nextAssessment.difficulty)}`}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto justify-center"
+            >
               <BookOpen size={20} /> Configure Assessment
             </Link>
           </div>

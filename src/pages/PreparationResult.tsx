@@ -164,6 +164,21 @@ export const PreparationResult: React.FC = () => {
           );
         })}
       </div>
+
+      <div className="mt-12 pt-8 border-t border-slate-200">
+        <h3 className="text-lg font-bold text-slate-900 mb-6 text-center">What's next?</h3>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link to="/preparation/practice" className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm w-full sm:w-auto text-center">
+            Continue Practice
+          </Link>
+          <Link to="/preparation/analytics" className="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto text-center">
+            View Analytics
+          </Link>
+          <Link to="/preparation/history" className="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto text-center">
+            View History
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

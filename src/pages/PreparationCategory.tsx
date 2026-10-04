@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { BookOpen, ArrowLeft, Settings2, Play, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -30,6 +30,7 @@ const TOPIC_MAP: Record<string, string[]> = {
 export const PreparationCategory: React.FC = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { resumes, loading: loadingResumes } = useResume();
   const { getToken } = useAuth();
 
@@ -41,12 +42,30 @@ export const PreparationCategory: React.FC = () => {
   const topics = TOPIC_MAP[category || ''] || [];
   const isResumeBased = category === 'resume-based-mcqs';
 
-  const [formData, setFormData] = useState({
-    topic: topics.length > 0 ? topics[0] : '',
-    resumeId: '',
-    difficulty: 'Medium',
-    questionCount: 10,
-    mode: 'Practice Mode'
+  const [formData, setFormData] = useState(() => {
+    let initialTopic = topics.length > 0 ? topics[0] : '';
+    let initialDifficulty = 'Medium';
+    
+    const urlTopic = searchParams.get('topic');
+    const urlDifficulty = searchParams.get('difficulty');
+    
+    if (urlTopic) {
+      const match = topics.find(t => t.toLowerCase() === urlTopic.toLowerCase());
+      if (match) initialTopic = match;
+    }
+    
+    if (urlDifficulty) {
+      const match = ['Easy', 'Medium', 'Hard'].find(d => d.toLowerCase() === urlDifficulty.toLowerCase());
+      if (match) initialDifficulty = match;
+    }
+
+    return {
+      topic: initialTopic,
+      resumeId: '',
+      difficulty: initialDifficulty,
+      questionCount: 10,
+      mode: 'Practice Mode'
+    };
   });
 
   const [summary, setSummary] = useState<any>(null);
@@ -126,8 +145,8 @@ export const PreparationCategory: React.FC = () => {
   if (!isValidCategory) {
     return (
       <div className="pb-24">
-        <Link to="/preparation" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft size={16} className="mr-2" /> Back to Preparation
+        <Link to="/preparation/practice" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
+          <ArrowLeft size={16} className="mr-2" /> Back to Practice
         </Link>
         <div className="text-center mt-20">
           <AlertCircle size={48} className="mx-auto text-rose-500 mb-4" />
@@ -141,7 +160,11 @@ export const PreparationCategory: React.FC = () => {
   if (summary) {
     return (
       <div className="pb-24">
-        <PreparationBreadcrumb items={[{ label: title, path: `/preparation/${category}` }, { label: 'Configuration' }]} />
+        <PreparationBreadcrumb items={[
+          { label: 'Practice', path: '/preparation/practice' },
+          { label: title, path: `/preparation/${category}` }, 
+          { label: 'Configuration' }
+        ]} />
         <Link to="#" onClick={(e) => { e.preventDefault(); setSummary(null); }} className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
           <ArrowLeft size={16} className="mr-2" /> Back to Configuration
         </Link>
@@ -217,7 +240,10 @@ export const PreparationCategory: React.FC = () => {
 
   return (
     <div className="pb-24">
-      <PreparationBreadcrumb items={[{ label: title }]} />
+      <PreparationBreadcrumb items={[
+        { label: 'Practice', path: '/preparation/practice' },
+        { label: title }
+      ]} />
       <PreparationNavigation />
       
       <PageHeader 
@@ -236,6 +262,13 @@ export const PreparationCategory: React.FC = () => {
           <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
             <AlertCircle className="shrink-0 mt-0.5" size={18} />
             <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
+
+        {(searchParams.get('topic') || searchParams.get('difficulty')) && (
+          <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start gap-3 text-indigo-700">
+            <Settings2 className="shrink-0 mt-0.5" size={18} />
+            <p className="text-sm font-medium">Pre-configured based on your AI preparation recommendation. You can change these settings below.</p>
           </div>
         )}
 

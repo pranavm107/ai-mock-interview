@@ -160,7 +160,7 @@ export const PreparationHistory: React.FC = () => {
             <History size={48} className="mb-4 text-slate-300" strokeWidth={1} />
             <p className="text-lg font-medium text-slate-700 mb-2">No assessments found</p>
             <p className="text-sm">Try adjusting your filters or start a new practice session.</p>
-            <Link to="/preparation" className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+            <Link to="/preparation/practice" className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
               Start Practising
             </Link>
           </div>
