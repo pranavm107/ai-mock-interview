@@ -5,8 +5,7 @@ import { useVoiceInterview } from '../hooks/useVoiceInterview';
 import { VoiceControls } from '../components/voice/VoiceControls';
 import { VoiceVisualizer } from '../components/voice/VoiceVisualizer';
 import { LiveTranscript } from '../components/voice/LiveTranscript';
-import { Loader2, Play, SkipForward, CheckCircle2, MessageSquare } from 'lucide-react';
-import { PageHeader } from '../components/dashboard/PageHeader';
+import { Loader2, Play, SkipForward, CheckCircle2, MessageSquare, Mic } from 'lucide-react';
 import { InterviewAnalyticsPanel } from '../components/interview/analytics/InterviewAnalyticsPanel';
 
 const InterviewRuntime: React.FC = () => {
@@ -45,6 +44,23 @@ const InterviewRuntime: React.FC = () => {
   const currentQuestion = dynamicQuestion || (session?.progress?.currentQuestionIndex !== undefined && session.progress.currentQuestionIndex >= 0 && interview?.questions
     ? interview.questions[session.progress.currentQuestionIndex]
     : null);
+
+  const getInterviewTitle = (type: string) => {
+    if (!type) return 'Interview';
+    const lower = type.toLowerCase();
+    if (lower.includes('technical')) return 'Technical Interview';
+    if (lower.includes('behavioral')) return 'Behavioral Interview';
+    if (lower.includes('mcq')) return 'MCQ Interview';
+    if (lower.includes('resume')) return 'Resume-Based Interview';
+    if (lower.includes('hr')) return 'HR Interview';
+    return `${type} Interview`;
+  };
+
+  const interviewTitle = getInterviewTitle(interview?.interviewType || '');
+  const interviewSubtitle = interview?.company ? `${interview.role} · ${interview.company}` : interview?.role;
+  const currentQNum = (session?.progress?.currentQuestionIndex ?? 0) + 1;
+  const totalQNum = session?.progress?.totalQuestions ?? 1;
+  const progressPercent = Math.min(100, Math.max(0, (currentQNum / totalQNum) * 100));
 
   const handleStart = async () => {
     await startSession();
@@ -100,8 +116,11 @@ const InterviewRuntime: React.FC = () => {
 
   const getVoiceStatusText = () => {
     if (!isVoiceMode) return '';
+    if (voice.connectionStatus === 'connecting') return 'Checking microphone and voice connection...';
+    if (voice.connectionStatus === 'error') return 'Voice unavailable. We couldn\'t connect to the voice service.';
+    
     switch (voice.interviewState) {
-      case 'READY': return 'Ready. Press "Start Answer" when you are ready to speak.';
+      case 'READY': return '✓ Voice ready. Press "Start Answer" when you are ready to speak.';
       case 'LISTENING': return 'Listening...';
       case 'PAUSED': return 'Waiting for you to continue...';
       case 'SUBMITTING': return 'Submitting your answer...';
@@ -142,13 +161,32 @@ const InterviewRuntime: React.FC = () => {
     <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
       
       {/* Left side: Interview Content */}
-      <div className="flex-1 lg:w-2/3 overflow-y-auto pb-24 px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200">
+      <div className={`flex-1 ${liveEvaluation ? 'lg:w-2/3' : 'lg:w-full max-w-5xl mx-auto'} overflow-y-auto pb-24 px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200`}>
         <div className="max-w-4xl mx-auto lg:mx-0">
-          <PageHeader 
-            title={`Live Interview: ${interview.role}`}
-        description={`Session State: ${session.state} | Progress: ${session.progress.currentQuestionIndex + 1}/${session.progress.totalQuestions}`}
-        icon={Play}
-      />
+          
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{interviewTitle}</h1>
+            <p className="text-slate-600 mt-1 text-lg">{interviewSubtitle}</p>
+          </div>
+
+          {(session.state === 'STARTED' || session.state === 'ASKING') && currentQuestion && (
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-sm font-bold text-slate-700">Question {currentQNum} of {totalQNum}</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+                  style={{ width: `${progressPercent}%` }}
+                  role="progressbar"
+                  aria-valuenow={currentQNum}
+                  aria-valuemin={1}
+                  aria-valuemax={totalQNum}
+                  aria-label="Interview Progress"
+                ></div>
+              </div>
+            </div>
+          )}
 
       <div className="mt-8 bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
         
@@ -205,25 +243,33 @@ const InterviewRuntime: React.FC = () => {
 
         {(session.state === 'STARTED' || session.state === 'ASKING') && currentQuestion && (
           <div className="space-y-6">
-            <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl flex justify-between items-start">
-              <div>
-                <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">Question {session.progress.currentQuestionIndex + 1}</span>
-                <h3 className="text-xl font-medium mt-2 text-slate-800">{currentQuestion.question}</h3>
-              </div>
+            <div className="flex bg-slate-100 rounded-xl p-1 mb-6 w-full sm:w-fit">
+              <button 
+                onClick={() => {
+                  if (isVoiceMode) {
+                    voice.stopVoice();
+                    setIsVoiceMode(false);
+                  }
+                }}
+                className={`flex-1 sm:flex-none sm:px-8 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${!isVoiceMode ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <MessageSquare size={16} /> Text
+              </button>
               <button 
                 onClick={async () => {
                   if (!isVoiceMode) {
                     setIsVoiceMode(true);
                     await voice.startVoice();
-                  } else {
-                    voice.stopVoice();
-                    setIsVoiceMode(false);
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50"
+                className={`flex-1 sm:flex-none sm:px-8 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${isVoiceMode ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                {isVoiceMode ? <><MessageSquare size={16} /> Switch to Text</> : <><Play size={16} /> Switch to Voice</>}
+                <Mic size={16} /> Voice
               </button>
+            </div>
+
+            <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl">
+              <h3 className="text-xl font-medium text-slate-800">{currentQuestion.question}</h3>
             </div>
 
             {isVoiceMode ? (
@@ -261,6 +307,26 @@ const InterviewRuntime: React.FC = () => {
                   onReplayQuestion={() => voice.replayQuestion(currentQuestion.question)}
                   isLastQuestion={session.progress.currentQuestionIndex === session.progress.totalQuestions - 1}
                 />
+
+                {voice.connectionStatus === 'error' && (
+                  <div className="mt-6 flex flex-col sm:flex-row items-center gap-4 bg-rose-50 p-6 rounded-2xl border border-rose-100">
+                    <p className="text-rose-700 font-medium">Voice is currently unavailable.</p>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => { voice.stopVoice(); setIsVoiceMode(false); }}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Continue with Text
+                      </button>
+                      <button 
+                        onClick={() => voice.startVoice()}
+                        className="px-6 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
 
@@ -302,22 +368,24 @@ const InterviewRuntime: React.FC = () => {
       </div>
 
       {/* Right side: Analytics Panel */}
-      <div className="w-full lg:w-1/3 h-full border-t lg:border-t-0 border-slate-200 bg-slate-50">
-        <InterviewAnalyticsPanel 
-          evaluation={liveEvaluation}
-          decision={decision}
-          difficulty={difficulty}
-          remainingQuestions={remainingQuestions}
-          remainingTime={remainingTime}
-          confidence={confidence}
-          adaptiveResult={adaptiveResult}
-          communicationAnalytics={communicationAnalytics}
-          speechTimeline={speechTimeline}
-          isLoading={loadingAnalytics || (loading && !liveEvaluation)}
-          error={analyticsError}
-          hasStarted={session.state === 'STARTED' || session.state === 'ASKING'}
-        />
-      </div>
+      {liveEvaluation && (
+        <div className="w-full lg:w-1/3 h-full border-t lg:border-t-0 border-slate-200 bg-slate-50">
+          <InterviewAnalyticsPanel 
+            evaluation={liveEvaluation}
+            decision={decision}
+            difficulty={difficulty}
+            remainingQuestions={remainingQuestions}
+            remainingTime={remainingTime}
+            confidence={confidence}
+            adaptiveResult={adaptiveResult}
+            communicationAnalytics={communicationAnalytics}
+            speechTimeline={speechTimeline}
+            isLoading={loadingAnalytics || (loading && !liveEvaluation)}
+            error={analyticsError}
+            hasStarted={session.state === 'STARTED' || session.state === 'ASKING'}
+          />
+        </div>
+      )}
 
     </div>
   );

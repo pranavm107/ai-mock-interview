@@ -65,6 +65,16 @@ export function useVoiceInterview(sessionId: string | undefined, options?: Voice
     try {
       if (!sessionId) return;
       
+      // Cleanup existing connection if any
+      if (wsRef.current) disconnectWebSocket();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      if (processorRef.current) {
+        processorRef.current.disconnect();
+        processorRef.current = null;
+      }
       // Start session on backend
       const backendUrl = API_BASE_URL;
       await fetch(`${backendUrl}/api/voice/session/${sessionId}/start`, { method: 'POST' });

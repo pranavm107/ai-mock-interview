@@ -354,3 +354,20 @@ Status: [x] Completed
 - Manual verification requested since automated browser testing is currently blocked by Vite 8 / Rolldown Playwright incompatibility.
 - No other outstanding regressions identified.
 
+---
+
+# Phase I1: Interview Trust & UX
+Status: [x] Completed
+
+## I1 Implementation Details
+- Created a separate feature branch `feature/interview-i1-trust-ux` to isolate interview product enhancements from the main preparation module.
+- Overhauled the Interview Runtime header to present a professional layout containing the dynamically mapped interview type, role, and company name instead of generic metadata.
+- Implemented a user-friendly visual progress bar (e.g., `Question 1 of 5`) replacing the raw developer-style state tracking.
+- Replaced separate text/voice switch buttons with a clean Segmented Control for Text vs. Voice mode selection.
+- Introduced explicit voice connection states (`Checking microphone and voice connection...`, `✓ Voice ready...`, and `Voice unavailable. We couldn't connect...`) to provide better context to the user.
+- Added a robust voice unavailability fallback UI allowing users to easily "Continue with Text" or "Try Again" when a WebSockets connection fails.
+- Added accessible `aria-label`s and visual tooltips to icon-only Voice Controls.
+- Hardened `useVoiceInterview` connection handling to immediately clean up previous WebSockets, streams, and processors before attempting a new connection to prevent orphaned sessions.
+- Modified `InterviewAnalyticsPanel` integration to completely hide the Live Analytics panel while the assessment is empty (before any question is evaluated), maximizing space for the interview content and preventing distraction.
+- Maintained strict backward compatibility with existing Mock Interview flows, Deepgram, Groq, and backend logic.
+

@@ -67,35 +67,46 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
         )}
       </div>
 
-      <button
-        onClick={onReplayQuestion}
-        disabled={connectionStatus !== 'connected' || isSpeaking}
-        className={`p-4 rounded-full transition-all duration-300 ${
-          isSpeaking 
-            ? 'bg-indigo-100 text-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.3)] scale-105' 
-            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50'
-        }`}
-        title="Replay Question"
-      >
-        <div className={`transition-transform duration-700 ${isSpeaking ? '-rotate-180 opacity-80' : ''}`}>
-          {isSpeaking ? <Loader2 size={24} className="animate-spin" /> : <RotateCcw size={24} />}
+      <div className="relative group">
+        <button
+          onClick={onReplayQuestion}
+          disabled={connectionStatus !== 'connected' || isSpeaking}
+          className={`p-4 rounded-full transition-all duration-300 ${
+            isSpeaking 
+              ? 'bg-indigo-100 text-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.3)] scale-105' 
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50'
+          }`}
+          aria-label="Replay Question"
+        >
+          <div className={`transition-transform duration-700 ${isSpeaking ? '-rotate-180 opacity-80' : ''}`}>
+            {isSpeaking ? <Loader2 size={24} className="animate-spin" /> : <RotateCcw size={24} />}
+          </div>
+        </button>
+        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Replay Question
         </div>
-      </button>
+      </div>
 
       {(interviewState === 'LISTENING' || interviewState === 'PAUSED') && (
-        <button
-          onClick={onRestartAnswer}
-          className="p-4 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
-          title="Restart Answer"
-        >
-          <RotateCcw size={24} />
-        </button>
+        <div className="relative group">
+          <button
+            onClick={onRestartAnswer}
+            className="p-4 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+            aria-label="Restart Answer"
+          >
+            <RotateCcw size={24} />
+          </button>
+          <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Restart Answer
+          </div>
+        </div>
       )}
 
       {interviewState === 'READY' && (
         <button
           onClick={onStartAnswer}
           className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 font-medium transition-colors shadow-lg"
+          aria-label="Start Answer"
         >
           <Mic size={24} />
           Start Answer
@@ -106,6 +117,7 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
         <button
           onClick={onFinishAnswer}
           className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 font-medium transition-colors shadow-lg"
+          aria-label="Finish Answer"
         >
           <Check size={24} />
           Finish Answer
@@ -132,24 +144,34 @@ export const VoiceControls: React.FC<VoiceControlsProps> = ({
         </button>
       )}
 
-      <button
-        onClick={onToggleMute}
-        disabled={connectionStatus !== 'connected'}
-        className={`p-4 rounded-full transition-colors shadow-sm ${
-          isMuted ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-        } disabled:opacity-50`}
-        title={isMuted ? "Unmute" : "Mute"}
-      >
-        {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-      </button>
+      <div className="relative group">
+        <button
+          onClick={onToggleMute}
+          disabled={connectionStatus !== 'connected'}
+          className={`p-4 rounded-full transition-colors shadow-sm ${
+            isMuted ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          } disabled:opacity-50`}
+          aria-label={isMuted ? "Unmute Microphone" : "Mute Microphone"}
+        >
+          {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+        </button>
+        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          {isMuted ? "Unmute Microphone" : "Mute Microphone"}
+        </div>
+      </div>
 
-      <button
-        onClick={onStopVoice}
-        className="p-4 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors shadow-sm"
-        title="Stop Voice Mode"
-      >
-        <PhoneOff size={24} />
-      </button>
+      <div className="relative group">
+        <button
+          onClick={onStopVoice}
+          className="p-4 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors shadow-sm"
+          aria-label="Stop Voice Mode"
+        >
+          <PhoneOff size={24} />
+        </button>
+        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Stop Voice Mode
+        </div>
+      </div>
     </div>
   );
 };
