@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect } from 'vitest';
 import SuggestedInterviewCard from '../../components/interview/SuggestedInterviewCard';
-import { SuggestedInterview } from '../../types/recommendation';
+import type { SuggestedInterview } from '../../types/recommendation';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 

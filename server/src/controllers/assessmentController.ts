@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { generateResumeAssessment } from '../services/resumeAssessmentGenerationService';
 import { generatePreparationAssessment } from '../services/preparationAssessmentGenerationService';
-import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentStatus } from '../services/assessmentService';
+import { getAssessmentById, getAssessmentQuestions, toUserSafeQuestion, updateAssessmentStatus, getUserAssessments, getUserAssessmentStats } from '../services/assessmentService';
 import { submitAssessment } from '../services/assessmentSubmissionService';
 
 const GenerateAssessmentRequestSchema = z.object({
@@ -252,5 +252,62 @@ export const getResultHandler = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Result retrieval failed:', error);
     return res.status(500).json({ error: 'Failed to retrieve results' });
+  }
+};
+
+const GetAssessmentsQuerySchema = z.object({
+  category: z.string().optional(),
+  status: z.enum(['GENERATING', 'READY', 'IN_PROGRESS', 'COMPLETED', 'FAILED']).optional(),
+  limit: z.preprocess((val) => (val ? parseInt(String(val), 10) : undefined), z.number().int().positive()).optional()
+});
+
+export const getAssessmentsHandler = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const auth = typeof authReq.auth === 'function' ? authReq.auth() : authReq.auth;
+    const userId = auth?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: Missing user identity' });
+    }
+
+    const parseResult = GetAssessmentsQuerySchema.safeParse(req.query);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: 'Invalid query parameters', details: parseResult.error.issues });
+    }
+
+    const { category, status, limit = 50 } = parseResult.data;
+
+    const assessments = await getUserAssessments(userId, { category, status, limit });
+
+    return res.status(200).json({
+      success: true,
+      data: assessments
+    });
+  } catch (error: any) {
+    console.error('Failed to retrieve assessments:', error);
+    return res.status(500).json({ error: 'Failed to retrieve assessments' });
+  }
+};
+
+export const getStatsHandler = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const auth = typeof authReq.auth === 'function' ? authReq.auth() : authReq.auth;
+    const userId = auth?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: Missing user identity' });
+    }
+
+    const stats = await getUserAssessmentStats(userId);
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error: any) {
+    console.error('Failed to retrieve assessment stats:', error);
+    return res.status(500).json({ error: 'Failed to retrieve assessment stats' });
   }
 };

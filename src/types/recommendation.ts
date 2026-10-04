@@ -12,16 +12,16 @@ export type RecommendationSource =
 
 export interface SuggestedInterview {
   targetRole: string; 
-  targetCompany: string; 
+  targetCompany?: string | null; 
   interviewType: "Technical" | "HR" | "Behavioral" | "Mixed" | "MCQ"; 
   difficulty: "EASY" | "MEDIUM" | "HARD"; 
   experienceLevel: "Student" | "Junior" | "Mid" | "Senior" | "Lead"; 
   questionCount: number; 
   durationMinutes: number; 
-  resumeId?: string; 
-  focusAreas: string[]; 
-  recommendationReason: string; 
-  recommendationSource: RecommendationSource; 
+  resumeId?: string | null; 
+  focusAreas?: string[]; 
+  recommendationReason?: string; 
+  recommendationSource?: RecommendationSource; 
   generatedAt: string; 
   coachingMessage?: string;
   preparationFocus?: string[];

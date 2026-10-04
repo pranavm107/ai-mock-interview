@@ -42,7 +42,7 @@ describe('SuggestedInterview', () => {
     vi.mocked(clerk.useAuth).mockReturnValue({
       getToken: vi.fn().mockResolvedValue('fake-token')
     } as any);
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   const renderComponent = () => {
@@ -55,14 +55,14 @@ describe('SuggestedInterview', () => {
 
   it('shows loading state initially', async () => {
     // Hang the fetch request slightly to observe loading
-    (global.fetch as any).mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
+    (globalThis.fetch as any).mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
     
     renderComponent();
     expect(screen.getByText(/Analyzing your profile/i)).toBeInTheDocument();
   });
 
   it('renders successfully when API returns valid suggestion', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       ok: true, status: 200, json: async () => ({
         status: 'ready',
         data: {
@@ -91,7 +91,7 @@ describe('SuggestedInterview', () => {
   });
 
   it('C16: Prevents duplicate concurrent API requests (React Strict Mode defense)', async () => {
-    (global.fetch as any).mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({
+    (globalThis.fetch as any).mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({
       ok: false,
       json: async () => ({ status: 'api_error' })
     }), 50)));
@@ -104,11 +104,11 @@ describe('SuggestedInterview', () => {
       expect(screen.getAllByText(/API Error/i).length).toBeGreaterThan(0);
     });
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows API error state when fetch fails', async () => {
-    (global.fetch as any).mockRejectedValue(new Error('Network Error'));
+    (globalThis.fetch as any).mockRejectedValue(new Error('Network Error'));
 
     renderComponent();
 
@@ -120,7 +120,7 @@ describe('SuggestedInterview', () => {
 
   it('retries successfully when "Try Again" is clicked', async () => {
     let fetchCount = 0;
-    (global.fetch as any).mockImplementation(async (url: string) => {
+    (globalThis.fetch as any).mockImplementation(async (url: string) => {
       console.log('MOCK FETCH CALLED WITH URL:', url);
       fetchCount++;
       if (fetchCount === 1) {
@@ -159,11 +159,11 @@ describe('SuggestedInterview', () => {
       expect(screen.getByText('Start Recommended Interview')).toBeInTheDocument();
     });
 
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('shows incomplete profile state', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       ok: true, status: 200, json: async () => ({
         status: 'incomplete_profile',
       })
@@ -177,7 +177,7 @@ describe('SuggestedInterview', () => {
   });
 
   it('shows AI Error state when AI_RECOMMENDATION_FAILED is received', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       ok: false,
       status: 503,
       json: async () => ({
@@ -194,7 +194,7 @@ describe('SuggestedInterview', () => {
   });
 
   it('C11: Navigation preservation for Customize Instead', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       ok: true, status: 200, json: async () => ({
         status: 'ready',
         data: {
@@ -232,7 +232,7 @@ describe('SuggestedInterview', () => {
   });
 
   it('C18: Zod Runtime validation rejects malformed response to api_error', async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       ok: true, status: 200, json: async () => ({
         status: 'ready',
         data: {
@@ -252,7 +252,7 @@ describe('SuggestedInterview', () => {
   });
 
   it('C12: Start interview sends exact required body', async () => {
-    (global.fetch as any).mockImplementation(async (url: string) => {
+    (globalThis.fetch as any).mockImplementation(async (url: string) => {
       if (url.includes('/api/interviews/generate')) {
         return { ok: true, status: 200, json: async () => ({ id: 'int-123' }) };
       }
@@ -296,7 +296,7 @@ describe('SuggestedInterview', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/session/sess-123');
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/interviews/generate'),
       expect.objectContaining({
         method: 'POST',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageHeader } from '../components/dashboard/PageHeader';
-import { BookOpen, Brain, Terminal, BookA, Puzzle, FileSearch, ArrowRight } from 'lucide-react';
+import { BookOpen, Brain, Terminal, BookA, Puzzle, FileSearch, ArrowRight, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -54,6 +54,9 @@ export const PreparationLanding: React.FC = () => {
         title="Placement Preparation" 
         description="Practise for company placement test rounds with timed assessments and topic-specific practice tests."
         icon={BookOpen}
+        actionLabel="View History"
+        actionTo="/preparation/history"
+        actionIcon={History}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

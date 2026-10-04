@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
-import { generatePreparationAssessmentHandler, submitAssessmentHandler, getResultHandler } from '../../src/controllers/assessmentController';
+import { generatePreparationAssessmentHandler, submitAssessmentHandler, getResultHandler, getAssessmentsHandler, getStatsHandler } from '../../src/controllers/assessmentController';
 import * as preparationAssessmentGenerationService from '../../src/services/preparationAssessmentGenerationService';
 import * as assessmentSubmissionService from '../../src/services/assessmentSubmissionService';
 import * as assessmentService from '../../src/services/assessmentService';
@@ -220,3 +220,87 @@ describe('assessmentController - getResultHandler', () => {
   });
 });
 
+describe('assessmentController - getAssessmentsHandler', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let jsonMock: ReturnType<typeof vi.fn>;
+  let statusMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    jsonMock = vi.fn();
+    statusMock = vi.fn().mockReturnValue({ json: jsonMock });
+    
+    mockRequest = {
+      query: {},
+      auth: () => ({ userId: 'user-123' })
+    } as any;
+    
+    mockResponse = {
+      status: statusMock,
+      json: jsonMock
+    } as Partial<Response>;
+
+    vi.clearAllMocks();
+  });
+
+  it('rejects unauthenticated requests', async () => {
+    mockRequest.auth = () => null;
+    await getAssessmentsHandler(mockRequest as Request, mockResponse as Response);
+    expect(statusMock).toHaveBeenCalledWith(401);
+  });
+
+  it('fetches history for the owner', async () => {
+    const mockHistory = [{ id: 'a1' }, { id: 'a2' }];
+    vi.mocked(assessmentService.getUserAssessments).mockResolvedValue(mockHistory as any);
+
+    await getAssessmentsHandler(mockRequest as Request, mockResponse as Response);
+    
+    expect(assessmentService.getUserAssessments).toHaveBeenCalledWith('user-123', { category: undefined, limit: 50, status: undefined });
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith({ success: true, data: mockHistory });
+  });
+
+  it('filters history by category and status', async () => {
+    mockRequest.query = { category: 'aptitude', status: 'COMPLETED' };
+    vi.mocked(assessmentService.getUserAssessments).mockResolvedValue([] as any);
+
+    await getAssessmentsHandler(mockRequest as Request, mockResponse as Response);
+    
+    expect(assessmentService.getUserAssessments).toHaveBeenCalledWith('user-123', { category: 'aptitude', status: 'COMPLETED', limit: 50 });
+    expect(statusMock).toHaveBeenCalledWith(200);
+  });
+});
+
+describe('assessmentController - getStatsHandler', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let jsonMock: ReturnType<typeof vi.fn>;
+  let statusMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    jsonMock = vi.fn();
+    statusMock = vi.fn().mockReturnValue({ json: jsonMock });
+    
+    mockRequest = {
+      auth: () => ({ userId: 'user-123' })
+    } as any;
+    
+    mockResponse = {
+      status: statusMock,
+      json: jsonMock
+    } as Partial<Response>;
+
+    vi.clearAllMocks();
+  });
+
+  it('fetches stats for the owner', async () => {
+    const mockStats = { totalAssessments: 10, completedAssessments: 5 };
+    vi.mocked(assessmentService.getUserAssessmentStats).mockResolvedValue(mockStats as any);
+
+    await getStatsHandler(mockRequest as Request, mockResponse as Response);
+    
+    expect(assessmentService.getUserAssessmentStats).toHaveBeenCalledWith('user-123');
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith({ success: true, data: mockStats });
+  });
+});

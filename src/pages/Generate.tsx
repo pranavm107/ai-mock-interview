@@ -262,7 +262,7 @@ const Generate: React.FC = () => {
                 <option value="HR">HR</option>
                 <option value="Behavioral">Behavioral</option>
                 <option value="Mixed">Mixed</option>
-                <option value="MCQ">MCQ</option>
+                <option value="MCQ">MCQ Interview</option>
               </select>
             </div>
 

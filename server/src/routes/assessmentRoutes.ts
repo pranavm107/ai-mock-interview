@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { generateResumeAssessmentHandler, getAssessmentHandler, generatePreparationAssessmentHandler, submitAssessmentHandler, getResultHandler } from '../controllers/assessmentController';
+import { generateResumeAssessmentHandler, getAssessmentHandler, generatePreparationAssessmentHandler, submitAssessmentHandler, getResultHandler, getAssessmentsHandler, getStatsHandler } from '../controllers/assessmentController';
 
 const router = Router();
 
+router.get('/', getAssessmentsHandler);
+router.get('/stats', getStatsHandler);
 router.post('/resume/generate', generateResumeAssessmentHandler);
 router.post('/placement/generate', generatePreparationAssessmentHandler);
 router.get('/:assessmentId', getAssessmentHandler);

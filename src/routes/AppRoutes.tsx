@@ -37,6 +37,7 @@ import { PreparationLanding } from '../pages/PreparationLanding';
 import { PreparationCategory } from '../pages/PreparationCategory';
 import { PreparationAssessment } from '../pages/PreparationAssessment';
 import { PreparationResult } from '../pages/PreparationResult';
+import { PreparationHistory } from '../pages/PreparationHistory';
 
 const router = createBrowserRouter([
   {
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
       { path: 'preparation', element: <PreparationLanding /> },
+      { path: 'preparation/history', element: <PreparationHistory /> },
       { path: 'preparation/:category', element: <PreparationCategory /> },
       { path: 'preparation/assessment/:id', element: <PreparationAssessment /> },
       { path: 'preparation/results/:id', element: <PreparationResult /> },
