@@ -371,3 +371,18 @@ Status: [x] Completed
 - Modified `InterviewAnalyticsPanel` integration to completely hide the Live Analytics panel while the assessment is empty (before any question is evaluated), maximizing space for the interview content and preventing distraction.
 - Maintained strict backward compatibility with existing Mock Interview flows, Deepgram, Groq, and backend logic.
 
+---
+
+# Phase I2: Question Quality Engine
+Status: [x] Completed
+
+## I2 Implementation Details
+- Created a separate feature branch `feature/interview-i2-question-quality` to build a production-grade question quality engine.
+- Implemented `runBatchAIValidation` which calls a new batch AI semantic validation prompt using Groq to evaluate the full set of generated questions in one go.
+- Integrated `runBatchAIValidation` into `interviewGenerationService.ts` to execute *after* deterministic structural checks (`validateGeneratedInterview`) pass.
+- Implemented targeted regeneration via `regenerateInvalidQuestions`. When questions fail validation (HIGH or MEDIUM severity), they are specifically targeted for replacement without throwing away valid questions.
+- Preserved existing interview generation pipelines and didn't migrate AI providers.
+- Prevented infinite loops by capping retries for AI generation, throwing safe error messages to the frontend.
+- Tested compilation through backend (`tsc`) successfully without errors.
+- Tests (Vitest) remain BLOCKED by the Vite 8 / Rolldown native dependency issue.
+
