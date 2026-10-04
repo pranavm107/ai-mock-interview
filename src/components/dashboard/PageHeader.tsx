@@ -11,6 +11,9 @@ interface PageHeaderProps {
   actionLabel?: string;
   actionIcon?: LucideIcon;
   actionTo?: string;
+  secondaryActionLabel?: string;
+  secondaryActionIcon?: LucideIcon;
+  secondaryActionTo?: string;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ 
@@ -19,7 +22,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   icon: Icon, 
   actionLabel, 
   actionIcon: ActionIcon, 
-  actionTo 
+  actionTo,
+  secondaryActionLabel,
+  secondaryActionIcon: SecondaryActionIcon,
+  secondaryActionTo
 }) => {
   return (
     <motion.div 
@@ -41,15 +47,25 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </p>
         </div>
       </div>
-      
-      {actionLabel && actionTo && (
-        <Link to={actionTo} className="shrink-0 w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 shadow-sm px-6 h-11 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all">
-            {ActionIcon && <ActionIcon size={18} />}
-            {actionLabel}
-          </Button>
-        </Link>
-      )}
+      <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
+        {secondaryActionLabel && secondaryActionTo && (
+          <Link to={secondaryActionTo} className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm px-6 h-11 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all">
+              {SecondaryActionIcon && <SecondaryActionIcon size={18} />}
+              {secondaryActionLabel}
+            </Button>
+          </Link>
+        )}
+        
+        {actionLabel && actionTo && (
+          <Link to={actionTo} className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 shadow-sm px-6 h-11 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all">
+              {ActionIcon && <ActionIcon size={18} />}
+              {actionLabel}
+            </Button>
+          </Link>
+        )}
+      </div>
     </motion.div>
   );
 };

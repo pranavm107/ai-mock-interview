@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { Sparkles, BrainCircuit, ArrowUpRight, ArrowDownRight, CheckCircle2, Target, CalendarDays, Loader2, AlertCircle, BarChart2, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 
@@ -87,6 +89,8 @@ export const PreparationRecommendations: React.FC = () => {
   if (error) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
+        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <PreparationNavigation />
         <PageHeader 
           title="AI Recommendations" 
           description="Personalized study plans and focus areas."
@@ -114,6 +118,8 @@ export const PreparationRecommendations: React.FC = () => {
   if (!data || !data.hasEnoughData || !data.recommendation) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
+        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <PreparationNavigation />
         <PageHeader 
           title="AI Recommendations" 
           description="Personalized study plans and focus areas."
@@ -148,14 +154,18 @@ export const PreparationRecommendations: React.FC = () => {
 
   return (
     <div className="pb-24 max-w-7xl mx-auto space-y-8">
-      <PageHeader 
-        title="AI Recommendations" 
-        description="Your personalized study plan based on verified assessment analytics."
-        icon={BrainCircuit}
-        actionLabel="View Analytics"
-        actionTo="/preparation/analytics"
-        actionIcon={BarChart2}
-      />
+      <div>
+        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <PreparationNavigation />
+        <PageHeader 
+          title="AI Recommendations" 
+          description="Your personalized study plan based on verified assessment analytics."
+          icon={BrainCircuit}
+          actionLabel="View Analytics"
+          actionTo="/preparation/analytics"
+          actionIcon={BarChart2}
+        />
+      </div>
 
       {/* Summary */}
       <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">

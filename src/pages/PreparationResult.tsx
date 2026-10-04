@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
 import { FileText, ArrowLeft, Loader2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../config/api';
@@ -66,10 +67,8 @@ export const PreparationResult: React.FC = () => {
 
   if (error || !result) {
     return (
-      <div className="pb-24">
-        <Link to="/preparation" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft size={16} className="mr-2" /> Back to Preparation
-        </Link>
+      <div className="pb-24 max-w-4xl mx-auto">
+        <PreparationBreadcrumb items={[{ label: 'Assessment Result' }]} />
         <div className="text-center mt-20">
           <AlertCircle size={48} className="mx-auto text-rose-500 mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to load results</h2>
@@ -81,9 +80,7 @@ export const PreparationResult: React.FC = () => {
 
   return (
     <div className="pb-24 max-w-4xl mx-auto">
-      <Link to="/preparation" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-        <ArrowLeft size={16} className="mr-2" /> Back to Preparation
-      </Link>
+      <PreparationBreadcrumb items={[{ label: 'Assessment Result' }]} />
       
       <PageHeader 
         title="Assessment Results"

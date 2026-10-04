@@ -3,6 +3,7 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { BookOpen, Brain, Terminal, BookA, Puzzle, FileSearch, ArrowRight, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
 
 const categories = [
   {
@@ -50,6 +51,7 @@ const categories = [
 export const PreparationLanding: React.FC = () => {
   return (
     <div className="pb-24">
+      <PreparationNavigation />
       <PageHeader 
         title="Placement Preparation" 
         description="Practise for company placement test rounds with timed assessments and topic-specific practice tests."

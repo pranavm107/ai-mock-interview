@@ -4,6 +4,8 @@ import { History, BarChart2, Filter, Loader2, AlertCircle, ArrowRight, CheckCirc
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
+import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
 import { API_BASE_URL } from '../config/api';
 import type { Assessment, AssessmentStatus } from '../types/assessment';
 
@@ -79,6 +81,8 @@ export const PreparationHistory: React.FC = () => {
 
   return (
     <div className="pb-24 max-w-6xl mx-auto">
+      <PreparationBreadcrumb items={[{ label: 'History' }]} />
+      <PreparationNavigation />
       <PageHeader 
         title="Preparation History" 
         description="Track your placement preparation progress and review past assessments."

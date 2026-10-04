@@ -4,6 +4,8 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { BookOpen, ArrowLeft, Settings2, Play, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useResume } from '../hooks/useResume';
+import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 
@@ -139,9 +141,11 @@ export const PreparationCategory: React.FC = () => {
   if (summary) {
     return (
       <div className="pb-24">
-        <Link to="#" onClick={() => setSummary(null)} className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
+        <PreparationBreadcrumb items={[{ label: title, path: `/preparation/${category}` }, { label: 'Configuration' }]} />
+        <Link to="#" onClick={(e) => { e.preventDefault(); setSummary(null); }} className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
           <ArrowLeft size={16} className="mr-2" /> Back to Configuration
         </Link>
+        <PreparationNavigation />
         <PageHeader 
           title={`Starting ${summary.categoryTitle}`} 
           description="Review your configuration before generating the assessment."
@@ -213,9 +217,8 @@ export const PreparationCategory: React.FC = () => {
 
   return (
     <div className="pb-24">
-      <Link to="/preparation" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-        <ArrowLeft size={16} className="mr-2" /> Back to Preparation
-      </Link>
+      <PreparationBreadcrumb items={[{ label: title }]} />
+      <PreparationNavigation />
       
       <PageHeader 
         title={title} 

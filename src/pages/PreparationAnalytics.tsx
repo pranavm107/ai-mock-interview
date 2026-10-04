@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../components/dashboard/PageHeader';
 import { BarChart2, BookOpen, Brain, Terminal, Puzzle, BookA, FileSearch, ArrowUpRight, ArrowDownRight, Minus, AlertCircle, Loader2, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
+import { Sparkles } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 
@@ -105,6 +108,8 @@ export const PreparationAnalytics: React.FC = () => {
   if (!analytics || analytics.overall.totalCompleted === 0) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
+        <PreparationBreadcrumb items={[{ label: 'Analytics' }]} />
+        <PreparationNavigation />
         <PageHeader 
           title="Preparation Analytics" 
           description="Track your performance, accuracy, and topic strengths across all assessments."
@@ -155,14 +160,21 @@ export const PreparationAnalytics: React.FC = () => {
 
   return (
     <div className="pb-24 max-w-7xl mx-auto space-y-8">
-      <PageHeader 
-        title="Performance Analytics" 
-        description="Comprehensive insights into your placement preparation progress."
-        icon={BarChart2}
-        actionLabel="View History"
-        actionTo="/preparation/history"
-        actionIcon={History}
-      />
+      <div>
+        <PreparationBreadcrumb items={[{ label: 'Analytics' }]} />
+        <PreparationNavigation />
+        <PageHeader 
+          title="Performance Analytics" 
+          description="Comprehensive insights into your placement preparation progress."
+          icon={BarChart2}
+          actionLabel="View History"
+          actionTo="/preparation/history"
+          actionIcon={History}
+          secondaryActionLabel="AI Recommendations"
+          secondaryActionTo="/preparation/recommendations"
+          secondaryActionIcon={Sparkles}
+        />
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">

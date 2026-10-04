@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
 import { Play, ArrowLeft, ArrowRight, CheckCircle2, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config/api';
@@ -149,10 +150,8 @@ export const PreparationAssessment: React.FC = () => {
 
   if (error || !assessment || questions.length === 0) {
     return (
-      <div className="pb-24">
-        <Link to="/preparation" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft size={16} className="mr-2" /> Back to Preparation
-        </Link>
+      <div className="pb-24 max-w-5xl mx-auto">
+        <PreparationBreadcrumb items={[{ label: 'Assessment Error' }]} />
         <div className="text-center mt-20">
           <AlertCircle size={48} className="mx-auto text-rose-500 mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to load assessment</h2>
@@ -174,8 +173,9 @@ export const PreparationAssessment: React.FC = () => {
 
   return (
     <div className="pb-24 max-w-5xl mx-auto">
+      <PreparationBreadcrumb items={[{ label: 'Assessment' }]} />
       {/* Header & Meta */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 mt-2">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{assessment.title}</h1>
           <p className="text-slate-500">{assessment.mode === 'TIMED' ? 'Timed Test' : 'Practice Mode'} • {assessment.questionCount} Questions</p>
