@@ -444,3 +444,29 @@ Status: [x] Completed
 - **Frontend Panel**: Created `ReadinessIntelligencePanel.tsx` delivering a stunning, responsive, gradient-infused UI that vividly visualizes readiness scores, components, trending top weaknesses (with deep-links to `/preparation/practice`), and priority action plans.
 - **Dashboard Integration**: Integrated the readiness panel seamlessly into the existing `AnalyticsDashboard.tsx` view as the primary header, fulfilling the dashboard integration requirement without rewriting existing overview cards. 
 - **Type Compliance**: Leveraged explicit `import type` to support strict `verbatimModuleSyntax` rules under Vite and tsc. Builds passing for both `server` and `frontend`.
+
+# Phase I8: Navigation & Product Architecture
+
+## Objectives
+- Restructure the application navigation into a coherent career platform.
+- Move towards a unified hierarchy: Practice, Progress, Career Coach, Library, and Profile/Settings.
+- Standardize breadcrumbs across the app to establish clear location context and logical back paths.
+- Preserve all existing functionality without regressions, especially I3 Focus Mode and I7 Deep Links.
+
+## Implementation Details
+1. **Sidebar Refactoring:**
+   - Updated `Sidebar.tsx` to group links under categorical headings (`HOME`, `PRACTICE`, `CAREER`, `PROGRESS`, `LIBRARY`, `ACCOUNT`).
+   - Mapped `Mock Interviews` and `Assessments` under `PRACTICE`.
+   - Unified `History`, `Analytics`, and `Achievements` under `PROGRESS`.
+   - Improved active path matching logic to correctly identify nested routes (e.g. `/interview/...` falling under `Mock Interviews`).
+   
+2. **Global Breadcrumb System (`AppBreadcrumb`):**
+   - Introduced a new reusable component `AppBreadcrumb.tsx`.
+   - Replaced the scoped `PreparationBreadcrumb` across all `Preparation*.tsx` routes with the global `AppBreadcrumb`.
+   - Implemented `AppBreadcrumb` in top-level dashboard pages (`Generate.tsx`, `History.tsx`, `AnalyticsDashboard.tsx`, `Resume.tsx`, `Achievements.tsx`, `CareerDashboard.tsx`).
+   - Assured Focus Mode integrity: Because breadcrumbs were inserted within standard pages (rather than forcibly inside `ProtectedLayout`), they natively disappear when I3 Focus Mode mounts the interview runtime layout, preventing any unwanted navigation leakage.
+
+## Status
+- Core navigation structure built.
+- TypeScript builds pass perfectly.
+- Awaiting manual verification (A-L).

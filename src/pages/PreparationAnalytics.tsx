@@ -3,7 +3,7 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { BarChart2, BookOpen, Brain, Terminal, Puzzle, BookA, FileSearch, ArrowUpRight, ArrowDownRight, Minus, AlertCircle, Loader2, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
-import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
@@ -108,7 +108,7 @@ export const PreparationAnalytics: React.FC = () => {
   if (!analytics || analytics.overall.totalCompleted === 0) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
-        <PreparationBreadcrumb items={[{ label: 'Analytics' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'Analytics' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="Preparation Analytics" 
@@ -161,7 +161,7 @@ export const PreparationAnalytics: React.FC = () => {
   return (
     <div className="pb-24 max-w-7xl mx-auto space-y-8">
       <div>
-        <PreparationBreadcrumb items={[{ label: 'Analytics' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'Analytics' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="Performance Analytics" 

@@ -3,6 +3,7 @@ import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Play, RotateCcw, AlertCircle, Loader2, FileText, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { motion } from 'framer-motion';
 import { useInterview } from '../hooks/useInterview';
 import { useResume } from '../hooks/useResume';
@@ -262,6 +263,11 @@ const Generate: React.FC = () => {
 
   return (
     <div className="pb-24">
+      <AppBreadcrumb items={[
+        { label: 'Practice' },
+        { label: 'Mock Interviews', path: '/generate' },
+        { label: 'Smart Setup' }
+      ]} />
       <PageHeader 
         title="Smart Interview Setup" 
         description="Provide your context, get AI recommendations, and review your configuration before generating the interview."

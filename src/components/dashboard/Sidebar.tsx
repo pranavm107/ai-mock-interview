@@ -18,17 +18,69 @@ import {
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
-const navItems = [
-  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'Career Coach', path: '/career', icon: Compass },
-  { name: 'Preparation', path: '/preparation', icon: BookOpen },
-  { name: 'Generate Interview', path: '/generate', icon: Sparkles },
-  { name: 'Interview History', path: '/history', icon: History },
-  { name: 'Resume Manager', path: '/resume', icon: FileText },
-  { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-  { name: 'Achievements', path: '/achievements', icon: Trophy },
-  { name: 'Profile', path: '/profile', icon: User },
-  { name: 'Settings', path: '/settings', icon: Settings },
+interface NavItem {
+  name: string;
+  path: string;
+  icon: React.ElementType;
+  activePaths?: string[];
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    title: 'HOME',
+    items: [
+      { name: 'Home', path: '/dashboard', icon: LayoutDashboard }
+    ]
+  },
+  {
+    title: 'PRACTICE',
+    items: [
+      { 
+        name: 'Mock Interviews', 
+        path: '/generate', 
+        icon: Sparkles,
+        activePaths: ['/generate', '/interview', '/session', '/report', '/replay', '/review']
+      },
+      { 
+        name: 'Assessments', 
+        path: '/preparation', 
+        icon: BookOpen,
+        activePaths: ['/preparation']
+      }
+    ]
+  },
+  {
+    title: 'CAREER',
+    items: [
+      { name: 'Career Coach', path: '/career', icon: Compass }
+    ]
+  },
+  {
+    title: 'PROGRESS',
+    items: [
+      { name: 'History', path: '/history', icon: History },
+      { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+      { name: 'Achievements', path: '/achievements', icon: Trophy }
+    ]
+  },
+  {
+    title: 'LIBRARY',
+    items: [
+      { name: 'Resume Manager', path: '/resume', icon: FileText }
+    ]
+  },
+  {
+    title: 'ACCOUNT',
+    items: [
+      { name: 'Profile', path: '/profile', icon: User },
+      { name: 'Settings', path: '/settings', icon: Settings }
+    ]
+  }
 ];
 
 export const Sidebar: React.FC = () => {
@@ -80,37 +132,56 @@ export const Sidebar: React.FC = () => {
         {isCollapsed ? <ChevronRight size={14} strokeWidth={3} /> : <ChevronLeft size={14} strokeWidth={3} />}
       </button>
 
-      <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
-          return (
-            <Link key={item.name} to={item.path}>
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm border border-blue-100/50' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <item.icon size={20} className={isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
-                <AnimatePresence>
-                  {!isCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="whitespace-nowrap"
-                    >
-                      {item.name}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </Link>
-          );
-        })}
+      <nav className="flex-1 px-4 py-2 space-y-4 overflow-y-auto">
+        {navGroups.map((group) => (
+          <div key={group.title} className="space-y-1">
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="px-3 mb-2 text-xs font-bold tracking-wider text-slate-400"
+                >
+                  {group.title}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {group.items.map((item) => {
+              const isActive = item.activePaths
+                ? item.activePaths.some((p: string) => location.pathname.startsWith(p))
+                : location.pathname.startsWith(item.path);
+                
+              return (
+                <Link key={item.name} to={item.path}>
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className={`flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm border border-blue-100/50' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
+                    }`}
+                  >
+                    <item.icon size={20} className={isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
+                    <AnimatePresence>
+                      {!isCollapsed && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="whitespace-nowrap"
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <AnimatePresence>

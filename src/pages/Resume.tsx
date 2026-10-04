@@ -4,6 +4,7 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { ResumeUpload } from '../components/resume/ResumeUpload';
 import { ResumeList } from '../components/resume/ResumeList';
 import { useResume } from '../hooks/useResume';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { motion } from 'framer-motion';
 
 const Resume: React.FC = () => {
@@ -23,6 +24,10 @@ const Resume: React.FC = () => {
 
   return (
     <div className="pb-24">
+      <AppBreadcrumb items={[
+        { label: 'Library' },
+        { label: 'Resume Manager', path: '/resume' }
+      ]} />
       <PageHeader 
         title="Resume Manager" 
         description="Upload, manage, and organize your resumes so PrepPilot AI can tailor your mock interviews perfectly."

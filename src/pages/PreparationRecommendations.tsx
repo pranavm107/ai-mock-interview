@@ -3,7 +3,7 @@ import { PageHeader } from '../components/dashboard/PageHeader';
 import { Sparkles, BrainCircuit, ArrowUpRight, ArrowDownRight, CheckCircle2, Target, CalendarDays, Loader2, AlertCircle, BarChart2, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
-import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 
@@ -100,7 +100,7 @@ export const PreparationRecommendations: React.FC = () => {
   if (error) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
-        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'AI Recommendations' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="AI Recommendations" 
@@ -129,7 +129,7 @@ export const PreparationRecommendations: React.FC = () => {
   if (!data || !data.hasEnoughData || !data.recommendation) {
     return (
       <div className="pb-24 max-w-6xl mx-auto">
-        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'AI Recommendations' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="AI Recommendations" 
@@ -166,7 +166,7 @@ export const PreparationRecommendations: React.FC = () => {
   return (
     <div className="pb-24 max-w-7xl mx-auto space-y-8">
       <div>
-        <PreparationBreadcrumb items={[{ label: 'AI Recommendations' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'AI Recommendations' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="AI Recommendations" 

@@ -11,6 +11,7 @@ import { HiringRecommendation } from '../components/report/HiringRecommendation'
 import { SkillMatrix } from '../components/report/SkillMatrix';
 import { InterviewTimeline } from '../components/report/InterviewTimeline';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { FileText, Loader2, ArrowLeft, Download } from 'lucide-react';
 
 const InterviewReportPage: React.FC = () => {
@@ -49,12 +50,13 @@ const InterviewReportPage: React.FC = () => {
   return (
     <div className="pb-24 max-w-5xl mx-auto space-y-12">
       <div>
-        <button 
-          onClick={() => navigate('/history')}
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium transition-colors mb-6 print:hidden"
-        >
-          <ArrowLeft size={18} /> Back to History
-        </button>
+        <div className="print:hidden">
+          <AppBreadcrumb items={[
+            { label: 'Practice' },
+            { label: 'Mock Interviews', path: '/generate' },
+            { label: 'Interview Report' }
+          ]} />
+        </div>
         <div className="flex justify-between items-start">
           <PageHeader 
             title="Interview Performance Report"

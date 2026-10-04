@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { History as HistoryIcon, Clock, AlertCircle, TrendingUp, CheckCircle, Target, Activity, FileQuestion } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { motion } from 'framer-motion';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useInterviewHistory } from '../hooks/useInterviewHistory';
@@ -119,6 +120,10 @@ const History: React.FC = () => {
 
   return (
     <div className="pb-24 space-y-8">
+      <AppBreadcrumb items={[
+        { label: 'Progress' },
+        { label: 'History', path: '/history' }
+      ]} />
       <PageHeader 
         title="Interview History" 
         description="Review past sessions, resume incomplete ones, and track your performance across different roles."

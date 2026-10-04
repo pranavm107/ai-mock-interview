@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 
 import { AnalyticsLoading } from '../components/analytics/AnalyticsLoading';
 import { AnalyticsError } from '../components/analytics/AnalyticsError';
@@ -39,6 +40,10 @@ const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <AppBreadcrumb items={[
+        { label: 'Progress' },
+        { label: 'Analytics', path: '/analytics' }
+      ]} />
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Analytics Dashboard</h1>

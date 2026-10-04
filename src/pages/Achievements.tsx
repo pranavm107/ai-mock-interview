@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Trophy, AlertCircle, RefreshCcw } from 'lucide-react';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { EmptyState } from '../components/dashboard/EmptyState';
 import { motion } from 'framer-motion';
 import { useAchievements } from '../hooks/useAchievements';
@@ -104,6 +105,10 @@ const Achievements: React.FC = () => {
 
   return (
     <div className="pb-24 space-y-8">
+      <AppBreadcrumb items={[
+        { label: 'Progress' },
+        { label: 'Achievements', path: '/achievements' }
+      ]} />
       <PageHeader 
         title="Achievements" 
         description="Track your milestones, unlock achievements, and see your interview preparation progress."
