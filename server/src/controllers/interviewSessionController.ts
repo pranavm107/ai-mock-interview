@@ -208,6 +208,51 @@ export const submitAdaptiveAnswer = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing answer details' });
     }
 
+    // --- IDEMPOTENCY CHECK (I6 FEATURE 17) ---
+    const { getAnswersBySession } = await import('../services/runtime/answerStorageService');
+    const existingAnswers = await getAnswersBySession(sessionId);
+    const existingAnswer = existingAnswers.find(a => a.questionId === questionId);
+    
+    if (existingAnswer && existingAnswer.answerText === answerText) {
+      // Return cached state if it exists
+      const { getAdaptiveState } = await import('../services/adaptive/adaptiveStorageService');
+      const { getSessionSpeechSummary, getSpeechTimeline } = await import('../services/speech/speechStorageService');
+      
+      const state = await getAdaptiveState(sessionId);
+      const session = await getInterviewSessionById(sessionId);
+      const summary = await getSessionSpeechSummary(sessionId);
+      const timeline = await getSpeechTimeline(sessionId);
+
+      let nextQuestion;
+      if (state) {
+        // Look for the follow up generated for this question
+        const followUp = state.followUpHistory.find(f => f.originalQuestionId === questionId);
+        if (followUp) {
+          nextQuestion = {
+            id: `q_followup_${Date.now()}`,
+            question: followUp.followUpQuestion,
+            context: "Follow-up question based on your previous answer"
+          };
+        }
+      }
+
+      return res.json({
+        session,
+        liveEvaluation: state?.liveEvaluation,
+        communicationAnalytics: null, // Omit or fetch from DB if needed
+        summary,
+        timeline,
+        adaptiveResult: state ? {
+          difficulty: state.currentDifficulty,
+          personality: state.personality,
+          liveEvaluation: state.liveEvaluation
+        } : null,
+        nextQuestion,
+        isIdempotentResponse: true
+      });
+    }
+    // -----------------------------------------
+
     // 1. Persist the standard answer and get updated session
     const { session: updatedSession, answerId } = await submitAnswer(sessionId, questionId, answerText, startTime, wordCount || 0);
 

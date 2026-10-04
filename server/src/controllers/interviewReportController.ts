@@ -4,6 +4,15 @@ import { getReportBySessionId, listReportsByUser, deleteReport, getReport } from
 export const getSessionReport = async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;
+    // @ts-ignore - Clerk injects auth property
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     let report = await getReportBySessionId(sessionId);
     
     if (!report) {
@@ -12,6 +21,10 @@ export const getSessionReport = async (req: Request, res: Response) => {
       const session = await getInterviewSessionById(sessionId);
       
       if (session && (session.state === 'COMPLETED' || (session as any).status === 'completed')) {
+        if (session.userId !== userId) {
+          return res.status(403).json({ error: 'Forbidden' });
+        }
+        
         const { getInterviewById } = await import('../services/interview/interviewStorageService');
         const interview = await getInterviewById(session.interviewId);
         if (interview) {
@@ -24,6 +37,10 @@ export const getSessionReport = async (req: Request, res: Response) => {
     if (!report) {
       return res.status(404).json({ error: 'Report not found for this session.' });
     }
+
+    if (report.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     
     res.json(report);
   } catch (error: any) {
@@ -33,7 +50,16 @@ export const getSessionReport = async (req: Request, res: Response) => {
 
 export const getUserReports = async (req: Request, res: Response) => {
   try {
-    const userId = req.params.userId as string;
+    // @ts-ignore
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Force fetching reports for the authenticated user, ignoring params to prevent IDOR
     const reports = await listReportsByUser(userId);
     res.json(reports);
   } catch (error: any) {
@@ -44,10 +70,22 @@ export const getUserReports = async (req: Request, res: Response) => {
 export const deleteUserReport = async (req: Request, res: Response) => {
   try {
     const reportId = req.params.reportId as string;
+    // @ts-ignore
+    const authReq = req as any;
+    const auth = authReq.auth();
+    const userId = auth.userId as string | undefined;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     
     const report = await getReport(reportId);
     if (!report) {
       return res.status(404).json({ error: 'Report not found' });
+    }
+    
+    if (report.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     
     await deleteReport(reportId);

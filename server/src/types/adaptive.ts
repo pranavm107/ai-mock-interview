@@ -35,6 +35,7 @@ export interface AnswerHistoryEntry {
 
 export interface FollowUpHistoryEntry {
   originalQuestionId: string;
+  followUpId?: string;
   followUpQuestion: string;
   followUpType: FollowUpType;
   answerText?: string;

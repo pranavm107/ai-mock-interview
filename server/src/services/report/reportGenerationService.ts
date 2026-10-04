@@ -31,8 +31,34 @@ export const generateInterviewReport = async (
     console.warn("Failed to get answers from getAnswersBySession");
   }
   
+  // 2.5 Reconstruct all questions (Base + Adaptive)
+  const allQuestions = [...interview.questions];
+  try {
+    const { getAdaptiveState } = await import('../adaptive/adaptiveStorageService');
+    const state = await getAdaptiveState(session.id);
+    if (state && state.followUpHistory) {
+      state.followUpHistory.forEach(f => {
+        if (f.followUpId) {
+           allQuestions.push({
+             id: f.followUpId,
+             question: f.followUpQuestion,
+             expectedTopics: [f.followUpType || 'Adaptive Follow-up'], 
+             skillsEvaluated: [f.followUpType || 'Adaptive Follow-up'], 
+             followUps: [],
+             category: 'Follow-up',
+             difficulty: 'MEDIUM',
+             type: 'TECHNICAL',
+             section: 'ROLE'
+           });
+        }
+      });
+    }
+  } catch (e) {
+    console.warn("Failed to fetch adaptive state for report generation");
+  }
+
   // 3. Evaluate Questions
-  const questionEvaluations = await evaluateQuestions(interview.questions, answers);
+  const questionEvaluations = await evaluateQuestions(allQuestions, answers);
   
   // 4. Calculate Scores
   const scores = calculateScores(questionEvaluations);

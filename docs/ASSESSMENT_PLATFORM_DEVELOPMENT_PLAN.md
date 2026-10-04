@@ -411,3 +411,25 @@ Status: [x] Completed
 - Implemented clear UI differentiation between AI-recommended values and User-selected overrides.
 - Retained the existing I2 generation pipeline and avoided auto-generation of interviews based on AI suggestions.
 - Preserved existing I1, I2, and I3 components seamlessly.
+
+# Phase I5: Professional Feedback Report
+**Status**: 🟢 COMPLETED
+**Goal**: Build a professional, actionable post-interview feedback experience.
+**Changes Made**:
+- Finalized and polished `InterviewReport.tsx` as the official post-interview report.
+- Ensured graceful error, missing, and loading states for evaluation.
+- Added practice connection in `ActionableInsights` using deep-linking to `/preparation/practice`.
+- Secured `interviewReportController.ts` by checking `userId` from the Clerk token and comparing it against the owner of the report/session to prevent IDOR.
+- Validated that the `reportGenerationService` is idempotent (does not duplicate evaluations).
+- Confirmed that I1-I4 functionality is perfectly preserved.
+
+# Phase I6: Adaptive AI Interviewer
+**Status**: 🟢 COMPLETED
+**Goal**: The interviewer should intelligently adapt the next question based on the candidate's previous answer (Follow-ups).
+**Changes Made**:
+- Integrated dynamic AI follow-up questions generated contextually from the user's previous answer using Groq.
+- **I6 Feature 14 - Validation**: Integrated `runBatchAIValidation` (I2) directly into `followUpEngine.ts` to ensure dynamically generated follow-ups meet the same rigorous quality standards. Automatically triggers fallback logic if AI validation fails.
+- **I6 Feature 17 - Idempotency**: Hardened `interviewSessionController.ts` by checking existing answers for the exact text and `questionId` to prevent AI duplication across double clicks or UI re-mounts.
+- **I6 Feature 7 & 22 & 24 - Progress and Completion**: Kept `totalQuestions` static in `sessionService.ts` and successfully injected follow-up questions in `InterviewRuntime.tsx` seamlessly so `currentQuestionIndex` does not confusingly advance for a follow-up. Limits maximum follow-ups by `difficulty` level.
+- **I6 Feature 25 - Report Compatibility**: Injected adaptive follow-up questions directly into `reportGenerationService.ts` by fetching the tracked `followUpHistory` during report generation. This ensures adaptive questions appear cleanly in the Professional Feedback Report.
+- Kept the UI in `InterviewRuntime.tsx` exactly the same without altering existing features. Tests successfully compile.
