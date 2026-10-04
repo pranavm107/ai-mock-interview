@@ -33,6 +33,10 @@ import Resume from '../pages/Resume';
 import AnalyticsDashboard from '../pages/AnalyticsDashboard';
 import Achievements from '../pages/Achievements';
 import CareerDashboard from '../pages/CareerDashboard';
+import { PreparationLanding } from '../pages/PreparationLanding';
+import { PreparationCategory } from '../pages/PreparationCategory';
+import { PreparationAssessment } from '../pages/PreparationAssessment';
+import { PreparationResult } from '../pages/PreparationResult';
 
 const router = createBrowserRouter([
   {
@@ -70,6 +74,10 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <AnalyticsDashboard /> },
       { path: 'achievements', element: <Achievements /> },
       { path: 'career', element: <CareerDashboard /> },
+      { path: 'preparation', element: <PreparationLanding /> },
+      { path: 'preparation/:category', element: <PreparationCategory /> },
+      { path: 'preparation/assessment/:id', element: <PreparationAssessment /> },
+      { path: 'preparation/results/:id', element: <PreparationResult /> },
     ],
   },
   {

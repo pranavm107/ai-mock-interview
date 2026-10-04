@@ -1,4 +1,4 @@
-export type AssessmentType = 'RESUME_MCQ' | 'APTITUDE';
+export type AssessmentType = 'RESUME_MCQ' | 'APTITUDE' | 'TECHNICAL_MCQ';
 
 export type AssessmentStatus = 'GENERATING' | 'READY' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
 
@@ -44,6 +44,10 @@ export interface Assessment {
   
   // Specific to APTITUDE
   category?: AptitudeCategory;
+  
+  // Specific to Preparation Module
+  topic?: string;
+  mode?: 'PRACTICE' | 'TIMED';
   
   // Overall difficulty if applicable
   difficulty?: AssessmentDifficulty;
