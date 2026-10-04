@@ -45,7 +45,6 @@ export const generateInterviewReport = async (
              expectedTopics: [f.followUpType || 'Adaptive Follow-up'], 
              skillsEvaluated: [f.followUpType || 'Adaptive Follow-up'], 
              followUps: [],
-             category: 'Follow-up',
              difficulty: 'MEDIUM',
              type: 'TECHNICAL',
              section: 'ROLE'

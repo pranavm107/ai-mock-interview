@@ -433,3 +433,14 @@ Status: [x] Completed
 - **I6 Feature 7 & 22 & 24 - Progress and Completion**: Kept `totalQuestions` static in `sessionService.ts` and successfully injected follow-up questions in `InterviewRuntime.tsx` seamlessly so `currentQuestionIndex` does not confusingly advance for a follow-up. Limits maximum follow-ups by `difficulty` level.
 - **I6 Feature 25 - Report Compatibility**: Injected adaptive follow-up questions directly into `reportGenerationService.ts` by fetching the tracked `followUpHistory` during report generation. This ensures adaptive questions appear cleanly in the Professional Feedback Report.
 - Kept the UI in `InterviewRuntime.tsx` exactly the same without altering existing features. Tests successfully compile.
+# Phase I7: Readiness & Weakness Intelligence
+**Status**: 🟢 COMPLETED
+**Goal**: Implement a longitudinal intelligence layer tracking interview readiness, weakness/strength detection, and skill trends based on historical interview and assessment data.
+**Changes Made**:
+- **Types**: Added `src/types/readiness.ts` explicitly modeling `ReadinessProfile`, `ReadinessLevel`, `ConfidenceLevel`, and trend metadata to ensure strict type safety across boundaries.
+- **Aggregation Service**: Created `readinessIntelligenceService.ts` utilizing existing `assessmentAnalyticsService.ts` and `firebaseAdmin` to deterministically aggregate historical Interview Reports and Assessment Results natively.
+- **Deterministic Metrics**: Developed purely mathematical evaluations of historical scores and recency to calculate readiness states without inventing logic or relying upon generative AI hallucination. Explicitly handles "Insufficient Data" scenarios cleanly.
+- **Controller & API**: Built `readinessController.ts` and registered it at `GET /api/analytics/readiness`, securely locked behind Clerk token verification.
+- **Frontend Panel**: Created `ReadinessIntelligencePanel.tsx` delivering a stunning, responsive, gradient-infused UI that vividly visualizes readiness scores, components, trending top weaknesses (with deep-links to `/preparation/practice`), and priority action plans.
+- **Dashboard Integration**: Integrated the readiness panel seamlessly into the existing `AnalyticsDashboard.tsx` view as the primary header, fulfilling the dashboard integration requirement without rewriting existing overview cards. 
+- **Type Compliance**: Leveraged explicit `import type` to support strict `verbatimModuleSyntax` rules under Vite and tsc. Builds passing for both `server` and `frontend`.

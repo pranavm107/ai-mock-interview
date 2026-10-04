@@ -14,6 +14,8 @@ import { ResumeAnalyticsCard } from '../components/analytics/ResumeAnalyticsCard
 import { ActivityHeatmap } from '../components/analytics/ActivityHeatmap';
 import { RecommendationPanel } from '../components/analytics/RecommendationPanel';
 
+import { ReadinessIntelligencePanel } from '../components/analytics/ReadinessIntelligencePanel';
+
 const AnalyticsDashboard: React.FC = () => {
   const { data, loading, error, refetch } = useAnalytics();
 
@@ -29,15 +31,8 @@ const AnalyticsDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl font-bold text-slate-900 mb-8">Analytics Dashboard</h1>
         <AnalyticsError message={error} onRetry={refetch} />
-      </div>
-    );
-  }
-
-  if (!data || data.overview.completedInterviews === 0) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AnalyticsEmpty />
       </div>
     );
   }
@@ -53,40 +48,49 @@ const AnalyticsDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Row: Overview Cards */}
-      <AnalyticsOverview overview={data.overview} />
+      {/* I7: Readiness Intelligence Layer */}
+      <ReadinessIntelligencePanel />
 
-      {/* Second Row: Performance Trend & Difficulty */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PerformanceTrendChart data={data.performanceTrend} />
-        </div>
-        <div className="lg:col-span-1">
-          <DifficultyChart data={data.difficultyAnalytics} />
-        </div>
-      </div>
+      {!data || data.overview.completedInterviews === 0 ? (
+        <AnalyticsEmpty />
+      ) : (
+        <>
+          {/* Top Row: Overview Cards */}
+          <AnalyticsOverview overview={data.overview} />
 
-      {/* Third Row: Radar & Skill Trend */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <CategoryRadarChart data={data.categoryTrend} />
-        </div>
-        <div className="lg:col-span-2">
-          <SkillTrendChart data={data.skillTrend} />
-        </div>
-      </div>
+          {/* Second Row: Performance Trend & Difficulty */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <PerformanceTrendChart data={data.performanceTrend} />
+            </div>
+            <div className="lg:col-span-1">
+              <DifficultyChart data={data.difficultyAnalytics} />
+            </div>
+          </div>
 
-      {/* Fourth Row: Speech & Resume Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SpeechAnalyticsCard data={data.speechAnalytics} />
-        <ResumeAnalyticsCard data={data.resumeAnalytics} />
-      </div>
+          {/* Third Row: Radar & Skill Trend */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <CategoryRadarChart data={data.categoryTrend} />
+            </div>
+            <div className="lg:col-span-2">
+              <SkillTrendChart data={data.skillTrend} />
+            </div>
+          </div>
 
-      {/* Fifth Row: Activity Heatmap */}
-      <ActivityHeatmap data={data.activityHeatmap} />
+          {/* Fourth Row: Speech & Resume Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SpeechAnalyticsCard data={data.speechAnalytics} />
+            <ResumeAnalyticsCard data={data.resumeAnalytics} />
+          </div>
 
-      {/* Final Row: Recommendations */}
-      <RecommendationPanel recommendations={data.recommendations} />
+          {/* Fifth Row: Activity Heatmap */}
+          <ActivityHeatmap data={data.activityHeatmap} />
+
+          {/* Final Row: Recommendations */}
+          <RecommendationPanel recommendations={data.recommendations} />
+        </>
+      )}
     </div>
   );
 };
