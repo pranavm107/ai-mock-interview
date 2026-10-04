@@ -386,3 +386,17 @@ Status: [x] Completed
 - Tested compilation through backend (`tsc`) successfully without errors.
 - Tests (Vitest) remain BLOCKED by the Vite 8 / Rolldown native dependency issue.
 
+---
+
+# Phase I3: Real Interview Experience
+Status: [x] Completed
+
+## I3 Implementation Details
+- Created a separate feature branch `feature/interview-i3-real-experience` to build the real interview runtime UX.
+- Created `uiStore.ts` using Zustand to manage a global Focus Mode state (`isFocusMode`) to control the layout hierarchy dynamically.
+- Implemented **Focus Mode**: When an interview is active (`STARTED` or `ASKING`), the global application layout hides the sidebar and top navigation header to maximize focus on the active session. This returns the user to the full dashboard once exited or completed.
+- Implemented **Exit Behavior**: Added a prominent "Exit Interview" button next to the title. When clicked during an active session, a modal confirmation dialog is shown to prevent accidental data loss. Otherwise, it safely redirects to the dashboard.
+- Implemented **Interview Timer**: Added a localized, client-side `<SessionTimer>` component in `InterviewRuntime.tsx`. This avoids re-rendering the entire component tree by managing its own state interval while fetching `session.startedAt` as the authoritative source of truth from the backend. The timer behaves gracefully as elapsed time (`Elapsed ⏱ MM:SS`).
+- Preserved existing I1 features: The professional header, "Question X of Y", visual progress bar, Text/Voice controls, voice fallback mechanisms, and Live Analytics structure remain intact.
+- Ensured responsiveness and accessibility without introducing arbitrary container limits (`max-w-4xl`) on the parent, allowing the interview view to maintain its flex layout gracefully across Desktop, Tablet, and Mobile devices.
+- Tests (Vitest) remain BLOCKED due to the ongoing Vite 8 / Rolldown native dependency issue.

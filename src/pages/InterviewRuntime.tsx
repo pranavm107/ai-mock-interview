@@ -8,22 +8,61 @@ import { LiveTranscript } from '../components/voice/LiveTranscript';
 import { Loader2, Play, SkipForward, CheckCircle2, MessageSquare, Mic } from 'lucide-react';
 import { InterviewAnalyticsPanel } from '../components/interview/analytics/InterviewAnalyticsPanel';
 
+import { useUiStore } from '../stores/uiStore';
+
+const SessionTimer: React.FC<{ startedAt?: string, isComplete: boolean, fallbackElapsedSeconds?: number }> = ({ startedAt, isComplete, fallbackElapsedSeconds = 0 }) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (isComplete) return;
+    
+    let interval: ReturnType<typeof setInterval>;
+    if (startedAt) {
+      const start = new Date(startedAt).getTime();
+      const update = () => setElapsed(Math.floor((Date.now() - start) / 1000));
+      update();
+      interval = setInterval(update, 1000);
+    } else {
+      setElapsed(fallbackElapsedSeconds);
+      interval = setInterval(() => setElapsed(prev => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [startedAt, isComplete, fallbackElapsedSeconds]);
+
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  return <div className="flex items-center gap-2 text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg font-medium text-sm">
+    <span>⏱</span>
+    <span>{m}:{s.toString().padStart(2, '0')}</span>
+  </div>;
+};
+
 const InterviewRuntime: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const setFocusMode = useUiStore((state) => state.setFocusMode);
+
   const { 
     session, interview, liveEvaluation, loading, error, reportPending, 
     decision, difficulty, remainingQuestions, remainingTime, confidence,
     adaptiveResult, communicationAnalytics, speechTimeline, analyticsError, loadingAnalytics,
-    startSession, nextQuestion, submitAnswer, skipQuestion 
+    startSession, nextQuestion, submitAnswer, skipQuestion, elapsedSeconds 
   } = useInterviewSession(sessionId);
 
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [questionStartTime, setQuestionStartTime] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [dynamicQuestion, setDynamicQuestion] = useState<any>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
-
+  useEffect(() => {
+    if (session?.state === 'STARTED' || session?.state === 'ASKING') {
+      setFocusMode(true);
+    } else {
+      setFocusMode(false);
+    }
+    return () => setFocusMode(false);
+  }, [session?.state, setFocusMode]);
 
   useEffect(() => {
     if ((session?.state === 'STARTED' || session?.state === 'ASKING') && !questionStartTime) {
@@ -40,6 +79,19 @@ const InterviewRuntime: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [session?.state, session?.id, navigate, reportPending]);
+
+  const handleExit = () => {
+    if (session?.state === 'STARTED' || session?.state === 'ASKING') {
+      setShowExitConfirm(true);
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const confirmExit = () => {
+    setFocusMode(false);
+    navigate('/dashboard');
+  };
 
   const currentQuestion = dynamicQuestion || (session?.progress?.currentQuestionIndex !== undefined && session.progress.currentQuestionIndex >= 0 && interview?.questions
     ? interview.questions[session.progress.currentQuestionIndex]
@@ -157,22 +209,61 @@ const InterviewRuntime: React.FC = () => {
     );
   }
 
+  const isFocused = session.state === 'STARTED' || session.state === 'ASKING';
+
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
+    <div className={`flex flex-col lg:flex-row h-full ${isFocused ? 'bg-white' : ''}`}>
       
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Leave interview?</h3>
+            <p className="text-slate-600 mb-8">Your current interview progress may be lost. Are you sure you want to exit?</p>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => setShowExitConfirm(false)}
+                className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+              >
+                Continue Interview
+              </button>
+              <button 
+                onClick={confirmExit}
+                className="w-full py-3 px-4 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors"
+              >
+                Exit Interview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left side: Interview Content */}
-      <div className={`flex-1 ${liveEvaluation ? 'lg:w-2/3' : 'lg:w-full max-w-5xl mx-auto'} overflow-y-auto pb-24 px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200`}>
-        <div className="max-w-4xl mx-auto lg:mx-0">
+      <div className={`flex-1 ${liveEvaluation ? 'lg:w-2/3' : 'w-full'} overflow-y-auto pb-24 px-4 sm:px-6 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200`}>
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
           
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{interviewTitle}</h1>
-            <p className="text-slate-600 mt-1 text-lg">{interviewSubtitle}</p>
+          {/* Header Row (Title + Exit Button) */}
+          <div className="flex justify-between items-start mb-8 gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{interviewTitle}</h1>
+              <p className="text-slate-600 mt-1 text-lg">{interviewSubtitle}</p>
+            </div>
+            
+            {isFocused && (
+              <button 
+                onClick={handleExit}
+                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-transparent hover:border-slate-200"
+              >
+                Exit Interview
+              </button>
+            )}
           </div>
 
           {(session.state === 'STARTED' || session.state === 'ASKING') && currentQuestion && (
             <div className="mb-8">
               <div className="flex justify-between items-end mb-2">
                 <span className="text-sm font-bold text-slate-700">Question {currentQNum} of {totalQNum}</span>
+                <SessionTimer startedAt={session.startedAt} isComplete={false} fallbackElapsedSeconds={elapsedSeconds} />
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
                 <div 
@@ -188,7 +279,7 @@ const InterviewRuntime: React.FC = () => {
             </div>
           )}
 
-      <div className="mt-8 bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+      <div className={`mt-2 ${isFocused ? '' : 'bg-white rounded-3xl p-8 shadow-sm border border-slate-200'}`}>
         
         {session.state === 'CREATED' && (
           <div className="text-center py-12">
