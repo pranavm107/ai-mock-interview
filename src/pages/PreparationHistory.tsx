@@ -153,7 +153,10 @@ export const PreparationHistory: React.FC = () => {
         ) : error ? (
           <div className="p-12 flex flex-col items-center justify-center text-rose-500">
             <AlertCircle size={32} className="mb-4" />
-            <p>{error}</p>
+            <p className="mb-4">{error}</p>
+            <button onClick={fetchHistory} className="px-6 py-2 border border-rose-200 text-rose-700 rounded-xl font-medium hover:bg-rose-50 transition-colors text-sm">
+              Try Again
+            </button>
           </div>
         ) : assessments.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-slate-500">

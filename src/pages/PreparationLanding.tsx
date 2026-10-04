@@ -144,6 +144,15 @@ export const PreparationLanding: React.FC = () => {
           <Loader2 size={40} className="animate-spin text-indigo-500 mb-4" />
           <p className="text-slate-500">Loading your personalized dashboard...</p>
         </div>
+      ) : error ? (
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-12 text-center max-w-2xl mx-auto mt-12">
+          <XCircle size={48} className="mx-auto text-rose-500 mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to load dashboard</h2>
+          <p className="text-slate-600 mb-6">{error}</p>
+          <button onClick={fetchDashboardData} className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+            Try Again
+          </button>
+        </div>
       ) : (
         <>
           {/* Progress Summary */}

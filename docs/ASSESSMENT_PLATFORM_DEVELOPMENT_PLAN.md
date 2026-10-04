@@ -336,3 +336,21 @@ Status: [x] Completed
 ## Known Limitations
 - Automated browser tests remain blocked due to the ongoing Vite 8/Rolldown environment mismatch with Playwright. Requires manual browser verification of the full loop.
 
+---
+
+# Phase P8.5: Final UX + Production Hardening
+Status: [x] Completed
+
+## P8.5 Implementation Details
+- **Error States**: Implemented robust error state handling across `PreparationLanding.tsx`, `PreparationAssessment.tsx`, `PreparationResult.tsx`, and `PreparationHistory.tsx`, complete with user-friendly actionable CTAs like "Try Again" or "Back to Dashboard" instead of exposing blank screens or stack traces.
+- **Double Submit Protection**: Verified and hardened duplicate action prevention. Re-confirmed submission logic limits duplicates, and added an early return `if (generating) return;` block to `PreparationCategory.tsx` to prevent accidental multi-clicks generating duplicate assessments.
+- **Security & Authorization Check**: Audited server controllers. Validated that assessment generation, submission, analytics and recommendation APIs are completely isolated to the `userId` in context, properly reject cross-account access, securely handle assessment questions, score strictly server-side, and do not leak environment variables.
+- **Navigation Verification**: Verified no dead `#categories` links or `window.location` reloads exist. Validated URL parameters properly map invalid parameters to defaults securely.
+- **Accessibility & Responsive**: Confirmed elements use native `<button>` and `react-router` `<Link>` components, maintain sufficient contrast, and naturally respond gracefully on mobile grids (e.g., question selector scales properly using grid layout without overflow).
+- **Console & Performance**: Checked for unused hooks/dependencies. Confirmed Dashboard `Promise.allSettled` fails gracefully on partial rejections without crashing the entire UI.
+- **Validation**: Performed full TS and Vite build validation.
+
+## Known Limitations
+- Manual verification requested since automated browser testing is currently blocked by Vite 8 / Rolldown Playwright incompatibility.
+- No other outstanding regressions identified.
+

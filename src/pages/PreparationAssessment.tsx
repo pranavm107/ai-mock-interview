@@ -156,6 +156,9 @@ export const PreparationAssessment: React.FC = () => {
           <AlertCircle size={48} className="mx-auto text-rose-500 mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to load assessment</h2>
           <p className="text-slate-600 mb-6">{error || 'Unknown error occurred'}</p>
+          <Link to="/preparation" className="inline-flex items-center px-6 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+            Back to Dashboard
+          </Link>
         </div>
       </div>
     );

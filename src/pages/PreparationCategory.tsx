@@ -95,6 +95,7 @@ export const PreparationCategory: React.FC = () => {
   };
 
   const handleGenerate = async () => {
+    if (generating) return;
     try {
       setGenerating(true);
       setError(null);
