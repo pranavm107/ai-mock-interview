@@ -38,6 +38,8 @@ import { PreparationCategory } from '../pages/PreparationCategory';
 import { PreparationAssessment } from '../pages/PreparationAssessment';
 import { PreparationResult } from '../pages/PreparationResult';
 import { PreparationHistory } from '../pages/PreparationHistory';
+import { PreparationAnalytics } from '../pages/PreparationAnalytics';
+import { PreparationRecommendations } from '../pages/PreparationRecommendations';
 
 const router = createBrowserRouter([
   {
@@ -77,6 +79,8 @@ const router = createBrowserRouter([
       { path: 'career', element: <CareerDashboard /> },
       { path: 'preparation', element: <PreparationLanding /> },
       { path: 'preparation/history', element: <PreparationHistory /> },
+      { path: 'preparation/analytics', element: <PreparationAnalytics /> },
+      { path: 'preparation/recommendations', element: <PreparationRecommendations /> },
       { path: 'preparation/:category', element: <PreparationCategory /> },
       { path: 'preparation/assessment/:id', element: <PreparationAssessment /> },
       { path: 'preparation/results/:id', element: <PreparationResult /> },

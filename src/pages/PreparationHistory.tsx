@@ -83,6 +83,9 @@ export const PreparationHistory: React.FC = () => {
         title="Preparation History" 
         description="Track your placement preparation progress and review past assessments."
         icon={History}
+        actionLabel="View Analytics"
+        actionTo="/preparation/analytics"
+        actionIcon={BarChart2}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
