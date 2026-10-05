@@ -27,25 +27,20 @@ export const useSpeechRecognition = (onTranscript: (text: string, isFinal: boole
     const ws = new WebSocket(`${wsProtocol}//${wsHost}/api/deepgram/socket`);
 
     ws.onopen = () => {
-      console.log('WebSocket OPEN');
       reconnectAttemptsRef.current = 0;
       setSpeechState('listening');
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
-        console.log('MediaRecorder START');
         chunkIndexRef.current = 0;
         mediaRecorderRef.current.start(1000);
       } else if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
-        console.log('MediaRecorder RESUME');
         mediaRecorderRef.current.resume();
       }
     };
 
     ws.onmessage = (event) => {
-      console.log('RAW', event.data);
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'Transcript' && data.transcript) {
-          console.log(`Transcript received: ${data.transcript} (isFinal=${data.isFinal})`);
           onTranscriptRef.current(data.transcript, data.isFinal);
         } else if (data.type === 'Error') {
           setError(data.message || 'Deepgram authentication failure');
@@ -116,24 +111,12 @@ export const useSpeechRecognition = (onTranscript: (text: string, isFinal: boole
         const mediaRecorder = new MediaRecorder(speechStream, {
           mimeType
         });
-        console.log('MediaRecorder mimeType:', mediaRecorder.mimeType);
 
         mediaRecorder.ondataavailable = (event) => {
           const currentIndex = chunkIndexRef.current++;
-          if (currentIndex === 0) {
-            console.log('First ondataavailable fired!');
-            const url = URL.createObjectURL(event.data);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "chunk0.webm";
-            a.click();
-          }
-          console.log(`Chunk [${currentIndex}] - size: ${event.data.size}, timecode: ${(event as any).timecode}, recorder.state: ${mediaRecorder.state}, ws.readyState: ${wsRef.current?.readyState}`);
 
           if (event.data.size > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(event.data);
-          } else {
-            console.log(`WARNING: Chunk [${currentIndex}] dropped. size: ${event.data.size}, ws.readyState: ${wsRef.current?.readyState}`);
           }
         };
 
@@ -151,11 +134,9 @@ export const useSpeechRecognition = (onTranscript: (text: string, isFinal: boole
     } else {
       setSpeechState('listening');
       if (mediaRecorderRef.current.state === 'inactive') {
-        console.log('MediaRecorder START (from else)');
         chunkIndexRef.current = 0;
         mediaRecorderRef.current.start(1000);
       } else if (mediaRecorderRef.current.state === 'paused') {
-        console.log('MediaRecorder RESUME (from else)');
         mediaRecorderRef.current.resume();
       }
     }

@@ -3,9 +3,6 @@ import { db } from '../config/firebase.config';
 import type { User as UserType } from '../types';
 
 export const syncUser = async (clerkUser: any): Promise<void> => {
-  console.log("syncUser started");
-  console.log(clerkUser);
-
   if (!clerkUser || !clerkUser.id) return;
 
   const userRef = doc(db, 'users', clerkUser.id);
@@ -43,10 +40,7 @@ export const syncUser = async (clerkUser: any): Promise<void> => {
         lastLogin: serverTimestamp(),
       };
 
-      console.log("Creating Firestore document...");
       await setDoc(userRef, userData);
-      console.log("Firestore document created");
-      console.log('New user document created in Firestore');
     } else {
       // Document already exists, migrate/update fields
       const data = userSnap.data();
@@ -91,7 +85,6 @@ export const syncUser = async (clerkUser: any): Promise<void> => {
       }
 
       await updateDoc(userRef, updatePayload);
-      console.log('User document migrated/updated in Firestore');
     }
   } catch (error) {
     console.error('Error in syncUser:', error);

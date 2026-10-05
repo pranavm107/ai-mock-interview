@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { VoiceSessionService } from '../services/voice/voiceSessionService';
 import { voiceConfig } from '../config/voiceConfig';
+import { logger } from '../utils/logger';
 
 // In a real app, you might manage these in a Map or DB
 const activeVoiceSessions = new Map<string, VoiceSessionService>();
@@ -19,20 +20,23 @@ export const startVoiceSession = async (req: Request, res: Response) => {
 
     await voiceSessionService.startSession();
 
-    console.log(`Voice session started for ${sessionId}`);
-    console.log('Deepgram model:', voiceConfig.deepgram.model);
-    console.log('Deepgram language:', voiceConfig.deepgram.language);
+    logger.info({ 
+      event: 'Voice session started',
+      sessionId,
+      model: voiceConfig.deepgram.model,
+      language: voiceConfig.deepgram.language
+    });
     
     try {
       const dgPkg = require('@deepgram/sdk/package.json');
-      console.log('Deepgram SDK version:', dgPkg.version);
+      logger.debug({ event: 'Deepgram SDK version', version: dgPkg.version });
     } catch {
-      console.log('Deepgram SDK version: unknown');
+      logger.debug({ event: 'Deepgram SDK version', version: 'unknown' });
     }
 
     res.json({ success: true, session: voiceSessionService.getSession() });
   } catch (error) {
-    console.error('Error starting voice session:', error);
+    logger.error({ event: 'Error starting voice session', error: (error as Error).message });
     res.status(500).json({ error: 'Failed to start voice session' });
   }
 };
@@ -52,7 +56,7 @@ export const stopVoiceSession = async (req: Request, res: Response) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Error stopping voice session:', error);
+    logger.error({ event: 'Error stopping voice session', error: (error as Error).message });
     res.status(500).json({ error: 'Failed to stop voice session' });
   }
 };
@@ -68,7 +72,7 @@ export const getVoiceSessionStatus = async (req: Request, res: Response) => {
 
     res.json({ session: voiceSessionService.getSession() });
   } catch (error) {
-    console.error('Error getting voice session status:', error);
+    logger.error({ event: 'Error getting voice session status', error: (error as Error).message });
     res.status(500).json({ error: 'Failed to get voice session status' });
   }
 };
@@ -96,7 +100,7 @@ export const replayQuestion = async (req: Request, res: Response) => {
     }
 
   } catch (error) {
-    console.error('Error replaying question:', error);
+    logger.error({ event: 'Error replaying question', error: (error as Error).message });
     res.status(500).json({ error: 'Failed to replay question' });
   }
 };
