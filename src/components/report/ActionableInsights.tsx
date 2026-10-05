@@ -92,11 +92,19 @@ export const ActionableInsights: React.FC<Props> = ({ strengths, weaknesses, imp
               <h4 className="text-indigo-200 font-semibold mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
                 <BookOpen size={16} /> Practice Topics
               </h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-3">
                 {improvementPlan.recommendedPracticeTopics.map((topic, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-indigo-500/20 text-indigo-100 border border-indigo-500/30 rounded-lg text-sm font-medium">
-                    {topic}
-                  </span>
+                  <div key={i} className="flex flex-col gap-2 p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <span className="text-indigo-100 text-sm font-medium">
+                      {topic}
+                    </span>
+                    <a 
+                      href={`/preparation/practice?q=${encodeURIComponent(topic)}`}
+                      className="inline-flex items-center text-xs font-semibold text-indigo-300 hover:text-indigo-200 transition-colors"
+                    >
+                      Practice Now →
+                    </a>
+                  </div>
                 ))}
               </div>
             </div>

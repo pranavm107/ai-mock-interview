@@ -31,8 +31,33 @@ export const generateInterviewReport = async (
     console.warn("Failed to get answers from getAnswersBySession");
   }
   
+  // 2.5 Reconstruct all questions (Base + Adaptive)
+  const allQuestions = [...interview.questions];
+  try {
+    const { getAdaptiveState } = await import('../adaptive/adaptiveStorageService');
+    const state = await getAdaptiveState(session.id);
+    if (state && state.followUpHistory) {
+      state.followUpHistory.forEach(f => {
+        if (f.followUpId) {
+           allQuestions.push({
+             id: f.followUpId,
+             question: f.followUpQuestion,
+             expectedTopics: [f.followUpType || 'Adaptive Follow-up'], 
+             skillsEvaluated: [f.followUpType || 'Adaptive Follow-up'], 
+             followUps: [],
+             difficulty: 'MEDIUM',
+             type: 'TECHNICAL',
+             section: 'ROLE'
+           });
+        }
+      });
+    }
+  } catch (e) {
+    console.warn("Failed to fetch adaptive state for report generation");
+  }
+
   // 3. Evaluate Questions
-  const questionEvaluations = await evaluateQuestions(interview.questions, answers);
+  const questionEvaluations = await evaluateQuestions(allQuestions, answers);
   
   // 4. Calculate Scores
   const scores = calculateScores(questionEvaluations);
@@ -67,14 +92,15 @@ export const generateInterviewReport = async (
   // 8. Fetch Timeline
   const timeline = await getSessionTimeline(session.id);
   
-  // 9. Mock ATS Readiness
-  const mockResumeScore = Math.floor(Math.random() * (95 - 75 + 1) + 75); // 75 to 95
-  const overallEmployability = Math.round((mockResumeScore * 0.4) + (scores.overallEvaluation.overallScore * 0.6));
-  const atsReadiness = {
-    resumeScore: mockResumeScore,
-    interviewScore: scores.overallEvaluation.overallScore,
-    overallEmployability
-  };
+  let atsReadiness;
+  if (interview.settings.atsScore !== undefined) {
+    const overallEmployability = Math.round((interview.settings.atsScore * 0.4) + (scores.overallEvaluation.overallScore * 0.6));
+    atsReadiness = {
+      resumeScore: interview.settings.atsScore,
+      interviewScore: scores.overallEvaluation.overallScore,
+      overallEmployability
+    };
+  }
 
   // 10. Fetch Speech Analytics
   const { getSessionSpeechSummary } = await import('../speech/speechStorageService');

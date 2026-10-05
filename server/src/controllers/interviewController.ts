@@ -152,11 +152,20 @@ export const generateNewInterview = async (req: Request, res: Response) => {
 
 export const getInterview = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
     const interview = await getInterviewById(id);
     
     if (!interview) {
       return res.status(404).json({ error: 'Interview not found' });
+    }
+    if (interview.userId && interview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     if (interview.settings?.interviewType === 'MCQ') {
       const safeQuestions = interview.questions?.map(q => {
@@ -174,11 +183,20 @@ export const getInterview = async (req: Request, res: Response) => {
 
 export const regenerateInterview = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
     const existingInterview = await getInterviewById(id);
     
     if (!existingInterview) {
       return res.status(404).json({ error: 'Interview not found' });
+    }
+    if (existingInterview.userId && existingInterview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     
     // Regenerate using the same settings
@@ -206,7 +224,18 @@ export const regenerateInterview = async (req: Request, res: Response) => {
 
 export const deleteInterviewEndpoint = async (req: Request, res: Response) => {
   try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const id = req.params.id as string;
+    const interview = await getInterviewById(id);
+    if (interview && interview.userId && interview.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     await deleteInterview(id);
     res.status(204).send();
   } catch (error: any) {
@@ -470,6 +499,50 @@ export const submitMcqInterview = async (req: Request, res: Response) => {
     if (error.message === 'ALREADY_COMPLETED') return res.status(400).json({ error: 'Already completed' });
     
     res.status(500).json({ error: error.message || 'Failed to submit MCQ interview' });
+  }
+};
+
+import { analyzeSmartSetup } from '../services/interview/smartSetupService';
+
+export const analyzeSmartSetupController = async (req: Request, res: Response) => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { resumeId, jobDescription } = req.body;
+    let resumeText: string | null = null;
+    
+    if (resumeId) {
+      const resumeDoc = await db.collection('resumes').doc(resumeId).get();
+      if (resumeDoc.exists && resumeDoc.data()?.userId === userId) {
+        // Find text content, inside analysis.parsedText or analysis.normalizedText
+        const data = resumeDoc.data();
+        resumeText = data?.analysis?.parsedText || data?.analysis?.normalizedText || null;
+      }
+    }
+    
+    if (!resumeText && !jobDescription) {
+      return res.status(400).json({ error: 'Must provide either a valid resume ID or job description.' });
+    }
+
+    const result = await analyzeSmartSetup(resumeText, jobDescription || null);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    console.error('Smart Setup Analysis failed:', error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SMART_SETUP_FAILED',
+        message: error.message || 'Failed to analyze smart setup.'
+      }
+    });
   }
 };
 

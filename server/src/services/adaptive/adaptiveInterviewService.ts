@@ -93,11 +93,14 @@ export const processAdaptiveAnswer = async (input: AdaptiveInput): Promise<Adapt
 
   // 5. Update follow-up queue if Groq suggested one
   let isFollowUpRequestedByEngine = false;
+  let followUpId = '';
   if (evalResult.followUp.shouldGenerate && evalResult.followUp.question) {
     isFollowUpRequestedByEngine = true;
+    followUpId = `q_followup_${Date.now()}_${Math.floor(Math.random()*1000)}`;
     await queueFollowUp(sessionId, evalResult.followUp.question, 'Auto-generated', evalResult.followUp.category || 'Clarification');
     state.followUpHistory.push({
       originalQuestionId: questionId,
+      followUpId,
       followUpQuestion: evalResult.followUp.question,
       followUpType: evalResult.followUp.category as any || 'Clarification',
       timestamp: new Date().toISOString()

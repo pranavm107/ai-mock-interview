@@ -5,7 +5,7 @@ import { BookOpen, ArrowLeft, Settings2, Play, AlertCircle, Loader2 } from 'luci
 import { motion } from 'framer-motion';
 import { useResume } from '../hooks/useResume';
 import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
-import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { useAuth } from '@clerk/clerk-react';
 import { API_BASE_URL } from '../config/api';
 
@@ -161,8 +161,9 @@ export const PreparationCategory: React.FC = () => {
   if (summary) {
     return (
       <div className="pb-24">
-        <PreparationBreadcrumb items={[
-          { label: 'Practice', path: '/preparation/practice' },
+        <AppBreadcrumb items={[
+          { label: 'Practice' },
+          { label: 'Assessments', path: '/preparation' },
           { label: title, path: `/preparation/${category}` }, 
           { label: 'Configuration' }
         ]} />
@@ -241,8 +242,9 @@ export const PreparationCategory: React.FC = () => {
 
   return (
     <div className="pb-24">
-      <PreparationBreadcrumb items={[
-        { label: 'Practice', path: '/preparation/practice' },
+      <AppBreadcrumb items={[
+        { label: 'Practice' },
+        { label: 'Assessments', path: '/preparation' },
         { label: title }
       ]} />
       <PreparationNavigation />

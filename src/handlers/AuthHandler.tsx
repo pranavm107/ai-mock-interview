@@ -12,12 +12,6 @@ const AuthHandler: React.FC<AuthHandlerProps> = ({ children }) => {
   const hasCheckedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log("AuthHandler");
-    console.log({
-        isLoaded,
-        isSignedIn,
-        userId: user?.id,
-    });
 
     const handleSync = async () => {
       // Wait until Clerk finishes loading and check if user is signed in
@@ -32,7 +26,6 @@ const AuthHandler: React.FC<AuthHandlerProps> = ({ children }) => {
         hasCheckedRef.current = user.id;
 
         // Delegate all Firestore logic to our dedicated user service
-        console.log("Calling syncUser...");
         await syncUser(user);
         
       } catch (error) {

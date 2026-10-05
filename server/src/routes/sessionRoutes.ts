@@ -16,13 +16,13 @@ import { requireAuth } from '@clerk/express';
 const router = Router();
 
 router.post('/', requireAuth(), createNewSession);
-router.get('/user/:userId', getUserSessions);
-router.get('/:id', getSession);
-router.delete('/:id', deleteSessionEndpoint);
-router.post('/:id/start', startSessionEndpoint);
-router.post('/:id/answer', submitSessionAnswer);
-router.post('/:sessionId/adaptive-answer', submitAdaptiveAnswer);
-router.post('/:id/next', advanceSession);
-router.post('/:id/skip', skipSessionQuestion);
+router.get('/user/:userId', requireAuth(), getUserSessions);
+router.get('/:id', requireAuth(), getSession);
+router.delete('/:id', requireAuth(), deleteSessionEndpoint);
+router.post('/:id/start', requireAuth(), startSessionEndpoint);
+router.post('/:id/answer', requireAuth(), submitSessionAnswer);
+router.post('/:sessionId/adaptive-answer', requireAuth(), submitAdaptiveAnswer);
+router.post('/:id/next', requireAuth(), advanceSession);
+router.post('/:id/skip', requireAuth(), skipSessionQuestion);
 
 export default router;

@@ -6,6 +6,8 @@ import { validateGeneratedInterview } from './interviewValidator';
 import { buildFinalPrompt } from './promptBuilder';
 import { generateInterviewAnalytics } from './interviewAnalyticsService';
 
+import { runBatchAIValidation, regenerateInvalidQuestions } from './aiQuestionValidator';
+
 export const generateInterview = async (
   userId: string,
   resumeId: string | null | undefined,
@@ -45,16 +47,55 @@ export const generateInterview = async (
     throw new Error("Failed to parse AI response as JSON");
   }
   
-  // 5. Validation, Quality Filters, Hallucination Guard
-  const validInterview = validateGeneratedInterview(parsedResponse, blueprint, settings);
+  // 5. Deterministic Validation
+  let validInterview = validateGeneratedInterview(parsedResponse, blueprint, settings);
   
-  // 6. Format Output
+  // 6. Batch AI Quality Validation
+  try {
+    const aiValidation = await runBatchAIValidation(
+      validInterview.questions,
+      settings.targetRole,
+      settings.targetCompany,
+      settings.interviewType || 'TECHNICAL'
+    );
+    
+    const invalidQuestions = aiValidation.questions
+      .filter(q => !q.valid && (q.severity === 'HIGH' || q.severity === 'MEDIUM'))
+      .map(q => ({
+        ...q,
+        original: validInterview.questions[q.index]
+      }));
+      
+    if (invalidQuestions.length > 0) {
+      console.log(`Regenerating ${invalidQuestions.length} invalid questions.`);
+      const replacements = await regenerateInvalidQuestions(
+        invalidQuestions,
+        settings.targetRole,
+        settings.targetCompany,
+        settings.interviewType || 'TECHNICAL'
+      );
+      
+      for (const replacement of replacements) {
+        if (replacement.questionData && typeof replacement.index === 'number' && replacement.index >= 0 && replacement.index < validInterview.questions.length) {
+          validInterview.questions[replacement.index] = replacement.questionData;
+        }
+      }
+      
+      // Final deterministic validation
+      validInterview = validateGeneratedInterview(validInterview, blueprint, settings);
+    }
+  } catch (error) {
+    console.error("AI Quality Validation failed:", error);
+    throw new Error("We couldn't create a reliable interview right now. Please try generating the interview again.");
+  }
+  
+  // 7. Format Output
   const questions: InterviewQuestion[] = validInterview.questions.map((q, i) => ({
     ...q,
     id: `gen-${Date.now()}-${i}`
   }));
   
-  // 7. Analytics
+  // 8. Analytics
   const analytics = generateInterviewAnalytics(questions, blueprint);
 
   const metadata: InterviewMetadata = {

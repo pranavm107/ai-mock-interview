@@ -4,14 +4,14 @@ import { BookOpen, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { PreparationNavigation } from '../components/preparation/PreparationNavigation';
-import { PreparationBreadcrumb } from '../components/preparation/PreparationBreadcrumb';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { categories } from './PreparationLanding';
 
 export const PreparationPractice: React.FC = () => {
   return (
     <div className="pb-24 max-w-7xl mx-auto space-y-8">
       <div>
-        <PreparationBreadcrumb items={[{ label: 'Practice' }]} />
+        <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'Practice Mode' }]} />
         <PreparationNavigation />
         <PageHeader 
           title="Practice Categories" 

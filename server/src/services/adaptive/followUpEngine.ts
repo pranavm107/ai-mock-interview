@@ -158,6 +158,34 @@ export const evaluateAnswerAndGenerateFollowUp = async (context: FollowUpContext
         if (validateDuplicate(parsed.question, context.memory)) {
           throw new Error('Duplicate follow-up detected');
         }
+
+        // 14. QUESTION QUALITY VALIDATION (I2 integration)
+        // Deterministic validation is handled by validateDuplicate above, and basic structural checks below.
+        // AI Question Quality Validation:
+        const { runBatchAIValidation } = await import('../interview/aiQuestionValidator');
+        
+        try {
+          const validationResult = await runBatchAIValidation(
+            [{
+              section: 'BEHAVIORAL', // Adaptive follow-ups use a generic behavioral/technical section for validation
+              type: 'TECHNICAL',
+              difficulty: parsed.estimatedDifficulty?.toUpperCase() || 'MEDIUM',
+              question: parsed.question,
+              options: [],
+              correctOptionId: null
+            }],
+            context.targetRole || 'Software Engineer',
+            'General',
+            'Follow-up'
+          );
+
+          const qResult = validationResult.questions[0];
+          if (!validationResult.overallValid || !qResult.valid || qResult.severity === 'HIGH' || qResult.severity === 'MEDIUM') {
+            throw new Error(`AI Validation failed (Severity: ${qResult.severity}): ${qResult.issues.join(', ')}`);
+          }
+        } catch (validationErr) {
+          throw new Error(`Question quality validation failed: ${validationErr instanceof Error ? validationErr.message : String(validationErr)}`);
+        }
       }
 
       return {

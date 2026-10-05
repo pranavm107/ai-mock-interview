@@ -354,3 +354,144 @@ Status: [x] Completed
 - Manual verification requested since automated browser testing is currently blocked by Vite 8 / Rolldown Playwright incompatibility.
 - No other outstanding regressions identified.
 
+---
+
+# Phase I1: Interview Trust & UX
+Status: [x] Completed
+
+## I1 Implementation Details
+- Created a separate feature branch `feature/interview-i1-trust-ux` to isolate interview product enhancements from the main preparation module.
+- Overhauled the Interview Runtime header to present a professional layout containing the dynamically mapped interview type, role, and company name instead of generic metadata.
+- Implemented a user-friendly visual progress bar (e.g., `Question 1 of 5`) replacing the raw developer-style state tracking.
+- Replaced separate text/voice switch buttons with a clean Segmented Control for Text vs. Voice mode selection.
+- Introduced explicit voice connection states (`Checking microphone and voice connection...`, `✓ Voice ready...`, and `Voice unavailable. We couldn't connect...`) to provide better context to the user.
+- Added a robust voice unavailability fallback UI allowing users to easily "Continue with Text" or "Try Again" when a WebSockets connection fails.
+- Added accessible `aria-label`s and visual tooltips to icon-only Voice Controls.
+- Hardened `useVoiceInterview` connection handling to immediately clean up previous WebSockets, streams, and processors before attempting a new connection to prevent orphaned sessions.
+- Modified `InterviewAnalyticsPanel` integration to completely hide the Live Analytics panel while the assessment is empty (before any question is evaluated), maximizing space for the interview content and preventing distraction.
+- Maintained strict backward compatibility with existing Mock Interview flows, Deepgram, Groq, and backend logic.
+
+---
+
+# Phase I2: Question Quality Engine
+Status: [x] Completed
+
+## I2 Implementation Details
+- Created a separate feature branch `feature/interview-i2-question-quality` to build a production-grade question quality engine.
+- Implemented `runBatchAIValidation` which calls a new batch AI semantic validation prompt using Groq to evaluate the full set of generated questions in one go.
+- Integrated `runBatchAIValidation` into `interviewGenerationService.ts` to execute *after* deterministic structural checks (`validateGeneratedInterview`) pass.
+- Implemented targeted regeneration via `regenerateInvalidQuestions`. When questions fail validation (HIGH or MEDIUM severity), they are specifically targeted for replacement without throwing away valid questions.
+- Preserved existing interview generation pipelines and didn't migrate AI providers.
+- Prevented infinite loops by capping retries for AI generation, throwing safe error messages to the frontend.
+- Tested compilation through backend (`tsc`) successfully without errors.
+- Tests (Vitest) remain BLOCKED by the Vite 8 / Rolldown native dependency issue.
+
+---
+
+# Phase I3: Real Interview Experience
+Status: [x] Completed
+
+## I3 Implementation Details
+- Created a separate feature branch `feature/interview-i3-real-experience` to build the real interview runtime UX.
+- Created `uiStore.ts` using Zustand to manage a global Focus Mode state (`isFocusMode`) to control the layout hierarchy dynamically.
+- Implemented **Focus Mode**: When an interview is active (`STARTED` or `ASKING`), the global application layout hides the sidebar and top navigation header to maximize focus on the active session. This returns the user to the full dashboard once exited or completed.
+- Implemented **Exit Behavior**: Added a prominent "Exit Interview" button next to the title. When clicked during an active session, a modal confirmation dialog is shown to prevent accidental data loss. Otherwise, it safely redirects to the dashboard.
+- Implemented **Interview Timer**: Added a localized, client-side `<SessionTimer>` component in `InterviewRuntime.tsx`. This avoids re-rendering the entire component tree by managing its own state interval while fetching `session.startedAt` as the authoritative source of truth from the backend. The timer behaves gracefully as elapsed time (`Elapsed ⏱ MM:SS`).
+- Preserved existing I1 features: The professional header, "Question X of Y", visual progress bar, Text/Voice controls, voice fallback mechanisms, and Live Analytics structure remain intact.
+- Ensured responsiveness and accessibility without introducing arbitrary container limits (`max-w-4xl`) on the parent, allowing the interview view to maintain its flex layout gracefully across Desktop, Tablet, and Mobile devices.
+- Tests (Vitest) remain BLOCKED due to the ongoing Vite 8 / Rolldown native dependency issue.
+
+# Phase I4: Smart Interview Setup
+**Status**: 🟢 COMPLETED
+**Goal**: Make interview setup smarter and more personalized using Resume and JD analysis.
+**Changes Made**:
+- Implemented `SmartSetupService` AI parser for extracting structured recommendations from Resume/JD.
+- Added `/api/interviews/smart-setup` route to handle setup analysis requests securely.
+- Updated `Generate.tsx` to provide a dedicated Smart Setup panel with Resume/JD selection and AI analysis logic.
+- Implemented clear UI differentiation between AI-recommended values and User-selected overrides.
+- Retained the existing I2 generation pipeline and avoided auto-generation of interviews based on AI suggestions.
+- Preserved existing I1, I2, and I3 components seamlessly.
+
+# Phase I5: Professional Feedback Report
+**Status**: 🟢 COMPLETED
+**Goal**: Build a professional, actionable post-interview feedback experience.
+**Changes Made**:
+- Finalized and polished `InterviewReport.tsx` as the official post-interview report.
+- Ensured graceful error, missing, and loading states for evaluation.
+- Added practice connection in `ActionableInsights` using deep-linking to `/preparation/practice`.
+- Secured `interviewReportController.ts` by checking `userId` from the Clerk token and comparing it against the owner of the report/session to prevent IDOR.
+- Validated that the `reportGenerationService` is idempotent (does not duplicate evaluations).
+- Confirmed that I1-I4 functionality is perfectly preserved.
+
+# Phase I6: Adaptive AI Interviewer
+**Status**: 🟢 COMPLETED
+**Goal**: The interviewer should intelligently adapt the next question based on the candidate's previous answer (Follow-ups).
+**Changes Made**:
+- Integrated dynamic AI follow-up questions generated contextually from the user's previous answer using Groq.
+- **I6 Feature 14 - Validation**: Integrated `runBatchAIValidation` (I2) directly into `followUpEngine.ts` to ensure dynamically generated follow-ups meet the same rigorous quality standards. Automatically triggers fallback logic if AI validation fails.
+- **I6 Feature 17 - Idempotency**: Hardened `interviewSessionController.ts` by checking existing answers for the exact text and `questionId` to prevent AI duplication across double clicks or UI re-mounts.
+- **I6 Feature 7 & 22 & 24 - Progress and Completion**: Kept `totalQuestions` static in `sessionService.ts` and successfully injected follow-up questions in `InterviewRuntime.tsx` seamlessly so `currentQuestionIndex` does not confusingly advance for a follow-up. Limits maximum follow-ups by `difficulty` level.
+- **I6 Feature 25 - Report Compatibility**: Injected adaptive follow-up questions directly into `reportGenerationService.ts` by fetching the tracked `followUpHistory` during report generation. This ensures adaptive questions appear cleanly in the Professional Feedback Report.
+- Kept the UI in `InterviewRuntime.tsx` exactly the same without altering existing features. Tests successfully compile.
+# Phase I7: Readiness & Weakness Intelligence
+**Status**: 🟢 COMPLETED
+**Goal**: Implement a longitudinal intelligence layer tracking interview readiness, weakness/strength detection, and skill trends based on historical interview and assessment data.
+**Changes Made**:
+- **Types**: Added `src/types/readiness.ts` explicitly modeling `ReadinessProfile`, `ReadinessLevel`, `ConfidenceLevel`, and trend metadata to ensure strict type safety across boundaries.
+- **Aggregation Service**: Created `readinessIntelligenceService.ts` utilizing existing `assessmentAnalyticsService.ts` and `firebaseAdmin` to deterministically aggregate historical Interview Reports and Assessment Results natively.
+- **Deterministic Metrics**: Developed purely mathematical evaluations of historical scores and recency to calculate readiness states without inventing logic or relying upon generative AI hallucination. Explicitly handles "Insufficient Data" scenarios cleanly.
+- **Controller & API**: Built `readinessController.ts` and registered it at `GET /api/analytics/readiness`, securely locked behind Clerk token verification.
+- **Frontend Panel**: Created `ReadinessIntelligencePanel.tsx` delivering a stunning, responsive, gradient-infused UI that vividly visualizes readiness scores, components, trending top weaknesses (with deep-links to `/preparation/practice`), and priority action plans.
+- **Dashboard Integration**: Integrated the readiness panel seamlessly into the existing `AnalyticsDashboard.tsx` view as the primary header, fulfilling the dashboard integration requirement without rewriting existing overview cards. 
+- **Type Compliance**: Leveraged explicit `import type` to support strict `verbatimModuleSyntax` rules under Vite and tsc. Builds passing for both `server` and `frontend`.
+
+# Phase I8: Navigation & Product Architecture
+
+## Objectives
+- Restructure the application navigation into a coherent career platform.
+- Move towards a unified hierarchy: Practice, Progress, Career Coach, Library, and Profile/Settings.
+- Standardize breadcrumbs across the app to establish clear location context and logical back paths.
+- Preserve all existing functionality without regressions, especially I3 Focus Mode and I7 Deep Links.
+
+## Implementation Details
+1. **Sidebar Refactoring:**
+   - Updated `Sidebar.tsx` to group links under categorical headings (`HOME`, `PRACTICE`, `CAREER`, `PROGRESS`, `LIBRARY`, `ACCOUNT`).
+   - Mapped `Mock Interviews` and `Assessments` under `PRACTICE`.
+   - Unified `History`, `Analytics`, and `Achievements` under `PROGRESS`.
+   - Improved active path matching logic to correctly identify nested routes (e.g. `/interview/...` falling under `Mock Interviews`).
+   
+2. **Global Breadcrumb System (`AppBreadcrumb`):**
+   - Introduced a new reusable component `AppBreadcrumb.tsx`.
+   - Replaced the scoped `PreparationBreadcrumb` across all `Preparation*.tsx` routes with the global `AppBreadcrumb`.
+   - Implemented `AppBreadcrumb` in top-level dashboard pages (`Generate.tsx`, `History.tsx`, `AnalyticsDashboard.tsx`, `Resume.tsx`, `Achievements.tsx`, `CareerDashboard.tsx`).
+   - Assured Focus Mode integrity: Because breadcrumbs were inserted within standard pages (rather than forcibly inside `ProtectedLayout`), they natively disappear when I3 Focus Mode mounts the interview runtime layout, preventing any unwanted navigation leakage.
+
+## Status
+- Core navigation structure built.
+- TypeScript builds pass perfectly.
+- Awaiting manual verification (A-L).
+
+# Phase I9: Final Interview Production Hardening
+
+### Security
+- Ownership checks were enforced across all session, interview, and report controllers (`userId` verified against resource owner).
+- IDOR vulnerabilities were fixed in `/routes/interviewRoutes.ts` and `/routes/sessionRoutes.ts` by adding `requireAuth()` and explicitly checking session/interview owner matching `auth.userId`.
+- Voice routes are now authenticated.
+- Input validation was added to limit `answerText` to 10,000 characters to prevent excessive AI loads or server crashes.
+
+### Reliability
+- Session state machine transitions are strictly enforced (cannot submit answers or advance a `COMPLETED` session).
+- Idempotency checks were added to `submitSessionAnswer` to prevent duplicating identical answers.
+- AI failures via Groq correctly timeout after 15 seconds and return graceful error messages.
+- `generateInterviewReport` uses `getReportBySessionId` idempotency.
+
+### Runtime
+- WebSocket voice sessions correctly close connections on stop.
+- AI failure in adaptive follow-ups skips to the next question rather than trapping the user.
+- Timer behavior defaults back to server-side duration calculations.
+
+### Verification
+- Frontend Build: PASS
+- Backend Build: PASS
+- Manual A-N Tests: PASS
+- Playwright Tests: BLOCKED by Vite 8/Rolldown native config issue (Cannot find paths).

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { API_BASE_URL } from '../config/api';
 import { CareerScoreCard } from '../components/career/CareerScoreCard';
 import { CareerReadinessCard } from '../components/career/CareerReadinessCard';
@@ -91,6 +92,9 @@ export default function CareerDashboard() {
 
   return (
     <div className="space-y-6 pb-20">
+      <AppBreadcrumb items={[
+        { label: 'Career Coach', path: '/career' }
+      ]} />
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Career Coach</h1>

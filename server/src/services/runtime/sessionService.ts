@@ -74,6 +74,7 @@ export const submitAnswer = async (
 ): Promise<{ session: InterviewSession; answerId: string }> => {
   const session = await getInterviewSessionById(sessionId);
   if (!session) throw new Error("Session not found");
+  if (session.state === InterviewSessionState.COMPLETED) throw new Error("Session is already completed");
 
   const endTime = new Date().toISOString();
   const durationMs = calculateElapsedMs(startTime, endTime);
@@ -109,6 +110,7 @@ export const submitAnswer = async (
 export const proceedToNextQuestion = async (sessionId: string, interview: Interview): Promise<InterviewSession> => {
   const session = await getInterviewSessionById(sessionId);
   if (!session) throw new Error("Session not found");
+  if (session.state === InterviewSessionState.COMPLETED) throw new Error("Session is already completed");
 
   const updatedSession = advanceToNextQuestion(session, interview.questions);
   
@@ -130,6 +132,7 @@ export const proceedToNextQuestion = async (sessionId: string, interview: Interv
 export const skipQuestion = async (sessionId: string, interview: Interview): Promise<InterviewSession> => {
   const session = await getInterviewSessionById(sessionId);
   if (!session) throw new Error("Session not found");
+  if (session.state === InterviewSessionState.COMPLETED) throw new Error("Session is already completed");
 
   const updatedSession = skipCurrentQuestion(session, interview.questions);
   

@@ -14,33 +14,17 @@ export const prepareReplayQuestions = (
     let replayAnswer: ReplayAnswer | null = null;
     
     if (answer) {
-      // Mocking transcripts as they would be generated or fetched from storage
-      const mockTranscript: ReplayTranscript[] = [
-        {
-          speaker: 'AI',
-          text: q.question, // The question text itself
-          startTimeMs: 0,
-          endTimeMs: 5000,
-        },
-        {
-          speaker: 'Candidate',
-          text: answer.answerText,
-          startTimeMs: 5000,
-          endTimeMs: 5000 + answer.durationMs,
-        }
-      ];
-
       replayAnswer = {
         id: answer.id,
         questionId: q.id as string,
-        transcript: mockTranscript,
-        aiAudio: null, // Would fetch from TTS storage
-        candidateAudio: null, // Would fetch from TTS storage
+        transcript: [], // Replay unavailable due to lack of persisted timing data
+        aiAudio: null,
+        candidateAudio: null,
         durationMs: answer.durationMs,
         timestamp: answer.startTime,
         wordCount: answer.wordCount,
-        communicationAnalytics: null, // Would map from speechAnalytics engine output
-        technicalEvaluation: null, // Would map from evaluation engine output
+        communicationAnalytics: null,
+        technicalEvaluation: null,
       };
     }
 

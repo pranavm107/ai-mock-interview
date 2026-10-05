@@ -11,6 +11,7 @@ import { HiringRecommendation } from '../components/report/HiringRecommendation'
 import { SkillMatrix } from '../components/report/SkillMatrix';
 import { InterviewTimeline } from '../components/report/InterviewTimeline';
 import { PageHeader } from '../components/dashboard/PageHeader';
+import { AppBreadcrumb } from '../components/dashboard/AppBreadcrumb';
 import { FileText, Loader2, ArrowLeft, Download } from 'lucide-react';
 
 const InterviewReportPage: React.FC = () => {
@@ -20,20 +21,28 @@ const InterviewReportPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 gap-4">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
-        <p className="text-slate-600 font-medium">Analyzing your interview and generating a detailed report...</p>
-        <p className="text-slate-400 text-sm">This may take up to 30 seconds.</p>
+      <div className="flex flex-col items-center justify-center h-96 gap-4 text-center">
+        <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+        <h3 className="text-xl font-bold text-slate-800">Analyzing your interview...</h3>
+        <p className="text-slate-600 font-medium max-w-md">We're reviewing your answers and preparing personalized feedback.</p>
+        <p className="text-slate-400 text-sm mt-4">This may take up to 30 seconds.</p>
       </div>
     );
   }
 
   if (error || !report) {
     return (
-      <div className="p-8 text-center text-rose-600">
-        <p className="text-lg font-medium">Failed to load interview report.</p>
-        <p className="text-sm opacity-70 mt-2">{error}</p>
-        <button onClick={() => navigate('/history')} className="mt-6 px-6 py-2 bg-slate-100 rounded-xl hover:bg-slate-200 text-slate-700 font-semibold transition-colors">Return to History</button>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Your interview was completed successfully.</h2>
+        <p className="text-lg text-slate-600 mb-2">Detailed AI feedback is currently unavailable.</p>
+        {error && <p className="text-sm text-rose-500 mb-8 max-w-md">{error}</p>}
+        <p className="text-slate-500 mb-8">You can still view your interview history.</p>
+        <button 
+          onClick={() => navigate('/history')} 
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-sm"
+        >
+          Back to History
+        </button>
       </div>
     );
   }
@@ -41,12 +50,13 @@ const InterviewReportPage: React.FC = () => {
   return (
     <div className="pb-24 max-w-5xl mx-auto space-y-12">
       <div>
-        <button 
-          onClick={() => navigate('/history')}
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium transition-colors mb-6 print:hidden"
-        >
-          <ArrowLeft size={18} /> Back to History
-        </button>
+        <div className="print:hidden">
+          <AppBreadcrumb items={[
+            { label: 'Practice' },
+            { label: 'Mock Interviews', path: '/generate' },
+            { label: 'Interview Report' }
+          ]} />
+        </div>
         <div className="flex justify-between items-start">
           <PageHeader 
             title="Interview Performance Report"
