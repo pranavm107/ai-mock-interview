@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
-import { Brain, Menu, X, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { Logo } from '../components/Logo';
 
 const PublicLayout: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,12 +43,7 @@ const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <Brain className="w-6 h-6" />
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-              PrepPilot AI
-            </span>
+            <Logo className="h-8" />
           </Link>
 
           {/* Desktop Nav */}

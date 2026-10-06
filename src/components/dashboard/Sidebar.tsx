@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Logo } from '../Logo';
 import { 
   LayoutDashboard, 
   Sparkles, 
@@ -104,13 +105,8 @@ export const Sidebar: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <Link to="/dashboard" className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
-                  P
-                </div>
-                <span className="font-bold text-xl text-slate-900 tracking-tight">
-                  PrepPilot AI
-                </span>
+              <Link to="/dashboard" className="flex items-center overflow-hidden whitespace-nowrap">
+                <Logo className="h-7" />
               </Link>
             </motion.div>
           )}
@@ -118,9 +114,7 @@ export const Sidebar: React.FC = () => {
         
         {isCollapsed && (
           <Link to="/dashboard">
-            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
-              P
-            </div>
+            <Logo className="w-9 h-9" showText={false} />
           </Link>
         )}
       </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Brain } from 'lucide-react';
+import { Logo } from './Logo';
 
 export const Footer = () => {
   return (
@@ -8,10 +8,9 @@ export const Footer = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div className="lg:col-span-2">
-            <div className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Brain className="w-6 h-6 text-indigo-400" />
-              PrepPilot AI
-            </div>
+            <Link to="/" className="mb-4 inline-block hover:opacity-80 transition-opacity">
+              <Logo className="h-7" variant="reversed" />
+            </Link>
             <p className="text-slate-400 max-w-sm text-sm leading-relaxed">
               Equipping candidates with deliberate practice and realistic feedback to master technical and behavioral interviews.
             </p>

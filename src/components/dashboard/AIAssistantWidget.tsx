@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send } from 'lucide-react';
+import { Logo } from '../Logo';
 
 export const AIAssistantWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,8 +18,8 @@ export const AIAssistantWidget: React.FC = () => {
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center justify-between shadow-sm z-10">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                  <MessageSquare size={16} />
+                <div className="flex items-center justify-center">
+                  <Logo className="w-8 h-8" showText={false} variant="reversed" />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm">PrepPilot AI</h3>
