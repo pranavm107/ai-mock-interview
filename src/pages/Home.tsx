@@ -52,10 +52,10 @@ const Home: React.FC = () => {
         <div className="absolute top-10 left-1/4 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply animate-pulse"></div>
         <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-indigo-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply"></div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-16 lg:gap-8 items-center lg:items-start">
           <motion.div
             initial="hidden" animate="visible" variants={staggerContainer}
-            className="flex flex-col items-center text-center lg:items-start lg:text-left z-10"
+            className="flex flex-col items-center text-center lg:items-start lg:text-left z-10 lg:pt-10"
           >
             <motion.h1 variants={fadeUp} className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] mb-6">
               Prepare Smarter.<br />
@@ -78,10 +78,10 @@ const Home: React.FC = () => {
 
           {/* Hero Visual Illustration */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            className="relative w-full mt-12 lg:mt-0 lg:scale-110 xl:scale-125 lg:origin-right"
+            className="relative w-full mt-12 lg:mt-0 lg:-mr-[10%] xl:-mr-[15%] flex justify-end"
           >
             <img 
               src="/images/hero/home-hero-students.webp" 
