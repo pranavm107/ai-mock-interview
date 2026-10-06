@@ -10,6 +10,7 @@ import {
   Lock, Zap, ShieldCheck, ChevronDown, ChevronUp, Copy, Check,
   Send, Brain, Paperclip, Loader2, Handshake, Bug, Lightbulb, CreditCard, UserCog, Star, HelpCircle
 } from 'lucide-react';
+import { Footer } from '../components/Footer';
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
@@ -438,98 +439,23 @@ const Contact: React.FC = () => {
       </section>
 
       {/* 10. FINAL CTA */}
-      <section className="py-24 max-w-6xl mx-auto px-6 w-full">
-        <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-900 rounded-[2.5rem] p-12 md:p-20 text-center shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[500px] h-[500px] bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[400px] h-[400px] bg-sky-400/20 rounded-full blur-[80px] pointer-events-none"></div>
-
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">Let's Build Better Interview Experiences Together</h2>
-            <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium">
-              We're always excited to hear from developers, students, recruiters, and organizations.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <a href="#contact-form">
-                <Button size="lg" className="bg-white text-indigo-700 hover:bg-gray-50 rounded-xl px-10 h-16 text-lg font-bold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
-                  Send a Message
-                </Button>
-              </a>
-              <Link to="/features">
-                <Button size="lg" variant="outline" className="border-indigo-300 text-white bg-transparent hover:bg-white/10 rounded-xl px-10 h-16 text-lg font-bold transition-all">
-                  Explore Features
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </motion.div>
+      <section className="py-32 bg-white text-center border-t border-slate-100">
+        <div className="max-w-3xl mx-auto px-6 w-full">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+            Have a question?<br /> Let's talk.
+          </h2>
+          <p className="text-xl text-slate-600 mb-10 leading-relaxed">
+            Whether you're a candidate, recruiter, <br className="hidden sm:block" /> developer, or organization, we'd like to hear from you.
+          </p>
+          <a href="#contact-form">
+            <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-10 h-14 text-lg font-semibold shadow-md transition-all">
+              Send a Message
+            </Button>
+          </a>
+        </div>
       </section>
 
-      {/* 11. FOOTER */}
-      <footer className="bg-gray-900 text-gray-300 pt-20 pb-10 w-full rounded-t-[3rem]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-            <div className="lg:col-span-2">
-              <div className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <Brain className="w-8 h-8 text-indigo-400" />
-                PrepPilot AI
-              </div>
-              <p className="text-gray-400 mb-8 max-w-sm leading-relaxed text-sm">
-                Empowering job seekers with state-of-the-art AI technology to master interviews and accelerate their careers in tech.
-              </p>
-
-              <div className="flex gap-4">
-                <a href="https://github.com/pranavm107" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <Code className="w-5 h-5" />
-                </a>
-                <a href="https://www.linkedin.com/in/pranav-agneesh" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <Briefcase className="w-5 h-5" />
-                </a>
-                <a href="mailto:pranavagneeshm@gmail.com" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <Mail className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Product</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link to="/features" className="hover:text-indigo-400 transition-colors">Features</Link></li>
-                <li><Link to="/how-it-works" className="hover:text-indigo-400 transition-colors">How it Works</Link></li>
-                <li><Link to="/pricing" className="hover:text-indigo-400 transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Resources</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link to="/privacy" className="hover:text-indigo-400 transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-indigo-400 transition-colors">Terms of Service</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Stay Updated</h4>
-              <p className="text-gray-400 text-sm mb-4">Subscribe to our newsletter for interview tips.</p>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3">
-                  Subscribe
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-gray-500">
-              © {new Date().getFullYear()} PrepPilot AI. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
