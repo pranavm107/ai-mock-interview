@@ -59,11 +59,11 @@ const HowItWorks: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative w-full flex items-center justify-center">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }} className="relative w-full mt-12 lg:mt-0 lg:scale-110 xl:scale-125 lg:origin-right">
             <img 
               src="/images/hero/how-it-works-hero-preparation.webp" 
               alt="Candidate preparing for an interview" 
-              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl"
+              className="w-full h-auto"
             />
           </motion.div>
         </div>
