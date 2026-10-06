@@ -77,15 +77,12 @@ const Features: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative w-full aspect-square md:aspect-video lg:aspect-square flex items-center justify-center p-4 lg:p-0">
-            <div className="relative w-full h-full max-w-[600px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-gray-900/5 bg-gray-100">
-              <img 
-                src="/images/hero/features-hero-interview.webp" 
-                alt="Professional candidate preparing" 
-                className="absolute inset-0 w-full h-full object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/20 to-transparent"></div>
-            </div>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative w-full flex items-center justify-center">
+            <img 
+              src="/images/hero/features-hero-interview.webp" 
+              alt="Professional candidate preparing" 
+              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl"
+            />
           </motion.div>
         </div>
       </section>
