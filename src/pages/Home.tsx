@@ -85,7 +85,7 @@ const Home: React.FC = () => {
           >
             <div className="relative w-full h-full max-w-[600px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-gray-900/5 bg-gray-100">
               <img 
-                src="/images/marketing/preppilot-hero-interview.jpg" 
+                src="/images/hero/home-hero-students.webp" 
                 alt="Candidate preparing for an interview" 
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
