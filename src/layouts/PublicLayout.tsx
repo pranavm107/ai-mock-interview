@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
-import { Brain, Menu, X } from 'lucide-react';
+import { Brain, Menu, X, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const PublicLayout: React.FC = () => {
@@ -12,18 +12,14 @@ const PublicLayout: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   const navLinks = [
+    { name: 'Home', path: '/' },
     { name: 'Features', path: '/features' },
     { name: 'How It Works', path: '/how-it-works' },
     { name: 'Pricing', path: '/pricing' },
@@ -31,103 +27,102 @@ const PublicLayout: React.FC = () => {
   ];
 
   if (isLoaded && isSignedIn) {
+    // Completely separate authenticated experience
     return <Navigate to="/dashboard" replace />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      <header 
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b ${
-          isScrolled 
-            ? 'bg-white/90 backdrop-blur-lg border-slate-200/80 shadow-sm' 
-            : 'bg-white border-transparent'
-        }`}
+    <div className="min-h-screen flex flex-col bg-white">
+      <header
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
+            ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm'
+            : 'bg-transparent border-b border-transparent'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 group outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg">
-            <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white transition-transform group-hover:scale-105">
-              <Brain className="w-5 h-5" />
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+              <Brain className="w-6 h-6" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
               PrepPilot AI
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
-                <Link 
-                  key={link.name} 
-                  to={link.path} 
-                  className={`text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-sm ${
-                    isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors hover:text-indigo-600 ${isActive ? 'text-indigo-600' : 'text-gray-600'
+                    }`}
                 >
                   {link.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-indigo-600 rounded-t-full" />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
+          {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-4">
             <SignInButton mode="modal">
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-sm">
+              <Button variant="outline" className="border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 text-gray-700 font-semibold rounded-full px-6 transition-all">
                 Sign In
-              </button>
+              </Button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full px-6 transition-all shadow-sm">
-                Get Started
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-full px-6 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+                Start Free <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </SignUpButton>
           </div>
 
-          <button 
-            className="md:hidden p-2 -mr-2 text-slate-600 hover:text-slate-900 transition-colors"
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Nav Drawer */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-200 shadow-xl py-6 px-6 flex flex-col gap-6 z-50">
-            <div className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <Link 
-                  key={link.name} 
-                  to={link.path} 
-                  className={`text-lg font-medium transition-colors ${
-                    location.pathname === link.path 
-                      ? 'text-indigo-600' 
-                      : 'text-slate-700 hover:text-slate-900'
+          <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-200 shadow-xl py-4 px-6 flex flex-col gap-2 z-50 animate-in slide-in-from-top-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`p-3 rounded-xl font-medium transition-colors ${location.pathname === link.path
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex flex-col gap-4">
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <div className="h-px bg-gray-100 my-2" />
+            <div className="flex flex-col gap-3 pb-2">
               <SignInButton mode="modal">
-                <Button variant="outline" className="w-full justify-center rounded-full h-12 text-base font-medium border-slate-200">
-                  Sign In
-                </Button>
+                <Button variant="outline" className="w-full justify-center rounded-xl h-12 text-base">Sign In</Button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <Button className="w-full justify-center rounded-full h-12 text-base font-medium bg-slate-900 text-white hover:bg-slate-800">
-                  Get Started
-                </Button>
+                <Button className="w-full justify-center rounded-xl h-12 text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white">Start Free</Button>
               </SignUpButton>
             </div>
           </div>
         )}
       </header>
 
-      <main className="flex-grow flex flex-col w-full pt-20">
+      <main className="flex-grow flex flex-col w-full">
         <Outlet />
       </main>
     </div>
@@ -135,3 +130,4 @@ const PublicLayout: React.FC = () => {
 };
 
 export default PublicLayout;
+
