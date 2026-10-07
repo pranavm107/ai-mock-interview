@@ -57,7 +57,7 @@ export const Footer = () => {
             <Link to="/privacy" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">Terms of Service</Link>
             <Link to="/cookies" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">Cookie Policy</Link>
-            <Link to="/refund-policy" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">Refund Policy</Link>
+            <Link to="/refund" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">Refund Policy</Link>
           </div>
         </div>
       </div>

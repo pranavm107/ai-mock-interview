@@ -15,30 +15,77 @@ import { Footer } from '../components/Footer';
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const fadeScale: any = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } }
 };
 
 const staggerContainer: any = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
 };
 
-const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
+const FeatureCard = ({ icon: Icon, title, description, path = "/features" }: { icon: any, title: string, description: string, path?: string }) => (
   <motion.div variants={fadeUp} className="group h-full">
-    <Card className="h-full border border-gray-200 shadow-sm rounded-2xl hover:shadow-xl transition-all duration-300 bg-white relative overflow-hidden group-hover:-translate-y-2">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-      <CardContent className="p-8">
-        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center mb-6 text-indigo-600 group-hover:scale-110 transition-transform duration-300">
-          <Icon className="h-7 w-7" />
-        </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-        <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
-        <div className="mt-auto flex items-center text-sm font-semibold text-indigo-600 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-          Learn more <ArrowRight className="w-4 h-4 ml-1" />
-        </div>
-      </CardContent>
-    </Card>
+    <Link to={path} className="block h-full focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-2xl">
+      <Card className="h-full flex flex-col border border-gray-200 shadow-sm rounded-2xl hover:shadow-xl transition-all duration-300 bg-white relative overflow-hidden group-hover:-translate-y-1">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        <CardContent className="p-8 flex flex-col h-full">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center mb-6 text-indigo-600 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+            <Icon className="h-7 w-7" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+          <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
+          <div className="mt-auto pt-4 flex items-center text-sm font-semibold text-indigo-600 transition-colors group-hover:text-indigo-700">
+            Learn more <ArrowRight className="w-4 h-4 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   </motion.div>
+);
+
+const COMPANY_LOGOS = [
+  { name: 'Google', Node: () => <span className="text-2xl font-medium tracking-tight">Google</span> },
+  { name: 'Microsoft', Node: () => <span className="flex items-center gap-2 text-2xl font-semibold"><div className="grid grid-cols-2 gap-[2px] w-5 h-5"><div className="bg-current" /><div className="bg-current" /><div className="bg-current" /><div className="bg-current" /></div>Microsoft</span> },
+  { name: 'Amazon', Node: () => <span className="text-3xl font-bold tracking-tighter lowercase">amazon</span> },
+  { name: 'Meta', Node: () => <span className="text-2xl font-semibold tracking-tight">Meta</span> },
+  { name: 'Apple', Node: () => <span className="text-3xl pb-1"></span> },
+  { name: 'Netflix', Node: () => <span className="text-2xl font-black tracking-tighter uppercase scale-y-110 inline-block">NETFLIX</span> },
+  { name: 'NVIDIA', Node: () => <span className="text-2xl font-bold tracking-widest uppercase">NVIDIA</span> },
+  { name: 'Adobe', Node: () => <span className="text-2xl font-black tracking-tighter">Adobe</span> },
+  { name: 'Salesforce', Node: () => <span className="text-2xl font-medium tracking-tight">salesforce</span> },
+  { name: 'Oracle', Node: () => <span className="text-2xl font-bold tracking-widest uppercase">ORACLE</span> },
+  { name: 'IBM', Node: () => <span className="text-3xl font-black tracking-widest font-serif">IBM</span> },
+  { name: 'Accenture', Node: () => <span className="text-2xl font-semibold lowercase">accenture <span className="font-bold text-xl">&gt;</span></span> },
+  { name: 'Deloitte', Node: () => <span className="text-2xl font-bold">Deloitte<span className="text-emerald-500 rounded-full">.</span></span> },
+  { name: 'Uber', Node: () => <span className="text-3xl font-normal tracking-tight">Uber</span> },
+  { name: 'Airbnb', Node: () => <span className="text-2xl font-bold tracking-tighter lowercase">airbnb</span> },
+  { name: 'Spotify', Node: () => <span className="text-2xl font-bold tracking-tighter">Spotify</span> },
+  { name: 'Atlassian', Node: () => <span className="text-2xl font-bold tracking-tight uppercase">ATLASSIAN</span> },
+  { name: 'Cisco', Node: () => <span className="text-2xl font-bold lowercase flex items-center gap-2"><div className="flex items-end gap-[2px] h-5"><div className="w-[3px] h-2 bg-current rounded-full"/><div className="w-[3px] h-4 bg-current rounded-full"/><div className="w-[3px] h-5 bg-current rounded-full"/><div className="w-[3px] h-4 bg-current rounded-full"/><div className="w-[3px] h-2 bg-current rounded-full"/></div>cisco</span> },
+  { name: 'Intel', Node: () => <span className="text-3xl font-medium tracking-tight lowercase">intel</span> },
+  { name: 'Samsung', Node: () => <span className="text-2xl font-black tracking-widest uppercase">SAMSUNG</span> }
+];
+
+const MarqueeTrack = () => (
+  <div className="flex shrink-0 items-center gap-16 md:gap-24 px-8 md:px-12">
+    {COMPANY_LOGOS.map((company, i) => (
+      <div 
+        key={i} 
+        className="flex-shrink-0 flex items-center justify-center opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 text-slate-800"
+        title={company.name}
+      >
+        <span className="sr-only">{company.name}</span>
+        <div aria-hidden="true">
+          <company.Node />
+        </div>
+      </div>
+    ))}
+  </div>
 );
 
 const Home: React.FC = () => {
@@ -76,18 +123,16 @@ const Home: React.FC = () => {
 
           {/* Right Minimal Image */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.0, ease: "easeOut" }}
+            variants={fadeScale}
             className="w-full flex justify-center lg:justify-end z-10 mt-12 lg:mt-0"
           >
-            <div className="relative w-full max-w-[600px]">
+            <div className="relative w-full max-w-[600px] group">
               {/* Soft inner white edge fade overlay */}
-              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10"></div>
+              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10 transition-shadow duration-700 group-hover:shadow-[inset_0_0_12px_rgba(255,255,255,0.3)]"></div>
               <img 
                 src="/images/hero/home-hero-students.webp" 
                 alt="Students preparing for an interview" 
-                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px]"
+                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               />
             </div>
           </motion.div>
@@ -169,31 +214,37 @@ const Home: React.FC = () => {
               icon={Upload}
               title="Resume-Based Interviews"
               description="Our AI deeply analyzes your resume and tailors highly specific questions to your past experiences and listed skills."
+              path="/features#resume-based-interviews"
             />
             <FeatureCard
               icon={Bot}
               title="AI Question Generator"
               description="Dynamic questions that adapt to your responses, simulating a real conversational interview flow with an expert."
+              path="/features#ai-question-generator"
             />
             <FeatureCard
               icon={Zap}
               title="Instant Feedback"
               description="Get immediate actionable insights, scoring, and suggested improvements for every answer you provide."
+              path="/features#instant-feedback"
             />
             <FeatureCard
               icon={LineChart}
               title="Performance Dashboard"
               description="Track your progress over time, identify weak areas, and see your confidence score grow visually."
+              path="/features#performance-dashboard"
             />
             <FeatureCard
               icon={Shield}
               title="Secure Authentication"
               description="Your data is protected with enterprise-grade security via Clerk authentication, ensuring complete privacy."
+              path="/features#secure-authentication"
             />
             <FeatureCard
               icon={Cloud}
               title="Cloud Storage"
               description="All your interview history, resumes, and detailed feedback are securely saved and synced across devices."
+              path="/features#cloud-storage"
             />
           </motion.div>
         </div>
@@ -250,7 +301,9 @@ const Home: React.FC = () => {
               <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Targeted Practice</h2>
               <p className="text-gray-600 max-w-2xl text-lg">Practice for exactly the role you are targeting with domain-specific AI models.</p>
             </div>
-            <Button variant="outline" className="rounded-full text-indigo-600 border-indigo-200 hover:bg-indigo-50">View All Categories</Button>
+            <Link to="/preparation/practice">
+              <Button variant="outline" className="rounded-full text-indigo-600 border-indigo-200 hover:bg-indigo-50">View All Categories</Button>
+            </Link>
           </div>
 
           <motion.div
@@ -258,26 +311,28 @@ const Home: React.FC = () => {
             className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {[
-              { name: 'Software Engineering', icon: Code, q: '450+ Questions' },
-              { name: 'Data Science', icon: Database, q: '320+ Questions' },
-              { name: 'AI / Machine Learning', icon: Brain, q: '280+ Questions' },
-              { name: 'Full Stack Web', icon: Layout, q: '510+ Questions' },
-              { name: 'Frontend', icon: MonitorSmartphone, q: '390+ Questions' },
-              { name: 'Backend', icon: Server, q: '410+ Questions' },
-              { name: 'DevOps / Cloud', icon: Cloud, q: '250+ Questions' },
-              { name: 'Behavioral', icon: Users, q: '150+ Questions' },
+              { name: 'Software Engineering', icon: Code, q: '450+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Data Science', icon: Database, q: '320+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'AI / Machine Learning', icon: Brain, q: '280+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Full Stack Web', icon: Layout, q: '510+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Frontend', icon: MonitorSmartphone, q: '390+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Backend', icon: Server, q: '410+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'DevOps / Cloud', icon: Cloud, q: '250+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Behavioral', icon: Users, q: '150+ Questions', path: '/preparation/verbal-ability' },
             ].map((cat) => (
-              <motion.div key={cat.name} variants={fadeUp} className="group bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative z-10 flex flex-col h-full">
-                  <cat.icon className="w-8 h-8 text-indigo-600 mb-4 group-hover:scale-110 transition-transform" />
-                  <h3 className="font-bold text-gray-900 text-lg mb-1">{cat.name}</h3>
-                  <p className="text-sm text-gray-500 font-medium mb-6">{cat.q}</p>
-                  <div className="mt-auto flex justify-between items-center w-full">
-                    <span className="text-indigo-600 font-semibold text-sm">Practice Now</span>
-                    <ArrowUpRight className="w-5 h-5 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <motion.div key={cat.name} variants={fadeUp} className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer relative overflow-hidden">
+                <Link to={cat.path} className="block p-6 h-full w-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="relative z-10 flex flex-col h-full">
+                    <cat.icon className="w-8 h-8 text-indigo-600 mb-4 group-hover:scale-110 transition-transform" />
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">{cat.name}</h3>
+                    <p className="text-sm text-gray-500 font-medium mb-6">{cat.q}</p>
+                    <div className="mt-auto flex justify-between items-center w-full">
+                      <span className="text-indigo-600 font-semibold text-sm">Practice Now</span>
+                      <ArrowUpRight className="w-5 h-5 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
@@ -308,7 +363,9 @@ const Home: React.FC = () => {
               ))}
             </motion.ul>
             <motion.div variants={fadeUp} className="mt-10">
-              <Button variant="outline" className="rounded-full px-8 h-12 border-gray-300">View Sample Report</Button>
+              <Link to="/sample-report">
+                <Button variant="outline" className="rounded-full px-8 h-12 border-gray-300">View Sample Report</Button>
+              </Link>
             </motion.div>
           </motion.div>
 
@@ -394,9 +451,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* STATISTICS */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-purple-900 -z-20"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 -z-10"></div>
+      <section className="py-24 relative bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
             {[
@@ -407,14 +462,14 @@ const Home: React.FC = () => {
             ].map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col items-center"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-20px" }} transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="flex flex-col items-center group"
               >
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 text-indigo-200">
-                  <stat.icon className="w-6 h-6" />
+                <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                  <stat.icon className="w-7 h-7" />
                 </div>
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">{stat.num}</div>
-                <div className="text-indigo-200 font-medium">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">{stat.num}</div>
+                <div className="text-slate-600 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -468,14 +523,20 @@ const Home: React.FC = () => {
       </section>
 
       {/* COMPANIES SECTION (New) */}
-      <section className="py-16 bg-white text-center">
-        <p className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-8">Questions inspired by interviews from</p>
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-          {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix', 'Apple'].map(company => (
-            <div key={company} className="text-2xl font-black text-gray-800 tracking-tighter">
-              {company}
+      <section className="py-20 bg-white text-center relative overflow-hidden border-t border-gray-100">
+        <p className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-12">Questions inspired by interviews from</p>
+        
+        <div className="relative w-full max-w-[100vw] overflow-hidden flex items-center">
+          {/* Edge fade masks */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 md:w-48 bg-gradient-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 md:w-48 bg-gradient-to-l from-white to-transparent" />
+          
+          <div className="group flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:w-full">
+            <MarqueeTrack />
+            <div aria-hidden="true" className="flex shrink-0 motion-reduce:hidden">
+              <MarqueeTrack />
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
@@ -489,25 +550,27 @@ const Home: React.FC = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { title: "Personalized Experience", desc: "Every interview is unique, tailored to your exact background and target role.", icon: Users },
-              { title: "Real-Time AI Evaluation", desc: "Get instant scores and granular feedback the moment you finish answering.", icon: Bot },
-              { title: "Industry Ready", desc: "Questions sourced from top tech companies to prepare you for real scenarios.", icon: Layout },
-              { title: "Enterprise Security", desc: "Enterprise-level security for your personal data and resume uploads.", icon: Lock },
-              { title: "Infinite Scalability", desc: "Practice as much as you want. Our AI scales to meet your preparation needs.", icon: LineChart },
-              { title: "Lightning Fast", desc: "Generate a complete tailored interview in seconds, not hours.", icon: Zap },
+              { title: "Personalized Experience", desc: "Every interview is unique, tailored to your exact background and target role.", icon: Users, path: "/features#personalized-experience" },
+              { title: "Real-Time AI Evaluation", desc: "Get instant scores and granular feedback the moment you finish answering.", icon: Bot, path: "/features#real-time-evaluation" },
+              { title: "Industry Ready", desc: "Questions sourced from top tech companies to prepare you for real scenarios.", icon: Layout, path: "/features#industry-ready" },
+              { title: "Enterprise Security", desc: "Enterprise-level security for your personal data and resume uploads.", icon: Lock, path: "/features#enterprise-security" },
+              { title: "Infinite Scalability", desc: "Practice as much as you want. Our AI scales to meet your preparation needs.", icon: LineChart, path: "/features#infinite-scalability" },
+              { title: "Lightning Fast", desc: "Generate a complete tailored interview in seconds, not hours.", icon: Zap, path: "/features#lightning-fast" },
             ].map((feature, i) => (
               <motion.div
                 key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-                className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-xl transition-shadow group cursor-pointer"
+                className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-shadow group cursor-pointer overflow-hidden"
               >
-                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h4>
-                <p className="text-gray-600 leading-relaxed mb-6">{feature.desc}</p>
-                <div className="text-indigo-600 font-semibold text-sm flex items-center">
-                  Explore Feature <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </div>
+                <Link to={feature.path} className="block p-8 h-full w-full">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h4>
+                  <p className="text-gray-600 leading-relaxed mb-6">{feature.desc}</p>
+                  <div className="text-indigo-600 font-semibold text-sm flex items-center">
+                    Explore Feature <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </div>
+                </Link>
               </motion.div>
             ))}
           </div>

@@ -20,6 +20,7 @@ import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsOfService from '../pages/TermsOfService';
 import CookiePolicy from '../pages/CookiePolicy';
 import RefundPolicy from '../pages/RefundPolicy';
+import SampleReport from '../pages/SampleReport';
 // Protected Pages
 import Dashboard from '../pages/Dashboard';
 import Generate from '../pages/Generate';
@@ -58,6 +59,7 @@ const router = createBrowserRouter([
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
       { path: 'pricing', element: <Pricing /> },
+      { path: 'sample-report', element: <SampleReport /> },
       { path: 'privacy', element: <PrivacyPolicy /> },
       { path: 'terms', element: <TermsOfService /> },
       { path: 'cookies', element: <CookiePolicy /> },

@@ -16,12 +16,17 @@ import { Footer } from '../components/Footer';
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const fadeScale: any = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } }
 };
 
 const staggerContainer: any = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
 };
 
 const HowItWorks: React.FC = () => {
@@ -62,18 +67,16 @@ const HowItWorks: React.FC = () => {
 
           {/* Right Minimal Image */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.0, ease: "easeOut" }}
+            variants={fadeScale}
             className="w-full flex justify-center lg:justify-end z-10 mt-12 lg:mt-0"
           >
-            <div className="relative w-full max-w-[600px]">
+            <div className="relative w-full max-w-[600px] group">
               {/* Soft inner white edge fade overlay */}
-              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10"></div>
+              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10 transition-shadow duration-700 group-hover:shadow-[inset_0_0_12px_rgba(255,255,255,0.3)]"></div>
               <img 
                 src="/images/hero/how-it-works-hero-preparation.webp" 
                 alt="Candidate preparing for an interview" 
-                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px]"
+                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               />
             </div>
           </motion.div>

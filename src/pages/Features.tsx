@@ -16,12 +16,12 @@ import { Footer } from '../components/Footer';
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
 };
 
 const staggerContainer: any = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
 };
 
 const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
@@ -34,9 +34,6 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: str
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
         <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
-        <div className="mt-auto flex items-center text-sm font-semibold text-indigo-600 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-          Learn more <ArrowRight className="w-4 h-4 ml-1" />
-        </div>
       </CardContent>
     </Card>
   </motion.div>
@@ -77,11 +74,11 @@ const Features: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative w-full flex items-center justify-center">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }} className="relative w-full flex items-center justify-center group">
             <img 
               src="/images/hero/features-hero-interview.webp" 
               alt="Professional candidate preparing" 
-              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl"
+              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl transition-transform duration-700 ease-out group-hover:scale-[1.02]"
             />
           </motion.div>
         </div>
@@ -120,7 +117,7 @@ const Features: React.FC = () => {
       </section>
 
       {/* 3. AI WORKFLOW SECTION */}
-      <section className="py-24 max-w-7xl mx-auto px-6 w-full">
+      <section id="ai-question-generator" className="py-24 max-w-7xl mx-auto px-6 w-full scroll-mt-20">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">The AI Workflow</h2>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg">A seamless pipeline from upload to actionable feedback.</p>
@@ -153,11 +150,11 @@ const Features: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. AI FEEDBACK PREVIEW */}
-      <section className="py-24 bg-gray-50 border-y border-gray-200 overflow-hidden">
+      {/* 4. REAL-TIME AI EVALUATION (formerly AI FEEDBACK PREVIEW) */}
+      <section id="real-time-evaluation" className="py-24 bg-gray-50 border-y border-gray-200 overflow-hidden scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Granular AI Feedback</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Real-Time AI Evaluation</h2>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Receive hyper-specific feedback across 5 dimensions instantly.</p>
           </div>
 
@@ -224,8 +221,8 @@ const Features: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. RESUME INTELLIGENCE */}
-      <section className="py-24 max-w-7xl mx-auto px-6 w-full">
+      {/* 5. PERSONALIZED EXPERIENCE (formerly RESUME INTELLIGENCE) */}
+      <section id="personalized-experience" className="py-24 max-w-7xl mx-auto px-6 w-full scroll-mt-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="relative">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
@@ -255,7 +252,7 @@ const Features: React.FC = () => {
           </motion.div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Your Resume Becomes Your Blueprint</motion.h2>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">A Deeply Personalized Experience</motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-gray-600 mb-8 leading-relaxed">
               No generic question banks. The AI deeply parses your PDF to build an internal model of your career. It analyzes your:
             </motion.p>
@@ -273,11 +270,11 @@ const Features: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. INTERVIEW CATEGORIES */}
-      <section className="py-24 bg-gray-50 border-y border-gray-200">
+      {/* 6. INDUSTRY READY (formerly INTERVIEW CATEGORIES) */}
+      <section id="industry-ready" className="py-24 bg-gray-50 border-y border-gray-200 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Comprehensive Categories</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Industry Ready Categories</h2>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Specialized domains calibrated for your specific target role.</p>
           </div>
 
@@ -334,12 +331,12 @@ const Features: React.FC = () => {
         </div>
       </section>
 
-      {/* 8. TECHNOLOGY STACK */}
-      <section className="py-24 bg-gray-900 text-white border-y border-gray-800">
+      {/* 8. INFINITE SCALABILITY (formerly TECHNOLOGY STACK) */}
+      <section id="infinite-scalability" className="py-24 bg-gray-900 text-white border-y border-gray-800 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white">Enterprise Technology Stack</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg">Built with modern, scalable frameworks for optimal performance.</p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white">Infinite Scalability</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-lg">Practice as much as you want. Built with modern, scalable frameworks for optimal performance.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
@@ -369,7 +366,7 @@ const Features: React.FC = () => {
       {/* 9. SECURITY & 10. PERFORMANCE SECTION */}
       <section className="py-24 max-w-7xl mx-auto px-6 w-full">
         <div className="grid lg:grid-cols-2 gap-12">
-          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-indigo-50 rounded-3xl p-10 border border-indigo-100 relative overflow-hidden">
+          <motion.div id="enterprise-security" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-indigo-50 rounded-3xl p-10 border border-indigo-100 relative overflow-hidden scroll-mt-24">
             <Lock className="absolute -right-10 -bottom-10 w-64 h-64 text-indigo-100/50" />
             <h3 className="text-3xl font-bold text-gray-900 mb-6 relative z-10">Bank-Level Security</h3>
             <ul className="space-y-4 relative z-10">
@@ -381,24 +378,39 @@ const Features: React.FC = () => {
             </ul>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-sky-50 rounded-3xl p-10 border border-sky-100 relative overflow-hidden">
-            <Gauge className="absolute -right-10 -bottom-10 w-64 h-64 text-sky-100/50" />
-            <h3 className="text-3xl font-bold text-gray-900 mb-6 relative z-10">Blazing Performance</h3>
+          <motion.div id="cloud-storage" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-purple-50 rounded-3xl p-10 border border-purple-100 relative overflow-hidden scroll-mt-24">
+            <Cloud className="absolute -right-10 -bottom-10 w-64 h-64 text-purple-100/50" />
+            <h3 className="text-3xl font-bold text-gray-900 mb-6 relative z-10">Secure Cloud Storage</h3>
             <ul className="space-y-4 relative z-10">
+              <li className="flex items-center gap-3 text-gray-700 font-medium"><Database className="text-purple-600" /> Interview History Sync</li>
+              <li className="flex items-center gap-3 text-gray-700 font-medium"><FileText className="text-purple-600" /> Resume Versioning</li>
+              <li className="flex items-center gap-3 text-gray-700 font-medium"><Target className="text-purple-600" /> Persistent Analytics</li>
+              <li className="flex items-center gap-3 text-gray-700 font-medium"><Cloud className="text-purple-600" /> Cross-Device Access</li>
+              <li className="flex items-center gap-3 text-gray-700 font-medium"><ShieldCheck className="text-purple-600" /> Fully Encrypted</li>
+            </ul>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 11. LIGHTNING FAST PERFORMANCE SECTION */}
+      <section className="py-24 max-w-7xl mx-auto px-6 w-full">
+        <motion.div id="lightning-fast" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-sky-50 rounded-3xl p-10 border border-sky-100 relative overflow-hidden scroll-mt-24 w-full">
+          <Gauge className="absolute right-10 top-1/2 -translate-y-1/2 w-64 h-64 text-sky-100/50" />
+          <div className="max-w-2xl relative z-10">
+            <h3 className="text-3xl font-bold text-gray-900 mb-6">Blazing Performance</h3>
+            <ul className="space-y-4">
               <li className="flex items-center gap-3 text-gray-700 font-medium"><FastForward className="text-sky-600" /> Fast Loading Times</li>
               <li className="flex items-center gap-3 text-gray-700 font-medium"><Code className="text-sky-600" /> Optimized React Components</li>
               <li className="flex items-center gap-3 text-gray-700 font-medium"><Layers className="text-sky-600" /> Lazy Loading</li>
               <li className="flex items-center gap-3 text-gray-700 font-medium"><MonitorSmartphone className="text-sky-600" /> Fully Responsive Design</li>
               <li className="flex items-center gap-3 text-gray-700 font-medium"><Server className="text-sky-600" /> Scalable Architecture</li>
             </ul>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* 11. STATISTICS */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-purple-900 -z-20"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 -z-10"></div>
+      <section className="py-24 relative bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
             {[
@@ -408,9 +420,9 @@ const Features: React.FC = () => {
               { num: "100%", label: "AI Generated Feedback" },
               { num: "99.9%", label: "Application Uptime" }
             ].map((stat, i) => (
-              <motion.div key={i} initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex flex-col items-center">
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">{stat.num}</div>
-                <div className="text-indigo-200 font-medium text-sm md:text-base">{stat.label}</div>
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-20px" }} transition={{ duration: 0.5, delay: i * 0.1 }} className="flex flex-col items-center">
+                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">{stat.num}</div>
+                <div className="text-slate-600 font-medium text-sm md:text-base">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -418,7 +430,7 @@ const Features: React.FC = () => {
       </section>
 
       {/* 12. TESTIMONIALS */}
-      <section className="py-24 bg-gray-50 border-y border-gray-200">
+      <section id="performance-dashboard" className="py-24 bg-gray-50 border-y border-gray-200 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Success Stories</h2>
