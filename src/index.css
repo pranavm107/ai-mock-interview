@@ -42,6 +42,13 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: 'Geist Variable', sans-serif;
   --font-heading: var(--font-sans);
+  --animate-marquee: marquee 40s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {

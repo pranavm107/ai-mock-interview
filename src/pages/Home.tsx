@@ -6,38 +6,86 @@ import { Badge } from '../components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, Brain, FileText, Shield, Cloud,
-  CheckCircle2, Code, Database, Bot, Layout, Server, Users, 
+  CheckCircle2, Code, Database, Bot, Layout, Server, Users,
   MessageSquare, LineChart, Sparkles, Zap, Check, Lock, MonitorSmartphone,
-  Star, Upload, FileUp, Award, Target, 
+  Star, Upload, FileUp, Award, Target,
   ChevronDown, ChevronUp, ArrowUpRight, ShieldCheck, Globe, Mail, MessageCircle
 } from 'lucide-react';
+import { Footer } from '../components/Footer';
 
 const fadeUp: any = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const fadeScale: any = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } }
 };
 
 const staggerContainer: any = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
 };
 
-const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
+const FeatureCard = ({ icon: Icon, title, description, path = "/features" }: { icon: any, title: string, description: string, path?: string }) => (
   <motion.div variants={fadeUp} className="group h-full">
-    <Card className="h-full border border-gray-200 shadow-sm rounded-2xl hover:shadow-xl transition-all duration-300 bg-white relative overflow-hidden group-hover:-translate-y-2">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-      <CardContent className="p-8">
-        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center mb-6 text-indigo-600 group-hover:scale-110 transition-transform duration-300">
-          <Icon className="h-7 w-7" />
-        </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-        <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
-        <div className="mt-auto flex items-center text-sm font-semibold text-indigo-600 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-          Learn more <ArrowRight className="w-4 h-4 ml-1" />
-        </div>
-      </CardContent>
-    </Card>
+    <Link to={path} className="block h-full focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-2xl">
+      <Card className="h-full flex flex-col border border-gray-200 shadow-sm rounded-2xl hover:shadow-xl transition-all duration-300 bg-white relative overflow-hidden group-hover:-translate-y-1">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        <CardContent className="p-8 flex flex-col h-full">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center mb-6 text-indigo-600 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+            <Icon className="h-7 w-7" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+          <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
+          <div className="mt-auto pt-4 flex items-center text-sm font-semibold text-indigo-600 transition-colors group-hover:text-indigo-700">
+            Learn more <ArrowRight className="w-4 h-4 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   </motion.div>
+);
+
+const COMPANY_LOGOS = [
+  { name: 'Google', Node: () => <span className="text-2xl font-medium tracking-tight">Google</span> },
+  { name: 'Microsoft', Node: () => <span className="flex items-center gap-2 text-2xl font-semibold"><div className="grid grid-cols-2 gap-[2px] w-5 h-5"><div className="bg-current" /><div className="bg-current" /><div className="bg-current" /><div className="bg-current" /></div>Microsoft</span> },
+  { name: 'Amazon', Node: () => <span className="text-3xl font-bold tracking-tighter lowercase">amazon</span> },
+  { name: 'Meta', Node: () => <span className="text-2xl font-semibold tracking-tight">Meta</span> },
+  { name: 'Apple', Node: () => <span className="text-3xl pb-1"></span> },
+  { name: 'Netflix', Node: () => <span className="text-2xl font-black tracking-tighter uppercase scale-y-110 inline-block">NETFLIX</span> },
+  { name: 'NVIDIA', Node: () => <span className="text-2xl font-bold tracking-widest uppercase">NVIDIA</span> },
+  { name: 'Adobe', Node: () => <span className="text-2xl font-black tracking-tighter">Adobe</span> },
+  { name: 'Salesforce', Node: () => <span className="text-2xl font-medium tracking-tight">salesforce</span> },
+  { name: 'Oracle', Node: () => <span className="text-2xl font-bold tracking-widest uppercase">ORACLE</span> },
+  { name: 'IBM', Node: () => <span className="text-3xl font-black tracking-widest font-serif">IBM</span> },
+  { name: 'Accenture', Node: () => <span className="text-2xl font-semibold lowercase">accenture <span className="font-bold text-xl">&gt;</span></span> },
+  { name: 'Deloitte', Node: () => <span className="text-2xl font-bold">Deloitte<span className="text-emerald-500 rounded-full">.</span></span> },
+  { name: 'Uber', Node: () => <span className="text-3xl font-normal tracking-tight">Uber</span> },
+  { name: 'Airbnb', Node: () => <span className="text-2xl font-bold tracking-tighter lowercase">airbnb</span> },
+  { name: 'Spotify', Node: () => <span className="text-2xl font-bold tracking-tighter">Spotify</span> },
+  { name: 'Atlassian', Node: () => <span className="text-2xl font-bold tracking-tight uppercase">ATLASSIAN</span> },
+  { name: 'Cisco', Node: () => <span className="text-2xl font-bold lowercase flex items-center gap-2"><div className="flex items-end gap-[2px] h-5"><div className="w-[3px] h-2 bg-current rounded-full"/><div className="w-[3px] h-4 bg-current rounded-full"/><div className="w-[3px] h-5 bg-current rounded-full"/><div className="w-[3px] h-4 bg-current rounded-full"/><div className="w-[3px] h-2 bg-current rounded-full"/></div>cisco</span> },
+  { name: 'Intel', Node: () => <span className="text-3xl font-medium tracking-tight lowercase">intel</span> },
+  { name: 'Samsung', Node: () => <span className="text-2xl font-black tracking-widest uppercase">SAMSUNG</span> }
+];
+
+const MarqueeTrack = () => (
+  <div className="flex shrink-0 items-center gap-16 md:gap-24 px-8 md:px-12">
+    {COMPANY_LOGOS.map((company, i) => (
+      <div 
+        key={i} 
+        className="flex-shrink-0 flex items-center justify-center opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 text-slate-800"
+        title={company.name}
+      >
+        <span className="sr-only">{company.name}</span>
+        <div aria-hidden="true">
+          <company.Node />
+        </div>
+      </div>
+    ))}
+  </div>
 );
 
 const Home: React.FC = () => {
@@ -46,33 +94,26 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col w-full bg-white font-sans selection:bg-indigo-100 overflow-x-hidden">
       {/* HERO SECTION */}
-      <section className="relative pt-24 pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Animated Background Gradients */}
-        <div className="absolute top-10 left-1/4 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply animate-pulse"></div>
-        <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-indigo-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply"></div>
-        
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <motion.div 
+      {/* HERO SECTION */}
+      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full bg-white">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Content Area */}
+          <motion.div
             initial="hidden" animate="visible" variants={staggerContainer}
             className="flex flex-col items-center text-center lg:items-start lg:text-left z-10"
           >
-            <motion.div variants={fadeUp}>
-              <Badge variant="secondary" className="mb-8 bg-indigo-50 text-indigo-700 border border-indigo-100 px-5 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-sm">
-                <Sparkles className="w-4 h-4 text-indigo-500" />
-                PrepPilot AI 2.0 is live
-              </Badge>
-            </motion.div>
-            
             <motion.h1 variants={fadeUp} className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] mb-6">
-              Ace Every Interview with <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AI Coaching</span>
+              Prepare Smarter.<br />
+              Interview Better.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Get Hired.</span>
             </motion.h1>
-            
+
             <motion.p variants={fadeUp} className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl leading-relaxed">
-              Upload your resume, generate personalized technical questions, practice in real-time, and get actionable feedback. Transform anxiety into unshakeable confidence.
+              Practice realistic AI interviews, understand where you're falling short, and improve with targeted preparation.
             </motion.p>
-            
+
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link to="/sign-up">
+              <Link to="/sign-up" className="w-full sm:w-auto">
                 <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl w-full sm:w-auto px-8 h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group">
                   Start Free Interview <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -80,88 +121,19 @@ const Home: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Hero Visual Illustration */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative w-full aspect-square md:aspect-video lg:aspect-square flex items-center justify-center p-4 lg:p-0"
+          {/* Right Minimal Image */}
+          <motion.div
+            variants={fadeScale}
+            className="w-full flex justify-center lg:justify-end z-10 mt-12 lg:mt-0"
           >
-            <div className="relative w-full max-w-[550px] h-[550px]">
-              
-              {/* Central AI Brain / Hub */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white rounded-3xl shadow-2xl border border-gray-100 flex items-center justify-center z-30"
-              >
-                <div className="w-24 h-24 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl flex items-center justify-center">
-                  <Brain className="w-12 h-12 text-indigo-600 animate-pulse" />
-                </div>
-              </motion.div>
-
-              {/* Resume Upload Card */}
-              <motion.div 
-                animate={{ y: [0, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                className="absolute top-10 right-10 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex items-center gap-4 z-20"
-              >
-                <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center text-sky-600">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-gray-900">your-resume.pdf</div>
-                  <div className="text-xs text-gray-500">Parsing complete</div>
-                </div>
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-2" />
-              </motion.div>
-
-              {/* Chat Question Bubble */}
-              <motion.div 
-                animate={{ y: [0, -15, 0] }}
-                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-1/4 -left-6 bg-white rounded-2xl rounded-tl-none shadow-xl border border-gray-100 p-5 z-40 max-w-[280px]"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white flex-shrink-0 mt-1">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800 leading-snug">Based on your experience at Acme Corp, how did you optimize that PostgreSQL query?</p>
-                    <div className="flex gap-1 mt-2">
-                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Score Card */}
-              <motion.div 
-                animate={{ y: [0, 12, 0] }}
-                transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }}
-                className="absolute bottom-10 right-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-5 z-20 flex items-center gap-4"
-              >
-                <div className="relative w-14 h-14 rounded-full border-4 border-indigo-100 flex items-center justify-center">
-                  <svg className="absolute top-0 left-0 w-full h-full -rotate-90">
-                    <circle cx="24" cy="24" r="24" fill="transparent" stroke="currentColor" strokeWidth="4" className="text-emerald-500" strokeDasharray="150" strokeDashoffset={150 * (1 - 0.92)} />
-                  </svg>
-                  <span className="text-sm font-black text-gray-900">92%</span>
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-gray-900">Great Answer!</div>
-                  <div className="text-xs text-gray-500 font-medium">+15 Confidence</div>
-                </div>
-              </motion.div>
-
-              {/* Connection Lines (SVGs) */}
-              <svg className="absolute top-0 left-0 w-full h-full -z-10 text-gray-200" style={{ strokeDasharray: "4 4" }}>
-                <path d="M400 80 Q275 80 275 275" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M100 400 Q275 400 275 275" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M400 450 Q275 450 275 275" fill="none" stroke="currentColor" strokeWidth="2" />
-              </svg>
-
+            <div className="relative w-full max-w-[600px] group">
+              {/* Soft inner white edge fade overlay */}
+              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10 transition-shadow duration-700 group-hover:shadow-[inset_0_0_12px_rgba(255,255,255,0.3)]"></div>
+              <img 
+                src="/images/hero/home-hero-students.webp" 
+                alt="Students preparing for an interview" 
+                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+              />
             </div>
           </motion.div>
         </div>
@@ -174,7 +146,7 @@ const Home: React.FC = () => {
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
             <div className="flex flex-col items-center">
               <div className="flex text-amber-400 mb-2">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
               </div>
               <span className="font-bold text-gray-900 text-xl">4.9/5</span>
               <span className="text-sm text-gray-500">Average Rating</span>
@@ -201,7 +173,7 @@ const Home: React.FC = () => {
       {/* TECHNOLOGY SECTION */}
       <section className="py-20 max-w-7xl mx-auto px-6 w-full text-center">
         <p className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-10">Powered by Enterprise Grade Technology</p>
-        <motion.div 
+        <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
           className="flex flex-wrap justify-center items-center gap-4 md:gap-6"
         >
@@ -234,39 +206,45 @@ const Home: React.FC = () => {
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">Supercharge Your Preparation</h2>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Everything you need to master your next technical or behavioral interview, packed into one powerful platform.</p>
           </div>
-          <motion.div 
+          <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            <FeatureCard 
-              icon={Upload} 
-              title="Resume-Based Interviews" 
-              description="Our AI deeply analyzes your resume and tailors highly specific questions to your past experiences and listed skills." 
+            <FeatureCard
+              icon={Upload}
+              title="Resume-Based Interviews"
+              description="Our AI deeply analyzes your resume and tailors highly specific questions to your past experiences and listed skills."
+              path="/features#resume-based-interviews"
             />
-            <FeatureCard 
-              icon={Bot} 
-              title="AI Question Generator" 
-              description="Dynamic questions that adapt to your responses, simulating a real conversational interview flow with an expert." 
+            <FeatureCard
+              icon={Bot}
+              title="AI Question Generator"
+              description="Dynamic questions that adapt to your responses, simulating a real conversational interview flow with an expert."
+              path="/features#ai-question-generator"
             />
-            <FeatureCard 
-              icon={Zap} 
-              title="Instant Feedback" 
-              description="Get immediate actionable insights, scoring, and suggested improvements for every answer you provide." 
+            <FeatureCard
+              icon={Zap}
+              title="Instant Feedback"
+              description="Get immediate actionable insights, scoring, and suggested improvements for every answer you provide."
+              path="/features#instant-feedback"
             />
-            <FeatureCard 
-              icon={LineChart} 
-              title="Performance Dashboard" 
-              description="Track your progress over time, identify weak areas, and see your confidence score grow visually." 
+            <FeatureCard
+              icon={LineChart}
+              title="Performance Dashboard"
+              description="Track your progress over time, identify weak areas, and see your confidence score grow visually."
+              path="/features#performance-dashboard"
             />
-            <FeatureCard 
-              icon={Shield} 
-              title="Secure Authentication" 
-              description="Your data is protected with enterprise-grade security via Clerk authentication, ensuring complete privacy." 
+            <FeatureCard
+              icon={Shield}
+              title="Secure Authentication"
+              description="Your data is protected with enterprise-grade security via Clerk authentication, ensuring complete privacy."
+              path="/features#secure-authentication"
             />
-            <FeatureCard 
-              icon={Cloud} 
-              title="Cloud Storage" 
-              description="All your interview history, resumes, and detailed feedback are securely saved and synced across devices." 
+            <FeatureCard
+              icon={Cloud}
+              title="Cloud Storage"
+              description="All your interview history, resumes, and detailed feedback are securely saved and synced across devices."
+              path="/features#cloud-storage"
             />
           </motion.div>
         </div>
@@ -278,11 +256,11 @@ const Home: React.FC = () => {
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">How It Works</h2>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg">Four simple steps from preparation to perfection.</p>
         </div>
-        
+
         <div className="relative">
           {/* Connecting Line (Desktop) */}
           <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-1 bg-gradient-to-r from-indigo-100 via-purple-100 to-sky-100 rounded-full">
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1.5, ease: "easeInOut" }}
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-500 rounded-full"
             />
@@ -295,7 +273,7 @@ const Home: React.FC = () => {
               { num: 3, title: "Generate Interview", desc: "Practice tailored questions", icon: MessageSquare },
               { num: 4, title: "Receive Feedback", desc: "Detailed metrics & tips", icon: Award }
             ].map((step, i) => (
-              <motion.div 
+              <motion.div
                 key={step.num}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.2 }}
                 className="flex flex-col items-center text-center flex-1 group"
@@ -323,34 +301,38 @@ const Home: React.FC = () => {
               <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Targeted Practice</h2>
               <p className="text-gray-600 max-w-2xl text-lg">Practice for exactly the role you are targeting with domain-specific AI models.</p>
             </div>
-            <Button variant="outline" className="rounded-full text-indigo-600 border-indigo-200 hover:bg-indigo-50">View All Categories</Button>
+            <Link to="/preparation/practice">
+              <Button variant="outline" className="rounded-full text-indigo-600 border-indigo-200 hover:bg-indigo-50">View All Categories</Button>
+            </Link>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
             className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {[
-              { name: 'Software Engineering', icon: Code, q: '450+ Questions' },
-              { name: 'Data Science', icon: Database, q: '320+ Questions' },
-              { name: 'AI / Machine Learning', icon: Brain, q: '280+ Questions' },
-              { name: 'Full Stack Web', icon: Layout, q: '510+ Questions' },
-              { name: 'Frontend', icon: MonitorSmartphone, q: '390+ Questions' },
-              { name: 'Backend', icon: Server, q: '410+ Questions' },
-              { name: 'DevOps / Cloud', icon: Cloud, q: '250+ Questions' },
-              { name: 'Behavioral', icon: Users, q: '150+ Questions' },
+              { name: 'Software Engineering', icon: Code, q: '450+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Data Science', icon: Database, q: '320+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'AI / Machine Learning', icon: Brain, q: '280+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Full Stack Web', icon: Layout, q: '510+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Frontend', icon: MonitorSmartphone, q: '390+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Backend', icon: Server, q: '410+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'DevOps / Cloud', icon: Cloud, q: '250+ Questions', path: '/preparation/technical-mcqs' },
+              { name: 'Behavioral', icon: Users, q: '150+ Questions', path: '/preparation/verbal-ability' },
             ].map((cat) => (
-              <motion.div key={cat.name} variants={fadeUp} className="group bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative z-10 flex flex-col h-full">
-                  <cat.icon className="w-8 h-8 text-indigo-600 mb-4 group-hover:scale-110 transition-transform" />
-                  <h3 className="font-bold text-gray-900 text-lg mb-1">{cat.name}</h3>
-                  <p className="text-sm text-gray-500 font-medium mb-6">{cat.q}</p>
-                  <div className="mt-auto flex justify-between items-center w-full">
-                    <span className="text-indigo-600 font-semibold text-sm">Practice Now</span>
-                    <ArrowUpRight className="w-5 h-5 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <motion.div key={cat.name} variants={fadeUp} className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer relative overflow-hidden">
+                <Link to={cat.path} className="block p-6 h-full w-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/100 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="relative z-10 flex flex-col h-full">
+                    <cat.icon className="w-8 h-8 text-indigo-600 mb-4 group-hover:scale-110 transition-transform" />
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">{cat.name}</h3>
+                    <p className="text-sm text-gray-500 font-medium mb-6">{cat.q}</p>
+                    <div className="mt-auto flex justify-between items-center w-full">
+                      <span className="text-indigo-600 font-semibold text-sm">Practice Now</span>
+                      <ArrowUpRight className="w-5 h-5 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
@@ -381,36 +363,38 @@ const Home: React.FC = () => {
               ))}
             </motion.ul>
             <motion.div variants={fadeUp} className="mt-10">
-              <Button variant="outline" className="rounded-full px-8 h-12 border-gray-300">View Sample Report</Button>
+              <Link to="/sample-report">
+                <Button variant="outline" className="rounded-full px-8 h-12 border-gray-300">View Sample Report</Button>
+              </Link>
             </motion.div>
           </motion.div>
-          
+
           {/* Dashboard Illustration */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
             className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-100 relative group"
           >
             {/* Background Glow */}
             <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity -z-10"></div>
-            
+
             <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
               <h3 className="text-2xl font-bold text-gray-900">Recent Interview</h3>
               <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-3 py-1">
                 Completed
               </Badge>
             </div>
-            
+
             <div className="flex flex-col md:flex-row gap-10 items-center mb-10">
               <div className="relative h-40 w-40 flex-shrink-0">
                 <svg className="w-full h-full -rotate-90">
                   <circle cx="80" cy="80" r="72" fill="transparent" stroke="#f3f4f6" strokeWidth="12" />
-                  <motion.circle 
+                  <motion.circle
                     initial={{ strokeDashoffset: 452 }}
                     whileInView={{ strokeDashoffset: 452 * (1 - 0.92) }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                    cx="80" cy="80" r="72" fill="transparent" stroke="url(#gradient)" strokeWidth="12" 
-                    strokeDasharray="452" 
+                    cx="80" cy="80" r="72" fill="transparent" stroke="url(#gradient)" strokeWidth="12"
+                    strokeDasharray="452"
                     strokeLinecap="round"
                   />
                   <defs>
@@ -425,7 +409,7 @@ const Home: React.FC = () => {
                   <div className="text-sm font-semibold text-gray-500">Overall Score</div>
                 </div>
               </div>
-              
+
               <div className="flex-1 w-full space-y-5">
                 {[
                   { label: "Technical Knowledge", score: 95, color: "bg-indigo-600" },
@@ -439,9 +423,9 @@ const Home: React.FC = () => {
                       <span className="text-gray-900 font-bold">{metric.score}%</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }} whileInView={{ width: `${metric.score}%` }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.5 + (idx * 0.1) }}
-                        className={`${metric.color} h-full rounded-full`} 
+                        className={`${metric.color} h-full rounded-full`}
                       />
                     </div>
                   </div>
@@ -467,9 +451,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* STATISTICS */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-purple-900 -z-20"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 -z-10"></div>
+      <section className="py-24 relative bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
             {[
@@ -478,49 +460,62 @@ const Home: React.FC = () => {
               { num: "10+", label: "Categories", icon: Target },
               { num: "100%", label: "AI Generated", icon: Brain },
             ].map((stat, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
-                initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col items-center"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-20px" }} transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="flex flex-col items-center group"
               >
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 text-indigo-200">
-                  <stat.icon className="w-6 h-6" />
+                <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                  <stat.icon className="w-7 h-7" />
                 </div>
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">{stat.num}</div>
-                <div className="text-indigo-200 font-medium">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">{stat.num}</div>
+                <div className="text-slate-600 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS (New) */}
+      {/* THE PREPPILOT APPROACH */}
       <section className="py-24 bg-gray-50 border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">Don't Just Take Our Word For It</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">See what other candidates are saying about PrepPilot AI.</p>
+            <p className="text-sm font-bold tracking-widest text-indigo-600 uppercase mb-4">The PrepPilot Approach</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">Built for Better Interviews</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              Built around how real interviews actually work. Everything you need to practice realistically, understand your weaknesses, and improve with purpose.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { quote: "This AI helped me prepare for my Amazon interview. The system design questions were incredibly accurate to the real thing.", name: "Sarah J.", role: "Software Engineer", company: "Amazon" },
-              { quote: "Great resume-based questions. It literally extracted a project I did 3 years ago and grilled me on it. So glad I practiced!", name: "Michael T.", role: "Recent Graduate", company: "Student" },
-              { quote: "The feedback is brutal but necessary. It pointed out my filler words and helped me structure my answers much better.", name: "David L.", role: "Product Manager", company: "Fintech Startup" }
+              { 
+                title: "Practice Realistically", 
+                desc: "Practice with AI interviews designed around your role, experience, resume, and interview goals.", 
+                icon: MessageSquare,
+                badge: "Practice"
+              },
+              { 
+                title: "Understand Your Performance", 
+                desc: "Get structured feedback that helps you understand your strengths, weaknesses, and areas that need improvement.", 
+                icon: LineChart,
+                badge: "Insight"
+              },
+              { 
+                title: "Improve With Purpose", 
+                desc: "Turn interview feedback into targeted preparation so every practice session moves you forward.", 
+                icon: Target,
+                badge: "Feedback"
+              }
             ].map((t, i) => (
-              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 relative">
-                <div className="flex text-amber-400 mb-4">
-                  {[1,2,3,4,5].map(star => <Star key={star} className="w-4 h-4 fill-current" />)}
-                </div>
-                <p className="text-gray-700 italic mb-6">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg">
-                    {t.name.charAt(0)}
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 relative group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <t.icon className="w-6 h-6" />
                   </div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-500">{t.role}</div>
-                  </div>
+                  <Badge className="bg-slate-100 text-slate-600 border-none hover:bg-slate-200">{t.badge}</Badge>
                 </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{t.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -528,14 +523,20 @@ const Home: React.FC = () => {
       </section>
 
       {/* COMPANIES SECTION (New) */}
-      <section className="py-16 bg-white text-center">
-        <p className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-8">Questions inspired by interviews from</p>
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-          {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix', 'Apple'].map(company => (
-            <div key={company} className="text-2xl font-black text-gray-800 tracking-tighter">
-              {company}
+      <section className="py-20 bg-white text-center relative overflow-hidden border-t border-gray-100">
+        <p className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-12">Questions inspired by interviews from</p>
+        
+        <div className="relative w-full max-w-[100vw] overflow-hidden flex items-center">
+          {/* Edge fade masks */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 md:w-48 bg-gradient-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 md:w-48 bg-gradient-to-l from-white to-transparent" />
+          
+          <div className="group flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:w-full">
+            <MarqueeTrack />
+            <div aria-hidden="true" className="flex shrink-0 motion-reduce:hidden">
+              <MarqueeTrack />
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
@@ -546,28 +547,30 @@ const Home: React.FC = () => {
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">The PrepPilot Advantage</h2>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Built for ambitious professionals aiming for top-tier companies.</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { title: "Personalized Experience", desc: "Every interview is unique, tailored to your exact background and target role.", icon: Users },
-              { title: "Real-Time AI Evaluation", desc: "Get instant scores and granular feedback the moment you finish answering.", icon: Bot },
-              { title: "Industry Ready", desc: "Questions sourced from top tech companies to prepare you for real scenarios.", icon: Layout },
-              { title: "Enterprise Security", desc: "Enterprise-level security for your personal data and resume uploads.", icon: Lock },
-              { title: "Infinite Scalability", desc: "Practice as much as you want. Our AI scales to meet your preparation needs.", icon: LineChart },
-              { title: "Lightning Fast", desc: "Generate a complete tailored interview in seconds, not hours.", icon: Zap },
+              { title: "Personalized Experience", desc: "Every interview is unique, tailored to your exact background and target role.", icon: Users, path: "/features#personalized-experience" },
+              { title: "Real-Time AI Evaluation", desc: "Get instant scores and granular feedback the moment you finish answering.", icon: Bot, path: "/features#real-time-evaluation" },
+              { title: "Industry Ready", desc: "Questions sourced from top tech companies to prepare you for real scenarios.", icon: Layout, path: "/features#industry-ready" },
+              { title: "Enterprise Security", desc: "Enterprise-level security for your personal data and resume uploads.", icon: Lock, path: "/features#enterprise-security" },
+              { title: "Infinite Scalability", desc: "Practice as much as you want. Our AI scales to meet your preparation needs.", icon: LineChart, path: "/features#infinite-scalability" },
+              { title: "Lightning Fast", desc: "Generate a complete tailored interview in seconds, not hours.", icon: Zap, path: "/features#lightning-fast" },
             ].map((feature, i) => (
-              <motion.div 
+              <motion.div
                 key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-                className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-xl transition-shadow group cursor-pointer"
+                className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-shadow group cursor-pointer overflow-hidden"
               >
-                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h4>
-                <p className="text-gray-600 leading-relaxed mb-6">{feature.desc}</p>
-                <div className="text-indigo-600 font-semibold text-sm flex items-center">
-                  Explore Feature <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </div>
+                <Link to={feature.path} className="block p-8 h-full w-full">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h4>
+                  <p className="text-gray-600 leading-relaxed mb-6">{feature.desc}</p>
+                  <div className="text-indigo-600 font-semibold text-sm flex items-center">
+                    Explore Feature <ArrowRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </div>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -589,7 +592,7 @@ const Home: React.FC = () => {
               { q: "Does AI provide feedback?", a: "Yes, you receive instant, highly detailed feedback on technical accuracy, communication, and confidence immediately after finishing." }
             ].map((faq, i) => (
               <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden bg-gray-50">
-                <button 
+                <button
                   className="w-full px-6 py-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors text-left"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
@@ -598,7 +601,7 @@ const Home: React.FC = () => {
                 </button>
                 <AnimatePresence>
                   {openFaq === i && (
-                    <motion.div 
+                    <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -615,103 +618,28 @@ const Home: React.FC = () => {
       </section>
 
       {/* CTA SECTION */}
-      <section className="py-24 max-w-6xl mx-auto px-6 w-full">
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
-          className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-900 rounded-[2.5rem] p-12 md:p-20 text-center shadow-2xl relative overflow-hidden"
-        >
-          {/* Floating blur shapes */}
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-[500px] h-[500px] bg-white/10 rounded-full blur-[80px] pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[400px] h-[400px] bg-sky-400/20 rounded-full blur-[80px] pointer-events-none"></div>
-          
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">Ready to Land Your Dream Job?</h2>
-            <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium">
-              Join thousands of candidates who cracked their dream company interviews using PrepPilot AI.
-            </p>
-            <Link to="/sign-up">
-              <Button size="lg" className="bg-white text-indigo-700 hover:bg-gray-50 rounded-full px-10 h-16 text-lg font-bold shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
-                Start Your Mock Interview For Free
-              </Button>
-            </Link>
-            <p className="text-indigo-200 mt-6 text-sm">No credit card required. Setup takes 30 seconds.</p>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-300 pt-20 pb-10 w-full rounded-t-[3rem]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-            <div className="lg:col-span-2">
-              <div className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <Brain className="w-8 h-8 text-indigo-400" />
-                PrepPilot AI
-              </div>
-              <p className="text-gray-400 mb-8 max-w-sm leading-relaxed text-sm">
-                Empowering job seekers with state-of-the-art AI technology to master interviews and accelerate their careers in tech.
-              </p>
-              
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <MessageCircle className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <Globe className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
-                  <Mail className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Product</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link to="/features" className="hover:text-indigo-400 transition-colors">Features</Link></li>
-                <li><Link to="/pricing" className="hover:text-indigo-400 transition-colors">Pricing</Link></li>
-                <li><Link to="/how-it-works" className="hover:text-indigo-400 transition-colors">How It Works</Link></li>
-                <li><Link to="/testimonials" className="hover:text-indigo-400 transition-colors">Testimonials</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Resources</h4>
-              <ul className="space-y-4 text-sm">
-                <li><Link to="/docs" className="hover:text-indigo-400 transition-colors">Documentation</Link></li>
-                <li><Link to="/blog" className="hover:text-indigo-400 transition-colors">Blog</Link></li>
-                <li><Link to="/faq" className="hover:text-indigo-400 transition-colors">FAQ</Link></li>
-                <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">Contact Support</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-white mb-6 tracking-wide text-sm">Stay Updated</h4>
-              <p className="text-gray-400 text-sm mb-4">Subscribe to our newsletter for interview tips.</p>
-              <div className="flex flex-col gap-2">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3">
-                  Subscribe
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-gray-500">
-              © {new Date().getFullYear()} PrepPilot AI. All rights reserved.
-            </p>
-            <div className="flex gap-6">
-              <Link to="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="text-gray-500 hover:text-white transition-colors">Terms of Service</Link>
-            </div>
+      <section className="py-32 max-w-5xl mx-auto px-6 w-full text-center border-t border-slate-100 mt-12">
+        <div className="flex justify-center mb-8">
+          <div className="w-16 h-16 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm">
+            <CheckCircle2 className="w-8 h-8 text-indigo-600" />
           </div>
         </div>
-      </footer>
+        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+          Your next interview <br className="hidden md:block" /> starts with better preparation.
+        </h2>
+        <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Practice with PrepPilot AI.<br/>
+          Understand where you need to improve.<br/>
+          Walk into the real interview prepared.
+        </p>
+        <Link to="/sign-up">
+          <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-10 h-14 text-lg font-semibold shadow-md transition-all">
+            Start Practicing
+          </Button>
+        </Link>
+      </section>
+
+      <Footer />
     </div>
   );
 };
