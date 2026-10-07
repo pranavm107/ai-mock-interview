@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, ScrollRestoration } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { TopHeader } from '../components/dashboard/TopHeader';
@@ -40,6 +40,7 @@ const ProtectedLayout: React.FC = () => {
         {!isFocusMode && <TopHeader />}
         <main className={`flex-1 overflow-y-auto scroll-smooth ${isFocusMode ? 'p-0 sm:p-0 lg:p-0' : 'p-4 sm:p-6 lg:p-8'}`}>
           <div className={`mx-auto ${isFocusMode ? 'w-full h-full' : 'max-w-7xl'}`}>
+            <ScrollRestoration />
             <Outlet />
           </div>
         </main>

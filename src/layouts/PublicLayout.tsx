@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, Navigate, ScrollRestoration } from 'react-router-dom';
 import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
 import { Menu, X, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -119,6 +119,7 @@ const PublicLayout: React.FC = () => {
       </header>
 
       <main className="flex-grow flex flex-col w-full">
+        <ScrollRestoration />
         <Outlet />
       </main>
     </div>

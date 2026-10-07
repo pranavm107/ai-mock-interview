@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 // Layouts
 import PublicLayout from '../layouts/PublicLayout';
 import ProtectedLayout from '../layouts/ProtectedLayout';
+import AuthLayout from '../layouts/AuthLayout';
 
 // Public Pages
 import Home from '../pages/Home';
@@ -15,7 +16,10 @@ import Pricing from '../pages/Pricing';
 import SignInPage from '../pages/SignIn';
 import SignUpPage from '../pages/SignUp';
 import NotFound from '../pages/NotFound';
-
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import TermsOfService from '../pages/TermsOfService';
+import CookiePolicy from '../pages/CookiePolicy';
+import RefundPolicy from '../pages/RefundPolicy';
 // Protected Pages
 import Dashboard from '../pages/Dashboard';
 import Generate from '../pages/Generate';
@@ -54,6 +58,16 @@ const router = createBrowserRouter([
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
       { path: 'pricing', element: <Pricing /> },
+      { path: 'privacy', element: <PrivacyPolicy /> },
+      { path: 'terms', element: <TermsOfService /> },
+      { path: 'cookies', element: <CookiePolicy /> },
+      { path: 'refund-policy', element: <RefundPolicy /> },
+    ],
+  },
+  {
+    path: '/',
+    element: <AuthLayout />,
+    children: [
       { path: 'sign-in/*', element: <SignInPage /> },
       { path: 'sign-up/*', element: <SignUpPage /> },
     ],

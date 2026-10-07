@@ -47,12 +47,10 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col w-full bg-white font-sans selection:bg-indigo-100 overflow-x-hidden">
       {/* HERO SECTION */}
-      <section className="relative pt-24 pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Animated Background Gradients */}
-        <div className="absolute top-10 left-1/4 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply animate-pulse"></div>
-        <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-indigo-200/40 rounded-full blur-[100px] opacity-70 -z-10 mix-blend-multiply"></div>
-
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      {/* HERO SECTION */}
+      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full bg-white">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Content Area */}
           <motion.div
             initial="hidden" animate="visible" variants={staggerContainer}
             className="flex flex-col items-center text-center lg:items-start lg:text-left z-10"
@@ -68,7 +66,7 @@ const Home: React.FC = () => {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link to="/sign-up">
+              <Link to="/sign-up" className="w-full sm:w-auto">
                 <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl w-full sm:w-auto px-8 h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group">
                   Start Free Interview <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -76,18 +74,22 @@ const Home: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Hero Visual Illustration */}
+          {/* Right Minimal Image */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative w-full flex items-center justify-center"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.0, ease: "easeOut" }}
+            className="w-full flex justify-center lg:justify-end z-10 mt-12 lg:mt-0"
           >
-            <img 
-              src="/images/hero/home-hero-students.webp" 
-              alt="Candidate preparing for an interview" 
-              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl"
-            />
+            <div className="relative w-full max-w-[600px]">
+              {/* Soft inner white edge fade overlay */}
+              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10"></div>
+              <img 
+                src="/images/hero/home-hero-students.webp" 
+                alt="Students preparing for an interview" 
+                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px]"
+              />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -419,33 +421,46 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* TESTIMONIALS (New) */}
+      {/* THE PREPPILOT APPROACH */}
       <section className="py-24 bg-gray-50 border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">Don't Just Take Our Word For It</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">See what other candidates are saying about PrepPilot AI.</p>
+            <p className="text-sm font-bold tracking-widest text-indigo-600 uppercase mb-4">The PrepPilot Approach</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">Built for Better Interviews</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              Built around how real interviews actually work. Everything you need to practice realistically, understand your weaknesses, and improve with purpose.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { quote: "This AI helped me prepare for my Amazon interview. The system design questions were incredibly accurate to the real thing.", name: "Sarah J.", role: "Software Engineer", company: "Amazon" },
-              { quote: "Great resume-based questions. It literally extracted a project I did 3 years ago and grilled me on it. So glad I practiced!", name: "Michael T.", role: "Recent Graduate", company: "Student" },
-              { quote: "The feedback is brutal but necessary. It pointed out my filler words and helped me structure my answers much better.", name: "David L.", role: "Product Manager", company: "Fintech Startup" }
+              { 
+                title: "Practice Realistically", 
+                desc: "Practice with AI interviews designed around your role, experience, resume, and interview goals.", 
+                icon: MessageSquare,
+                badge: "Practice"
+              },
+              { 
+                title: "Understand Your Performance", 
+                desc: "Get structured feedback that helps you understand your strengths, weaknesses, and areas that need improvement.", 
+                icon: LineChart,
+                badge: "Insight"
+              },
+              { 
+                title: "Improve With Purpose", 
+                desc: "Turn interview feedback into targeted preparation so every practice session moves you forward.", 
+                icon: Target,
+                badge: "Feedback"
+              }
             ].map((t, i) => (
-              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 relative">
-                <div className="flex text-amber-400 mb-4">
-                  {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-4 h-4 fill-current" />)}
-                </div>
-                <p className="text-gray-700 italic mb-6">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg">
-                    {t.name.charAt(0)}
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 relative group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <t.icon className="w-6 h-6" />
                   </div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-500">{t.role}</div>
-                  </div>
+                  <Badge className="bg-slate-100 text-slate-600 border-none hover:bg-slate-200">{t.badge}</Badge>
                 </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{t.desc}</p>
               </motion.div>
             ))}
           </div>

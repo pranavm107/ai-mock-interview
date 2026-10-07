@@ -31,12 +31,13 @@ const HowItWorks: React.FC = () => {
     <div className="flex flex-col w-full bg-white font-sans selection:bg-indigo-100 overflow-x-hidden">
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-24 pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="absolute top-10 right-1/4 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-[100px] opacity-70 -z-10 animate-pulse"></div>
-        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-200/40 rounded-full blur-[100px] opacity-70 -z-10"></div>
-
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="z-10">
+      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-32 overflow-hidden px-6 lg:px-8 max-w-7xl mx-auto w-full bg-white">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Content Area */}
+          <motion.div
+            initial="hidden" animate="visible" variants={staggerContainer}
+            className="flex flex-col items-center text-center lg:items-start lg:text-left z-10"
+          >
             <motion.h1 variants={fadeUp} className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] mb-6">
               How <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">PrepPilot AI</span> Works
             </motion.h1>
@@ -45,26 +46,36 @@ const HowItWorks: React.FC = () => {
               Follow a simple step-by-step journey from uploading your resume to receiving personalized AI-powered interview feedback.
             </motion.p>
 
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4">
-              <Link to="/sign-up">
-                <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl px-8 h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link to="/sign-up" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl w-full sm:w-auto px-8 h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
                   Start Free Interview
                 </Button>
               </Link>
-              <Link to="/features">
-                <Button size="lg" variant="outline" className="rounded-xl px-8 h-14 text-lg font-semibold border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+              <Link to="/features" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="rounded-xl w-full sm:w-auto px-8 h-14 text-lg font-semibold border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
                   View Features
                 </Button>
               </Link>
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative w-full flex items-center justify-center">
-            <img 
-              src="/images/hero/how-it-works-hero-preparation.webp" 
-              alt="Candidate preparing for an interview" 
-              className="w-full h-auto max-w-[600px] object-contain rounded-2xl shadow-xl"
-            />
+          {/* Right Minimal Image */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.0, ease: "easeOut" }}
+            className="w-full flex justify-center lg:justify-end z-10 mt-12 lg:mt-0"
+          >
+            <div className="relative w-full max-w-[600px]">
+              {/* Soft inner white edge fade overlay */}
+              <div className="absolute inset-0 rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px] shadow-[inset_0_0_24px_rgba(255,255,255,0.6)] pointer-events-none z-10"></div>
+              <img 
+                src="/images/hero/how-it-works-hero-preparation.webp" 
+                alt="Candidate preparing for an interview" 
+                className="w-full h-auto aspect-[4/3] object-cover rounded-tl-[32px] rounded-tr-[8px] rounded-br-[32px] rounded-bl-[8px]"
+              />
+            </div>
           </motion.div>
         </div>
       </section>
