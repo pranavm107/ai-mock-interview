@@ -9,8 +9,9 @@ import { SUPPORTED_LANGUAGES, getDefaultLanguage } from '../config/codingLanguag
 import type { CodingLanguage } from '../config/codingLanguages';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SubmissionResult, TestCaseResult } from '../types/evaluation';
-import type { CodingSessionMode, CodingIntegrityState, IntegritySignal } from '../types/coding';
+import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEnforcementState, CodingStrikeState } from '../types/coding';
 import { createIntegrityDetector, IntegrityDetectionService } from '../services/coding/integrityDetectionService';
+import { createStrikeEnforcementService, StrikeEnforcementService } from '../services/coding/strikeEnforcementService';
 
 const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
   const colors = {
@@ -55,6 +56,20 @@ const CodingWorkspace: React.FC = () => {
   const [integritySignals, setIntegritySignals] = useState<IntegritySignal[]>([]);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const detectorRef = useRef<IntegrityDetectionService | null>(null);
+  const strikeEngineRef = useRef<StrikeEnforcementService>(createStrikeEnforcementService());
+  const [enforcementState, setEnforcementState] = useState<CodingEnforcementState>('ACTIVE');
+  const [strikeState, setStrikeState] = useState<CodingStrikeState | null>(null);
+  const [currentWarningMsg, setCurrentWarningMsg] = useState<string>('');
+
+  const mapSignalToWarningMsg = (signalType: string) => {
+    switch (signalType) {
+      case 'TAB_SWITCH': return 'Browser tab visibility changed.';
+      case 'WINDOW_BLUR': return 'The coding window lost focus.';
+      case 'FULLSCREEN_EXIT': return 'Fullscreen mode was exited.';
+      case 'NAVIGATION_ATTEMPT': return 'A navigation attempt was detected.';
+      default: return 'An unexpected browser event was detected.';
+    }
+  };
 
   // Fullscreen sync and detector lifecycle
   useEffect(() => {
@@ -77,10 +92,30 @@ const CodingWorkspace: React.FC = () => {
           sessionId,
           onSignal: (signal) => {
             setIntegritySignals(prev => [...prev, signal]);
+            
+            // Process the signal through C8 Strike Engine
+            const res = strikeEngineRef.current.processSignal(signal);
+            if (res.applied) {
+              setEnforcementState(res.enforcementState);
+              setStrikeState(strikeEngineRef.current.getState());
+              setCurrentWarningMsg(mapSignalToWarningMsg(signal.type));
+
+              if (res.enforcementState === 'TERMINATED') {
+                // Exit fullscreen
+                if (document.fullscreenElement) {
+                  document.exitFullscreen().catch(console.error);
+                }
+                // Stop detection
+                detectorRef.current?.stop();
+                setIntegrityState('ENDED');
+              }
+            }
           }
         });
       }
-      detectorRef.current.start();
+      if (enforcementState !== 'TERMINATED') {
+        detectorRef.current.start();
+      }
     } else {
       if (detectorRef.current) {
         detectorRef.current.stop();
@@ -177,6 +212,7 @@ const CodingWorkspace: React.FC = () => {
   };
 
   const handleReset = () => {
+    if (enforcementState === 'TERMINATED') return;
     if (window.confirm('Are you sure you want to reset the code? Your current progress will be lost.')) {
       setCode(activeLanguage.starterCode);
       setOutputState('IDLE');
@@ -185,6 +221,7 @@ const CodingWorkspace: React.FC = () => {
   };
 
   const handleRunCode = async () => {
+    if (enforcementState === 'TERMINATED') return;
     setIsExecuting(true);
     setOutputState('RUNNING');
     setOutputMessage('Running...');
@@ -226,6 +263,7 @@ const CodingWorkspace: React.FC = () => {
   };
 
   const handleRunTests = async () => {
+    if (enforcementState === 'TERMINATED') return;
     if (!slug) return;
     setIsExecuting(true);
     setOutputState('RUNNING');
@@ -248,6 +286,7 @@ const CodingWorkspace: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (enforcementState === 'TERMINATED') return;
     if (!slug) return;
     setIsExecuting(true);
     setOutputState('RUNNING');
@@ -274,6 +313,9 @@ const CodingWorkspace: React.FC = () => {
     setConsentChecked(false);
     setFullscreenError(null);
     setIntegritySignals([]); // clear old debug signals if any
+    setEnforcementState('ACTIVE');
+    setStrikeState(null);
+    strikeEngineRef.current.reset();
     setSessionId(crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2));
   };
 
@@ -316,6 +358,9 @@ const CodingWorkspace: React.FC = () => {
     
     setTimeout(() => {
       setIntegrityState('INACTIVE');
+      setEnforcementState('ACTIVE');
+      setStrikeState(null);
+      strikeEngineRef.current.reset();
     }, 500);
   };
 
@@ -368,7 +413,8 @@ const CodingWorkspace: React.FC = () => {
             <select
               value={activeLanguage.id}
               onChange={handleLanguageChange}
-              className="appearance-none bg-slate-800 text-sm font-medium text-white px-4 py-1.5 pr-8 rounded border border-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+              disabled={enforcementState === 'TERMINATED'}
+              className="appearance-none bg-slate-800 text-sm font-medium text-white px-4 py-1.5 pr-8 rounded border border-slate-700 outline-none focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {SUPPORTED_LANGUAGES.map(lang => (
                 <option key={lang.id} value={lang.id}>{lang.label}</option>
@@ -379,7 +425,8 @@ const CodingWorkspace: React.FC = () => {
 
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium transition-colors p-2 rounded-md hover:bg-slate-800"
+            disabled={enforcementState === 'TERMINATED'}
+            className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium transition-colors p-2 rounded-md hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Reset to initial starter code"
           >
             <RefreshCcw size={14} /> Reset
@@ -531,7 +578,7 @@ const CodingWorkspace: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              disabled={isExecuting}
+              disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunCode}
               className="flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -539,7 +586,7 @@ const CodingWorkspace: React.FC = () => {
               Run Code
             </button>
             <button
-              disabled={isExecuting}
+              disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunTests}
               className="flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -547,7 +594,7 @@ const CodingWorkspace: React.FC = () => {
               Run Tests
             </button>
             <button
-              disabled={isExecuting}
+              disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleSubmit}
               className="flex items-center gap-1.5 px-5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
             >
@@ -766,6 +813,97 @@ const CodingWorkspace: React.FC = () => {
                   className="px-5 py-2.5 rounded-lg text-sm font-medium bg-slate-700 hover:bg-slate-600 text-white transition-colors"
                 >
                   End Session
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* STRIKE WARNING MODALS */}
+        {(enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING') && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-slate-900 border border-amber-900/50 rounded-xl max-w-md w-full shadow-2xl overflow-hidden"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="warning-modal-title"
+            >
+              <div className="p-6 border-b border-slate-800 bg-amber-950/20 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h2 id="warning-modal-title" className="text-xl font-bold text-amber-500">
+                    {enforcementState === 'FINAL_WARNING' ? 'Final Integrity Warning' : 'Integrity Warning'}
+                  </h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-slate-300 mb-4">
+                  {enforcementState === 'FINAL_WARNING' 
+                    ? 'Another integrity signal was detected:'
+                    : 'We detected an integrity signal:'}
+                </p>
+                <div className="bg-slate-950 p-4 rounded border border-slate-800 text-slate-300 font-medium mb-4">
+                  {currentWarningMsg}
+                </div>
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                  {enforcementState === 'FINAL_WARNING'
+                    ? 'This is your final warning. One more integrity strike will end this session.'
+                    : 'This is your first warning. Further integrity violations may result in session termination.'}
+                </p>
+                <button
+                  autoFocus
+                  onClick={() => setEnforcementState('ACTIVE')}
+                  className="w-full px-5 py-2.5 rounded-lg text-sm font-bold bg-amber-600 hover:bg-amber-500 text-white transition-colors"
+                >
+                  Continue Session
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* TERMINATED MODAL */}
+        {enforcementState === 'TERMINATED' && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-slate-900 border border-red-900/50 rounded-xl max-w-md w-full shadow-2xl overflow-hidden"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="terminated-modal-title"
+            >
+              <div className="p-6 border-b border-slate-800 bg-red-950/20 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                  <XCircle className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h2 id="terminated-modal-title" className="text-xl font-bold text-red-500">
+                    Integrity Session Terminated
+                  </h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-slate-300 mb-4 leading-relaxed">
+                  This coding session has been ended because the maximum number of integrity strikes was reached.
+                </p>
+                <div className="bg-slate-950 p-4 rounded border border-slate-800 mb-6 flex justify-between items-center">
+                  <span className="text-slate-400 text-sm font-bold uppercase tracking-wider">Strikes</span>
+                  <span className="text-red-500 font-bold text-lg">3 / 3</span>
+                </div>
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                  You can review your coding result, but this integrity session cannot be resumed.
+                </p>
+                <button
+                  autoFocus
+                  onClick={() => navigate('/coding')}
+                  className="w-full px-5 py-2.5 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-500 text-white transition-colors"
+                >
+                  Return to Coding
                 </button>
               </div>
             </motion.div>

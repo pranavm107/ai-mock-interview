@@ -68,4 +68,27 @@ export interface IntegritySignal {
   metadata?: Record<string, unknown>;
 }
 
+export type CodingStrikeLevel = 0 | 1 | 2 | 3;
+
+export type CodingEnforcementState =
+  | "ACTIVE"
+  | "WARNING"
+  | "FINAL_WARNING"
+  | "TERMINATED";
+
+export interface CodingStrikeState {
+  level: CodingStrikeLevel;
+  enforcementState: CodingEnforcementState;
+  lastStrikeAt: string | null;
+  lastSignalType: IntegrityEventType | null;
+}
+
+export interface StrikeResult {
+  applied: boolean;
+  level: CodingStrikeLevel;
+  enforcementState: CodingEnforcementState;
+  signal: IntegritySignal;
+}
+
+
 

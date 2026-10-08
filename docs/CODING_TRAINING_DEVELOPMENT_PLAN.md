@@ -181,14 +181,22 @@
 - **Privacy**: Does not record screen, keystrokes, clipboard, or sensitive metadata. Does not claim AI extension detection.
 - **Storage**: Temporary client-side debug storage only; server-side enforcement deferred to C8/C9.
 
-### C8: Three-Strike System
+### C8: Three-Strike Enforcement System
 **Goal**: Implement the 3-strike logic.
 **Scope**: Warning thresholds, session termination logic.
 **Out of scope**: Backend authority.
 **Dependencies**: C7
 **Expected outputs**: Client-side enforcement of strikes.
 **Verification requirements**: System warns and terminates appropriately.
-**Status**: Pending
+**Status**: COMPLETE
+
+**Implemented**:
+- **Strike State Engine**: Isolated deterministic logic in `StrikeEnforcementService` preventing race conditions.
+- **Signal Tracking**: Duplicate signals are tracked by `signal.id` preventing accidental double-strikes.
+- **Warnings**: Modals implemented for `Strike 1` and `Strike 2` preventing execution during warning states.
+- **Termination**: Strike 3 instantly triggers session termination, stops C7 detectors, drops fullscreen, and disables Run/Test/Submit features.
+- **Code Preservation**: User's editor and current state remains visible even after termination.
+- **Practice Mode Isolation**: The engine entirely detaches in normal practice sessions.
 
 ### C9: Server-Side Integrity Authority
 **Goal**: Move integrity authority to the backend.
