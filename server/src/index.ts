@@ -43,6 +43,7 @@ import dashboardRoutes from './routes/dashboardRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
+import codingRoutes from './routes/codingRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -56,6 +57,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/assessments', assessmentRoutes);
+app.use('/api/coding', codingRoutes);
 
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);

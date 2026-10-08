@@ -1,0 +1,330 @@
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Play, CheckCircle2, Clock, Calendar, Hash, BookOpen, Sparkles, ChevronRight, AlertCircle, RefreshCcw } from 'lucide-react';
+import type { CodingDashboardData } from '../types/coding';
+import { codingFrontendService } from '../services/codingFrontendService';
+import { useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
+
+const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
+  const colors = {
+    EASY: 'bg-green-100 text-green-700 border-green-200',
+    MEDIUM: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    HARD: 'bg-red-100 text-red-700 border-red-200'
+  };
+  const color = colors[difficulty as keyof typeof colors] || colors.EASY;
+  const label = difficulty.charAt(0) + difficulty.slice(1).toLowerCase();
+
+  return (
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${color}`}>
+      {label}
+    </span>
+  );
+};
+
+const formatDateKey = (dateKey?: string) => {
+  if (!dateKey) return "Today's Challenge";
+  try {
+    const [year, month, day] = dateKey.split('-');
+    if (!year || !month || !day) return "Today's Challenge";
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    if (isNaN(d.getTime())) return "Today's Challenge";
+    return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+  } catch {
+    return "Today's Challenge";
+  }
+};
+
+const CodingDashboard: React.FC = () => {
+  const { getToken } = useAuth();
+  const navigate = useNavigate();
+  const [data, setData] = useState<CodingDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("No auth token available");
+      
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const result = await codingFrontendService.getDashboardData(token, tz);
+      setData(result);
+    } catch (err) {
+      console.error('Failed to load coding dashboard', err);
+      setError('We couldn\'t load your coding practice. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto animate-pulse">
+        <div className="h-24 bg-slate-200 rounded-2xl w-full"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-64 bg-slate-200 rounded-2xl"></div>
+          <div className="h-64 bg-slate-200 rounded-2xl"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="bg-red-50 p-4 rounded-full mb-4">
+          <AlertCircle className="w-10 h-10 text-red-500" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h2>
+        <p className="text-slate-600 mb-6 max-w-md">{error}</p>
+        <button
+          onClick={loadData}
+          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+        >
+          <RefreshCcw size={18} />
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  const { dailyAssignment, recentTasks, progress } = data!;
+
+  const isNewUser = progress.problemsAssigned === 0;
+
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-[24px] text-white shadow-xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-500/20 blur-3xl pointer-events-none"></div>
+        <div className="relative z-10 max-w-2xl">
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+            <Sparkles className="text-blue-400" />
+            Coding Practice
+          </h1>
+          <p className="text-slate-300 text-lg leading-relaxed">
+            Build your problem-solving skills through focused, personalized coding practice.
+          </p>
+        </div>
+      </div>
+
+      {!dailyAssignment ? (
+        <div className="bg-white p-12 rounded-[24px] border border-slate-200 shadow-sm text-center flex flex-col items-center">
+          <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
+            <Clock size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Coding Practice is getting ready</h2>
+          <p className="text-slate-500 max-w-md">
+            There aren't enough coding challenges available yet. Please check back soon as we add more content.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Calendar className="text-blue-600" size={20} />
+                  TODAY'S CHALLENGE
+                </h2>
+                <span className="text-sm font-medium text-slate-500">
+                  {formatDateKey(dailyAssignment.dateKey)}
+                </span>
+              </div>
+              
+              <div className="p-8 flex flex-col gap-6">
+                {isNewUser && (
+                  <div className="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 border border-blue-100">
+                    <Sparkles size={18} className="text-blue-600" />
+                    Start Coding Practice: Your first challenge is ready. We'll personalize future challenges as you build history.
+                  </div>
+                )}
+                
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 mb-1">
+                    <DifficultyBadge difficulty={dailyAssignment.difficulty} />
+                    <span className="text-sm font-semibold text-slate-500 flex items-center gap-1">
+                      <Hash size={14} />
+                      {dailyAssignment.topic}
+                    </span>
+                    {dailyAssignment.problem?.estimatedMinutes && (
+                      <span className="text-sm font-semibold text-slate-500 flex items-center gap-1">
+                        <Clock size={14} />
+                        {dailyAssignment.problem.estimatedMinutes} min
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900">{dailyAssignment.problem?.title || 'Daily Challenge'}</h3>
+                </div>
+
+                <p className="text-slate-600 leading-relaxed text-base">
+                  {dailyAssignment.problem?.description || 'Complete your daily coding challenge.'}
+                </p>
+
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-start gap-3">
+                  <Sparkles className="text-purple-500 shrink-0 mt-0.5" size={20} />
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 mb-1">Recommended for you</span>
+                    <span className="text-sm text-slate-600">{dailyAssignment.reason}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+                  <div className="flex items-center gap-2">
+                    {dailyAssignment.status === 'COMPLETED' ? (
+                      <span className="flex items-center gap-2 text-green-600 font-semibold text-sm">
+                        <CheckCircle2 size={18} /> Completed
+                      </span>
+                    ) : dailyAssignment.status === 'IN_PROGRESS' ? (
+                      <span className="flex items-center gap-2 text-yellow-600 font-semibold text-sm">
+                        <Play size={18} /> In Progress
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2 text-slate-500 font-semibold text-sm">
+                        <BookOpen size={18} /> Not Started
+                      </span>
+                    )}
+                  </div>
+                  <button 
+                    disabled={false}
+                    onClick={() => {
+                      if (dailyAssignment.problem?.slug) {
+                        navigate(`/coding/problem/${dailyAssignment.problem.slug}`);
+                      }
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors group"
+                  >
+                    View Challenge
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">Recent Practice</h2>
+              </div>
+              <div className="p-6">
+                {recentTasks.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <p>Your coding activity will appear here<br/>as you complete challenges.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {recentTasks.map(task => (
+                      <div key={task.id} className="py-4 flex items-center justify-between group">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                            {task.problem?.title || 'Unknown Problem'}
+                          </span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <DifficultyBadge difficulty={task.difficulty} />
+                            <span className="text-slate-500">&middot;</span>
+                            <span className="text-slate-500 font-medium">{task.topic}</span>
+                          </div>
+                        </div>
+                        <div>
+                          {task.status === 'COMPLETED' ? (
+                            <span className="text-green-600 text-sm font-semibold flex items-center gap-1"><CheckCircle2 size={16}/> Completed</span>
+                          ) : task.status === 'IN_PROGRESS' ? (
+                            <span className="text-yellow-600 text-sm font-semibold flex items-center gap-1"><Play size={16}/> In Progress</span>
+                          ) : (
+                            <span className="text-slate-400 text-sm font-semibold">Not Started</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">Progress</h2>
+              </div>
+              <div className="p-6 flex flex-col gap-4">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-slate-500">Assigned</span>
+                    <span className="text-2xl font-bold text-slate-900">{progress.problemsAssigned}</span>
+                  </div>
+                  <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                    <Calendar size={20} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-slate-500">Completed</span>
+                    <span className="text-2xl font-bold text-slate-900">{progress.problemsCompleted}</span>
+                  </div>
+                  <div className="h-10 w-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                    <CheckCircle2 size={20} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-slate-500">Topics</span>
+                    <span className="text-2xl font-bold text-slate-900">{progress.topicsPracticed.length}</span>
+                  </div>
+                  <div className="h-10 w-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                    <Hash size={20} />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">Topics Practiced</h2>
+              </div>
+              <div className="p-6">
+                {progress.topicsPracticed.length === 0 ? (
+                  <p className="text-slate-500 text-sm text-center py-4">No topics practiced yet.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {progress.topicsPracticed.map(topic => (
+                      <span key={topic} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg border border-slate-200">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CodingDashboard;

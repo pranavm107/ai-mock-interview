@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Zap,
   Compass,
-  BookOpen
+  BookOpen,
+  Code2
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
@@ -52,6 +53,12 @@ const navGroups: NavGroup[] = [
         path: '/preparation', 
         icon: BookOpen,
         activePaths: ['/preparation']
+      },
+      {
+        name: 'Coding Practice',
+        path: '/coding',
+        icon: Code2,
+        activePaths: ['/coding']
       }
     ]
   },
