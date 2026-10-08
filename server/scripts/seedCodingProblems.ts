@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../src/config/firebaseAdmin';
+import { codingTestCases } from './codingTestCases';
 
 const problems = [
   // EASY (15 problems)
@@ -380,8 +381,11 @@ async function seed() {
     const docRef = db.collection('codingProblems').doc(p.slug);
     const doc = await docRef.get();
     
+    const testCases = codingTestCases[p.slug] || [];
+    
     const problemData = {
       ...p,
+      testCases,
       isActive: true,
       updatedAt: FieldValue.serverTimestamp()
     };

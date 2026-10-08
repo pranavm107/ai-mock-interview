@@ -1,5 +1,12 @@
 import { Timestamp } from 'firebase-admin/firestore';
 
+export interface CodingTestCase {
+  id: string;
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
+}
+
 export interface CodingProblem {
   id: string;
   slug: string;
@@ -13,6 +20,7 @@ export interface CodingProblem {
     output: string;
     explanation?: string;
   }[];
+  testCases?: CodingTestCase[];
   estimatedMinutes?: number;
   isActive: boolean;
   createdAt: Timestamp | any;

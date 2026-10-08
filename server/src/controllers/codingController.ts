@@ -37,12 +37,30 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
 
     const { slug } = req.params;
     
-    const snapshot = await db.collection('codingProblems').doc(slug).get();
+    const snapshot = await db.collection('codingProblems').doc(slug as string).get();
     if (!snapshot.exists) {
       return res.status(404).json({ success: false, error: 'Problem not found' });
     }
 
-    const problem = { id: snapshot.id, ...snapshot.data() };
+    const rawData = snapshot.data();
+    let safeTestCases = undefined;
+
+    if (rawData && Array.isArray(rawData.testCases)) {
+      safeTestCases = rawData.testCases
+        .filter(tc => !tc.isHidden)
+        .map(tc => ({
+          id: tc.id,
+          input: tc.input,
+          expectedOutput: tc.expectedOutput,
+          isHidden: false
+        }));
+    }
+
+    const problem = { 
+      id: snapshot.id, 
+      ...rawData,
+      testCases: safeTestCases
+    };
     res.json({ success: true, data: problem });
   } catch (error: any) {
     console.error('Error fetching problem details:', error);

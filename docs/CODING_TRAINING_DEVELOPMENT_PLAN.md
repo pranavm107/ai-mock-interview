@@ -69,8 +69,31 @@
 **Out of scope**: Actual code execution backend.
 **Dependencies**: C2
 **Expected outputs**: Functional code editor UI.
-**Verification requirements**: Editor behaves correctly, language selection updates UI.
-**Status**: Pending
+**Verification requirements**: Workspace layout and language toggles correctly without errors.
+**Status**: Complete
+
+**Implemented**:
+- **Workspace Architecture**: `CodingWorkspace.tsx` modular split layout (Left: problem details & examples; Right: Editor & Output).
+- **Editor Choice**: Integrated `@monaco-editor/react` (Monaco) configured with JetBrains Mono, vs-dark base theme, and rich syntax support.
+- **Supported Languages**: Centralized configuration (`config/codingLanguages.ts`) for Python, Java, C++, C, JavaScript, TypeScript, Go, Rust, and C#.
+- **Starter Code**: Defined localized starting templates mapping per language. Editor updates dynamically on switch.
+- **Run Code Behavior**: Added intentional placeholder UI reflecting "Code execution is being prepared. Secure execution will be enabled in Phase C4."
+- **Submit Behavior**: Added intentional placeholder UI reflecting "Submission evaluation will be available after secure code execution is implemented (Phase C4)."
+- **Test Case UI**: Added examples mapped safely from C2 metadata. Did not expose hidden tests.
+- **Responsive Behavior**: Stacked columns via Tailwind for small devices (`md:flex-row`). Handled overflow.
+- **Authentication**: Relying safely on `ProtectedLayout` + `useAuth()`. Uses deterministic `getToken()`.
+- **Known Limitations**: C3 is strictly UI boundary layout. No code is transmitted to any unsandboxed environments. 
+
+**C3 UI Refinement / UX Hardening (Completed)**:
+- **Collapsed Sidebar**: `Sidebar.tsx` intelligently auto-collapses on workspace mount for maximum horizontal space.
+- **Draggable Splitter**: Implemented a responsive React splitter tracking `mousemove`, bounding left width (30-70%), and persisting layout in localStorage (`coding-workspace-split`).
+- **Unified IDE Header**: Merged individual panel headers into a unified global workspace header for a cleaner IDE experience.
+- **Editor Alignment & Indentation Improvements**: Configured Monaco strictly: `wordWrap: "off"`, `tabSize: 4`, `insertSpaces: true` ensuring Python and Java templates render syntactically and visually correct without squashing lines.
+- **Responsive Workspace**: Workspace expands to use available viewport securely (`min-w-0`, `shrink-0`). Mobile falls back to a clean vertical stack.
+- **Performance Considerations**: Draggable UI utilizes robust ref updates for `isResizing` and limits renders efficiently.
+- **Output Improvements**: Retained 30% default layout flex with strict C3 placeholder logic preserving the security boundary.
+
+**Next phase**: C4
 
 ### C4: Secure Code Execution Engine
 **Goal**: Build a secure backend execution environment.
@@ -78,8 +101,28 @@
 **Out of scope**: Advanced evaluation metrics.
 **Dependencies**: C3
 **Expected outputs**: Working secure execution API.
-**Verification requirements**: Code runs securely, resource limits are enforced.
-**Status**: Pending
+**Verification requirements**: Code runs securely, resource limits are enforced. Fails safely when sandbox unavailable. No raw host shell usage.
+**Status**: COMPLETE (Real sandbox verification passed)
+
+**Implemented**:
+- **Execution Architecture**: Centralized ExecutionService exposing safe orchestration behind `POST /api/coding/execute`.
+- **Sandbox Technology**: Uses `dockerode` to strictly isolate Python inside a `python:3.12-alpine` container without unsafe host fallback.
+- **Resource Limits**: Concurrency limit max 10. Memory 256m, CPU 1, PIDs strict limit (64) enforced at container level. OUTPUT_LIMIT safely captured to 1MB. Source/Stdin max 256KB/64KB via validation. TIMEOUT enforced after 5s.
+- **Security Limits**: Container mounts tmpfs read-write for python workspace only. Root filesystem is strictly read-only. Environment is stripped of host variables. Guest user execution without capabilities and no network mapping (`--network none`).
+- **API**: Returns standard `ExecutionResult` payload parsing stderr/stdout uniformly.
+- **Run Code**: Connected frontend to the new API endpoint resolving actual status outputs seamlessly with existing layout limits.
+- **No Unsafe Execution**: Verified zero unsafe `child_process.exec`, `eval()`, or `spawn` containing user code exists in the application server logic.
+
+**Supported runtimes**:
+- Python (Actual verified execution)
+
+**Unsupported runtimes**:
+- Java, C++, C, JavaScript, TypeScript, Go, Rust, C# are NOT YET SUPPORTED safely because they lack a verified real sandbox runtime on this host.
+
+**Production requirements**:
+- Production architecture natively requires an isolated execution environment distinct from the web application context. Deployments must utilize sandboxes capable of `--network none` and `--read-only` root filesystems, with stringent CPU and PID limits.
+
+**Next phase**: C5
 
 ### C5: Test & Evaluation Engine
 **Goal**: Implement test evaluation logic.
@@ -88,7 +131,17 @@
 **Dependencies**: C4
 **Expected outputs**: Pass/fail test results for submissions.
 **Verification requirements**: Accurate test evaluation.
-**Status**: Pending
+**Status**: COMPLETE
+
+**Implemented**:
+- **Test Case Data Model**: `testCases` added to `CodingProblem` schema in Firestore. Each case has `id`, `input`, `expectedOutput`, `isHidden`.
+- **Public & Hidden Separation**: `getProblemBySlug` strips all hidden test cases from the response payload before sending to frontend.
+- **Problem Seed Data**: Migrated all 30 problems to include at least 2 public cases and 3 hidden cases.
+- **Deterministic Evaluation**: Implemented `evaluationService` in the backend which sequentially executes code for each test case via the C4 `executionService`. Normalizes line endings and whitespace for strict equality comparisons.
+- **Run Tests (Public)**: Exposed via `POST /api/coding/run-tests`. Validates user solution against public test cases only and returns inputs/outputs.
+- **Submit (All Tests)**: Exposed via `POST /api/coding/submit`. Evaluates against both public and hidden test cases, determines a final `SubmissionStatus` (e.g. ACCEPTED, WRONG_ANSWER, TIMEOUT), computes a percentage score, and returns safe results without exposing hidden cases.
+- **Persistence**: Final submission results are saved to the `codingSubmissions` Firestore collection. History fetchable via `GET /api/coding/submissions`.
+- **Frontend UI**: Integrated Test Results panel showing checkmarks/crosses and execution errors cleanly for both Run Tests and Submit actions.
 
 ### C6: Coding Integrity Mode UX
 **Goal**: Design the user experience for Integrity Mode.
@@ -97,7 +150,18 @@
 **Dependencies**: C5
 **Expected outputs**: UI flow for integrity mode.
 **Verification requirements**: Screens flow correctly.
-**Status**: Pending
+**Status**: COMPLETE
+
+**Implemented**:
+- **Practice Mode**: Normal coding experience is default and retains all C3/C4/C5 functionality.
+- **Integrity Mode Entry**: Explicit "Start Integrity Mode" entry point added to workspace header.
+- **Integrity Briefing**: Clean modal outlining rules (stay active, use allowed resources, etc).
+- **Explicit Consent**: Checkbox enforced before the Start button is enabled.
+- **Fullscreen Entry**: Utilizes browser Fullscreen API with error handling for unsupported/denied environments.
+- **Active UI State**: Unobtrusive "● Integrity Mode Active" banner and "End Session" button replacing entry button.
+- **Session Exit**: Provides "End Session" confirmation dialog that cleanly exits fullscreen and resets to Practice Mode without losing code state.
+- **Fullscreen Sync**: Basic `fullscreenchange` listener syncs state if user exits via Esc key.
+- **Execution**: Sandbox execution, test evaluation, and submissions continue operating safely.
 
 ### C7: Integrity Detection Engine
 **Goal**: Build the client-side detection engine.
@@ -106,7 +170,16 @@
 **Dependencies**: C6
 **Expected outputs**: Client-side event detection.
 **Verification requirements**: Events are correctly identified.
-**Status**: Pending
+**Status**: COMPLETE
+
+**Implemented**:
+- **Signals**: Reliably detects `TAB_SWITCH`, `WINDOW_BLUR`, `FULLSCREEN_EXIT`, and `NAVIGATION_ATTEMPT`.
+- **Isolation**: Detection logic isolated to `IntegrityDetectionService`.
+- **Gating**: Detectors are strictly active only when `integrityState === 'ACTIVE'`.
+- **Deduplication**: Suppresses redundant signals (e.g. `WINDOW_BLUR` alongside `TAB_SWITCH` within 1000ms window).
+- **Cleanup**: Strict removal of DOM listeners on `stop()` and React unmount to prevent leaks and React Strict Mode duplicates.
+- **Privacy**: Does not record screen, keystrokes, clipboard, or sensitive metadata. Does not claim AI extension detection.
+- **Storage**: Temporary client-side debug storage only; server-side enforcement deferred to C8/C9.
 
 ### C8: Three-Strike System
 **Goal**: Implement the 3-strike logic.

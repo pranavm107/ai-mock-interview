@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '../Logo';
@@ -95,6 +95,12 @@ export const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useUser();
+
+  useEffect(() => {
+    if (location.pathname.includes('/workspace')) {
+      setIsCollapsed(true);
+    }
+  }, [location.pathname]);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 

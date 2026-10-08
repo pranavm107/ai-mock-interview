@@ -152,7 +152,7 @@ const CodingProblemDetails: React.FC = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => {
-            alert("Coding workspace will be available in Phase C3. Great job getting ready!");
+            navigate(`/coding/problem/${problem.slug}/workspace`);
           }}
           className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white text-lg font-bold rounded-2xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/40 transition-all"
         >

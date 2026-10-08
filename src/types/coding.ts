@@ -42,3 +42,30 @@ export interface CodingDashboardData {
     topicsPracticed: string[];
   };
 }
+
+export type CodingSessionMode = "PRACTICE" | "INTEGRITY";
+
+export type CodingIntegrityState =
+  | "INACTIVE"
+  | "CONSENT_REQUIRED"
+  | "STARTING"
+  | "ACTIVE"
+  | "ENDING"
+  | "ENDED";
+
+export type IntegrityEventType =
+  | "TAB_SWITCH"
+  | "WINDOW_BLUR"
+  | "FULLSCREEN_EXIT"
+  | "NAVIGATION_ATTEMPT"
+  | "HEARTBEAT_FAILURE";
+
+export interface IntegritySignal {
+  id: string;
+  type: IntegrityEventType;
+  timestamp: string;
+  sessionId: string;
+  metadata?: Record<string, unknown>;
+}
+
+
