@@ -46,6 +46,7 @@ const CodingWorkspace: React.FC = () => {
   const [outputState, setOutputState] = useState<'IDLE' | 'RUNNING' | 'FINISHED' | 'EVALUATED'>('IDLE');
   const [outputMessage, setOutputMessage] = useState<string>('Run your code to see the output here.');
   const [evaluationResult, setEvaluationResult] = useState<SubmissionResult | null>(null);
+  const [activeTab, setActiveTab] = useState<'CONSOLE' | 'TESTS'>('CONSOLE');
 
   // Integrity Session State
   const [sessionMode, setSessionMode] = useState<CodingSessionMode>('PRACTICE');
@@ -148,15 +149,26 @@ const CodingWorkspace: React.FC = () => {
     const saved = localStorage.getItem('coding-workspace-split');
     return saved ? parseInt(saved, 10) : 45;
   });
+  const [topHeight, setTopHeight] = useState(() => {
+    const saved = localStorage.getItem('coding-workspace-vsplit');
+    return saved ? parseInt(saved, 10) : 65;
+  });
+
   const isResizing = useRef(false);
+  const isVResizing = useRef(false);
 
   useEffect(() => {
     localStorage.setItem('coding-workspace-split', leftWidth.toString());
   }, [leftWidth]);
 
+  useEffect(() => {
+    localStorage.setItem('coding-workspace-vsplit', topHeight.toString());
+  }, [topHeight]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     isResizing.current = true;
+    document.body.style.userSelect = 'none';
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
@@ -164,15 +176,39 @@ const CodingWorkspace: React.FC = () => {
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing.current) return;
     const newLeftWidth = (e.clientX / window.innerWidth) * 100;
-    if (newLeftWidth >= 30 && newLeftWidth <= 70) {
+    if (newLeftWidth >= 20 && newLeftWidth <= 80) {
       setLeftWidth(newLeftWidth);
     }
   };
 
   const handleMouseUp = () => {
     isResizing.current = false;
+    document.body.style.userSelect = '';
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleVMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isVResizing.current = true;
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', handleVMouseMove);
+    document.addEventListener('mouseup', handleVMouseUp);
+  };
+
+  const handleVMouseMove = (e: MouseEvent) => {
+    if (!isVResizing.current) return;
+    const newTopHeight = (e.clientY / window.innerHeight) * 100;
+    if (newTopHeight >= 30 && newTopHeight <= 85) {
+      setTopHeight(newTopHeight);
+    }
+  };
+
+  const handleVMouseUp = () => {
+    isVResizing.current = false;
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', handleVMouseMove);
+    document.removeEventListener('mouseup', handleVMouseUp);
   };
 
   const handleEditorWillMount = (monaco: any) => {
@@ -235,6 +271,7 @@ const CodingWorkspace: React.FC = () => {
     setIsExecuting(true);
     setOutputState('RUNNING');
     setOutputMessage('Running...');
+    setActiveTab('CONSOLE');
     
     try {
       const token = await getToken();
@@ -278,6 +315,7 @@ const CodingWorkspace: React.FC = () => {
     setIsExecuting(true);
     setOutputState('RUNNING');
     setOutputMessage('Running public tests...');
+    setActiveTab('TESTS');
     setEvaluationResult(null);
     
     try {
@@ -301,6 +339,7 @@ const CodingWorkspace: React.FC = () => {
     setIsExecuting(true);
     setOutputState('RUNNING');
     setOutputMessage('Evaluating submission...');
+    setActiveTab('TESTS');
     setEvaluationResult(null);
     
     try {
@@ -577,7 +616,10 @@ const CodingWorkspace: React.FC = () => {
       <div className="w-full flex-1 h-full flex flex-col bg-slate-900 min-w-0">
 
         {/* Editor Area */}
-        <div className="flex-1 relative">
+        <div 
+          className="relative w-full flex-shrink-0" 
+          style={{ height: window.innerWidth >= 768 ? `${topHeight}%` : '60%' }}
+        >
           <Editor
             height="100%"
             language={activeLanguage.monacoLanguage}
@@ -602,126 +644,164 @@ const CodingWorkspace: React.FC = () => {
           />
         </div>
 
+        {/* HORIZONTAL SPLITTER (Desktop only) */}
+        <div
+          className="hidden md:flex h-1.5 hover:h-2 w-full bg-transparent hover:bg-blue-500/50 cursor-row-resize z-10 items-center justify-center shrink-0 transition-colors"
+          onMouseDown={handleVMouseDown}
+          role="separator"
+          aria-label="Resize editor and output panels"
+        >
+          <div className="w-8 h-0.5 bg-slate-600 rounded-full" />
+        </div>
+
         {/* Output Panel Header & Controls */}
-        <div className="h-14 border-t border-slate-800 flex items-center justify-between px-4 shrink-0 bg-slate-900">
-          <div className="text-sm font-medium text-slate-400 flex items-center gap-2">
-            Output
-            {outputState === 'RUNNING' && <Loader2 size={14} className="animate-spin text-blue-500" />}
+        <div className="h-12 border-y border-slate-800 flex items-center justify-between px-2 md:px-4 shrink-0 bg-slate-900 overflow-x-auto custom-scrollbar">
+          <div className="flex items-center">
+            <button 
+              onClick={() => setActiveTab('CONSOLE')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'CONSOLE' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}
+            >
+              Console
+            </button>
+            <button 
+              onClick={() => setActiveTab('TESTS')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'TESTS' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}
+            >
+              Test Results
+            </button>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunCode}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {isExecuting && outputMessage === 'Running...' ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} className="text-emerald-400" />}
+              {isExecuting && activeTab === 'CONSOLE' ? <Loader2 size={12} className="animate-spin text-emerald-400" /> : <Play size={12} className="text-emerald-400" />}
               Run Code
             </button>
             <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunTests}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {isExecuting && outputMessage === 'Running public tests...' ? <Loader2 size={14} className="animate-spin" /> : <Beaker size={14} className="text-blue-400" />}
+              {isExecuting && activeTab === 'TESTS' && outputMessage.includes('public') ? <Loader2 size={12} className="animate-spin text-blue-400" /> : <Beaker size={12} className="text-blue-400" />}
               Run Tests
             </button>
             <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleSubmit}
-              className="flex items-center gap-1.5 px-5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20 whitespace-nowrap"
             >
-              {isExecuting && outputMessage === 'Evaluating submission...' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              {isExecuting && activeTab === 'TESTS' && outputMessage.includes('Evaluat') ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
               Submit
             </button>
           </div>
         </div>
 
         {/* Output Area */}
-        <div className="h-[30%] min-h-[200px] bg-[#09090b] border-t border-slate-800 p-4 overflow-y-auto font-mono text-sm">
+        <div className="flex-1 bg-[#09090b] p-4 overflow-y-auto custom-scrollbar font-mono text-sm relative">
           <AnimatePresence mode="wait">
             <motion.div
-              key={outputState + outputMessage}
+              key={activeTab + (activeTab === 'CONSOLE' ? outputState : '')}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
               transition={{ duration: 0.15 }}
+              className="absolute inset-4"
             >
-              {outputState === 'IDLE' ? (
-                <div className="text-slate-500">{outputMessage}</div>
-              ) : outputState === 'RUNNING' ? (
-                <div className="text-slate-400 flex items-center gap-2">
-                  <Loader2 size={14} className="animate-spin text-blue-500" />
-                  {outputMessage}
-                </div>
-              ) : outputState === 'EVALUATED' && evaluationResult ? (
-                <div className="flex flex-col gap-4">
-                  <div className={`p-4 rounded border flex items-center justify-between ${
-                    evaluationResult.status === 'ACCEPTED' ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-400' :
-                    evaluationResult.status === 'WRONG_ANSWER' ? 'bg-red-950/30 border-red-900/50 text-red-400' :
-                    'bg-yellow-950/30 border-yellow-900/50 text-yellow-400'
-                  }`}>
-                    <div className="flex items-center gap-2 font-bold text-lg">
-                      {evaluationResult.status === 'ACCEPTED' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
-                      {evaluationResult.status === 'ACCEPTED' ? 'Accepted' : 
-                       evaluationResult.status === 'WRONG_ANSWER' ? 'Wrong Answer' :
-                       evaluationResult.status === 'TIMEOUT' ? 'Time Limit Exceeded' :
-                       evaluationResult.status === 'MEMORY_LIMIT_EXCEEDED' ? 'Memory Limit Exceeded' :
-                       evaluationResult.status === 'OUTPUT_LIMIT_EXCEEDED' ? 'Output Limit Exceeded' :
-                       'Runtime Error'}
-                    </div>
-                    <div className="text-sm font-medium">
-                      {evaluationResult.passedTests} / {evaluationResult.totalTests} passed &nbsp;&bull;&nbsp; Score: {evaluationResult.score}
-                    </div>
+              {activeTab === 'CONSOLE' ? (
+                // CONSOLE TAB
+                outputState === 'IDLE' ? (
+                  <div className="text-slate-500">{outputMessage}</div>
+                ) : outputState === 'RUNNING' && !outputMessage.includes('Evaluating') && !outputMessage.includes('public tests') ? (
+                  <div className="text-slate-400 flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin text-blue-500" />
+                    {outputMessage}
                   </div>
-                  
-                  <div className="space-y-4">
-                    {evaluationResult.testResults.map((tr: TestCaseResult, i: number) => (
-                      <div key={tr.testCaseId || i} className={`p-4 rounded border ${tr.status === 'PASSED' ? 'bg-emerald-950/10 border-emerald-900/30' : 'bg-red-950/10 border-red-900/30'}`}>
-                        <div className="flex items-center gap-2 font-semibold mb-2 text-slate-300">
-                          {tr.status === 'PASSED' ? <CheckCircle2 size={16} className="text-emerald-500" /> : <XCircle size={16} className="text-red-500" />}
-                          {tr.isHidden ? 'Hidden Test Case' : `Test Case ${i + 1}`}
-                          <span className={`ml-auto text-xs font-normal ${tr.status === 'PASSED' ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {tr.status === 'PASSED' ? 'Passed' : 'Failed'}
-                          </span>
-                        </div>
-                        
-                        {!tr.isHidden && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mt-3">
-                            <div>
-                              <div className="text-slate-500 mb-1">Input:</div>
-                              <div className="bg-slate-900 p-2 rounded text-slate-300 font-mono whitespace-pre-wrap">{tr.input}</div>
-                            </div>
-                            <div>
-                              <div className="text-slate-500 mb-1">Expected Output:</div>
-                              <div className="bg-slate-900 p-2 rounded text-emerald-300 font-mono whitespace-pre-wrap">{tr.expectedOutput}</div>
-                            </div>
-                            {tr.actualOutput !== undefined && (
-                              <div className="md:col-span-2">
-                                <div className="text-slate-500 mb-1">Actual Output:</div>
-                                <div className={`bg-slate-900 p-2 rounded font-mono whitespace-pre-wrap ${tr.status === 'PASSED' ? 'text-emerald-300' : 'text-red-300'}`}>
-                                  {tr.actualOutput || <span className="opacity-50 italic">No output</span>}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        
-                        {tr.error && (
-                          <div className="mt-3 text-xs">
-                            <div className="text-slate-500 mb-1">Error:</div>
-                            <div className="bg-red-950/30 text-red-400 p-2 rounded font-mono whitespace-pre-wrap border border-red-900/30">
-                              {tr.error}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                ) : (outputState === 'FINISHED' || (outputState === 'EVALUATED' && !outputMessage.includes('Evaluating'))) ? (
+                  <div className="text-slate-300 whitespace-pre-wrap">
+                    {outputMessage}
                   </div>
-                </div>
+                ) : (
+                  <div className="text-slate-500">Run code to see console output.</div>
+                )
               ) : (
-                <div className="text-blue-300 border border-blue-900/50 bg-blue-950/20 p-4 rounded whitespace-pre-wrap">
-                  {outputMessage}
-                </div>
+                // TESTS TAB
+                outputState === 'IDLE' ? (
+                  <div className="text-slate-500">Run tests or submit to see results here.</div>
+                ) : outputState === 'RUNNING' && (outputMessage.includes('Evaluating') || outputMessage.includes('public tests')) ? (
+                  <div className="text-slate-400 flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin text-blue-500" />
+                    {outputMessage}
+                  </div>
+                ) : outputState === 'EVALUATED' && evaluationResult ? (
+                  <div className="flex flex-col gap-4 pb-8">
+                    <div className={`p-4 rounded border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+                      evaluationResult.status === 'ACCEPTED' ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-400' :
+                      evaluationResult.status === 'WRONG_ANSWER' ? 'bg-red-950/30 border-red-900/50 text-red-400' :
+                      'bg-yellow-950/30 border-yellow-900/50 text-yellow-400'
+                    }`}>
+                      <div className="flex items-center gap-2 font-bold text-lg">
+                        {evaluationResult.status === 'ACCEPTED' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+                        {evaluationResult.status === 'ACCEPTED' ? 'Accepted' : 
+                         evaluationResult.status === 'WRONG_ANSWER' ? 'Wrong Answer' :
+                         evaluationResult.status === 'TIMEOUT' ? 'Time Limit Exceeded' :
+                         evaluationResult.status === 'MEMORY_LIMIT_EXCEEDED' ? 'Memory Limit Exceeded' :
+                         evaluationResult.status === 'OUTPUT_LIMIT_EXCEEDED' ? 'Output Limit Exceeded' :
+                         'Runtime Error'}
+                      </div>
+                      <div className="text-sm font-medium bg-black/20 px-3 py-1.5 rounded-full">
+                        {evaluationResult.passedTests} / {evaluationResult.totalTests} passed &nbsp;&bull;&nbsp; Score: {evaluationResult.score}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {evaluationResult.testResults.map((tr: TestCaseResult, i: number) => (
+                        <div key={tr.testCaseId || i} className={`p-4 rounded border ${tr.status === 'PASSED' ? 'bg-emerald-950/10 border-emerald-900/30' : 'bg-red-950/10 border-red-900/30'}`}>
+                          <div className="flex items-center gap-2 font-semibold mb-2 text-slate-300">
+                            {tr.status === 'PASSED' ? <CheckCircle2 size={16} className="text-emerald-500" /> : <XCircle size={16} className="text-red-500" />}
+                            {tr.isHidden ? 'Hidden Test Case' : `Test Case ${i + 1}`}
+                            <span className={`ml-auto text-xs font-normal px-2 py-0.5 rounded-full ${tr.status === 'PASSED' ? 'bg-emerald-950/50 text-emerald-400' : 'bg-red-950/50 text-red-400'}`}>
+                              {tr.status === 'PASSED' ? 'Passed' : 'Failed'}
+                            </span>
+                          </div>
+                          
+                          {!tr.isHidden && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mt-3">
+                              <div>
+                                <div className="text-slate-500 mb-1 font-sans">Input:</div>
+                                <div className="bg-slate-900/80 p-2.5 rounded text-slate-300 font-mono whitespace-pre-wrap border border-slate-800">{tr.input}</div>
+                              </div>
+                              <div>
+                                <div className="text-slate-500 mb-1 font-sans">Expected Output:</div>
+                                <div className="bg-slate-900/80 p-2.5 rounded text-emerald-300 font-mono whitespace-pre-wrap border border-slate-800">{tr.expectedOutput}</div>
+                              </div>
+                              {tr.actualOutput !== undefined && (
+                                <div className="md:col-span-2">
+                                  <div className="text-slate-500 mb-1 font-sans">Actual Output:</div>
+                                  <div className={`bg-slate-900/80 p-2.5 rounded font-mono whitespace-pre-wrap border border-slate-800 ${tr.status === 'PASSED' ? 'text-emerald-300' : 'text-red-300'}`}>
+                                    {tr.actualOutput || <span className="opacity-50 italic font-sans">No output</span>}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {tr.error && (
+                            <div className="mt-3 text-xs">
+                              <div className="text-slate-500 mb-1 font-sans">Error:</div>
+                              <div className="bg-red-950/20 text-red-400 p-2.5 rounded font-mono whitespace-pre-wrap border border-red-900/30">
+                                {tr.error}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-slate-500">Run tests or submit to see results here.</div>
+                )
               )}
             </motion.div>
           </AnimatePresence>
