@@ -9,9 +9,9 @@ import { SUPPORTED_LANGUAGES, getDefaultLanguage } from '../config/codingLanguag
 import type { CodingLanguage } from '../config/codingLanguages';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SubmissionResult, TestCaseResult } from '../types/evaluation';
-import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEnforcementState, CodingStrikeState } from '../types/coding';
+import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEnforcementState, ServerIntegritySession } from '../types/coding';
 import { createIntegrityDetector, IntegrityDetectionService } from '../services/coding/integrityDetectionService';
-import { createStrikeEnforcementService, StrikeEnforcementService } from '../services/coding/strikeEnforcementService';
+import { createServerIntegritySession, getServerIntegritySession, processServerIntegritySignal, endServerIntegritySession } from '../services/coding/integrityApiService';
 
 const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
   const colors = {
@@ -56,11 +56,9 @@ const CodingWorkspace: React.FC = () => {
   const [integritySignals, setIntegritySignals] = useState<IntegritySignal[]>([]);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const detectorRef = useRef<IntegrityDetectionService | null>(null);
-  const strikeEngineRef = useRef<StrikeEnforcementService>(createStrikeEnforcementService());
   const [enforcementState, setEnforcementState] = useState<CodingEnforcementState>('ACTIVE');
-  const [strikeState, setStrikeState] = useState<CodingStrikeState | null>(null);
+  const [serverSession, setServerSession] = useState<ServerIntegritySession | null>(null);
   const [currentWarningMsg, setCurrentWarningMsg] = useState<string>('');
-
   const mapSignalToWarningMsg = (signalType: string) => {
     switch (signalType) {
       case 'TAB_SWITCH': return 'Browser tab visibility changed.';
@@ -90,25 +88,37 @@ const CodingWorkspace: React.FC = () => {
       if (!detectorRef.current) {
         detectorRef.current = createIntegrityDetector({
           sessionId,
-          onSignal: (signal) => {
+          onSignal: async (signal) => {
             setIntegritySignals(prev => [...prev, signal]);
             
-            // Process the signal through C8 Strike Engine
-            const res = strikeEngineRef.current.processSignal(signal);
-            if (res.applied) {
-              setEnforcementState(res.enforcementState);
-              setStrikeState(strikeEngineRef.current.getState());
-              setCurrentWarningMsg(mapSignalToWarningMsg(signal.type));
+            // Process the signal through C9 Server Strike Engine
+            try {
+              const token = await getToken();
+              if (!token || !sessionId) return;
+              
+              const res = await processServerIntegritySignal(sessionId, signal.id, signal.type, token);
+              if (res.signalAccepted && !res.duplicate) {
+                const s = res.session;
+                setServerSession(s);
+                setCurrentWarningMsg(mapSignalToWarningMsg(signal.type));
 
-              if (res.enforcementState === 'TERMINATED') {
-                // Exit fullscreen
-                if (document.fullscreenElement) {
-                  document.exitFullscreen().catch(console.error);
+                if (s.status === 'TERMINATED') {
+                  setEnforcementState('TERMINATED');
+                  // Exit fullscreen
+                  if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(console.error);
+                  }
+                  // Stop detection
+                  detectorRef.current?.stop();
+                  setIntegrityState('ENDED');
+                } else if (s.strikeCount === 1) {
+                  setEnforcementState('WARNING');
+                } else if (s.strikeCount === 2) {
+                  setEnforcementState('FINAL_WARNING');
                 }
-                // Stop detection
-                detectorRef.current?.stop();
-                setIntegrityState('ENDED');
               }
+            } catch (err) {
+              console.error('Failed to report integrity signal', err);
             }
           }
         });
@@ -314,19 +324,27 @@ const CodingWorkspace: React.FC = () => {
     setFullscreenError(null);
     setIntegritySignals([]); // clear old debug signals if any
     setEnforcementState('ACTIVE');
-    setStrikeState(null);
-    strikeEngineRef.current.reset();
-    setSessionId(crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2));
+    setServerSession(null);
+    setSessionId(null);
   };
 
   const handleConfirmIntegritySession = async () => {
     if (!consentChecked) return;
+    if (!slug) return;
     setIntegrityState('STARTING');
     setFullscreenError(null);
 
     try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication failed");
+
       if (document.fullscreenEnabled && workspaceRef.current) {
         await workspaceRef.current.requestFullscreen();
+        
+        // Wait for fullscreen then hit server
+        const session = await createServerIntegritySession(slug, activeLanguage.id, token);
+        setSessionId(session.sessionId);
+        setServerSession(session);
         setSessionMode('INTEGRITY');
         setIntegrityState('ACTIVE');
       } else {
@@ -334,8 +352,11 @@ const CodingWorkspace: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
+      }
       setIntegrityState('CONSENT_REQUIRED'); // revert back so they can see the error
-      setFullscreenError('Unable to enter fullscreen. Please allow fullscreen access and try again.');
+      setFullscreenError(err.message || 'Unable to enter fullscreen or create session. Please try again.');
     }
   };
 
@@ -348,7 +369,18 @@ const CodingWorkspace: React.FC = () => {
     setIntegrityState('ENDING');
   };
 
-  const handleConfirmEndSession = () => {
+  const handleConfirmEndSession = async () => {
+    if (sessionId) {
+      try {
+        const token = await getToken();
+        if (token) {
+          await endServerIntegritySession(sessionId, token);
+        }
+      } catch (e) {
+        console.error('Failed to end session on server', e);
+      }
+    }
+
     setIntegrityState('ENDED');
     setSessionMode('PRACTICE');
     
@@ -359,8 +391,8 @@ const CodingWorkspace: React.FC = () => {
     setTimeout(() => {
       setIntegrityState('INACTIVE');
       setEnforcementState('ACTIVE');
-      setStrikeState(null);
-      strikeEngineRef.current.reset();
+      setServerSession(null);
+      setSessionId(null);
     }, 500);
   };
 
@@ -893,7 +925,7 @@ const CodingWorkspace: React.FC = () => {
                 </p>
                 <div className="bg-slate-950 p-4 rounded border border-slate-800 mb-6 flex justify-between items-center">
                   <span className="text-slate-400 text-sm font-bold uppercase tracking-wider">Strikes</span>
-                  <span className="text-red-500 font-bold text-lg">3 / 3</span>
+                  <span className="text-red-500 font-bold text-lg">{serverSession?.strikeCount || 3} / {serverSession?.maxStrikes || 3}</span>
                 </div>
                 <p className="text-slate-400 text-sm mb-6 leading-relaxed">
                   You can review your coding result, but this integrity session cannot be resumed.

@@ -90,5 +90,25 @@ export interface StrikeResult {
   signal: IntegritySignal;
 }
 
+export type IntegritySessionStatus = "ACTIVE" | "TERMINATED" | "ENDED";
+
+export interface ServerIntegritySession {
+  sessionId: string;
+  status: IntegritySessionStatus;
+  strikeCount: number;
+  maxStrikes: number;
+}
+
+export interface IntegritySignalRequest {
+  signalId: string;
+  type: IntegrityEventType;
+}
+
+export interface IntegritySignalResponse {
+  signalAccepted: boolean;
+  duplicate: boolean;
+  session: ServerIntegritySession;
+}
+
 
 

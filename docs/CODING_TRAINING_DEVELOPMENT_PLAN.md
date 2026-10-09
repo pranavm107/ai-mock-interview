@@ -205,7 +205,16 @@
 **Dependencies**: C8
 **Expected outputs**: Secure backend integrity API.
 **Verification requirements**: Server prevents bypass of integrity rules.
-**Status**: Pending
+**Status**: COMPLETE
+
+**Implemented**:
+- **Server-authoritative session state**: Atomic strike evaluation using Firestore transactions.
+- **Authentication**: Strict `userId` and ownership validation with Clerk.
+- **Duplicate Protection**: Bounded `recentSignalIds` on the backend to suppress redundant concurrent events.
+- **Three-Strike Cap**: Maximum strike enforced server-side.
+- **Termination persistence**: Server safely guards terminated sessions from resuming.
+- **Client tampering resistance**: Client fetches state instead of determining state.
+- **API Boundaries**: `POST /integrity/session`, `POST /.../signal`, `GET /.../:sessionId`, `POST /.../end`.
 
 ### C10: Integrity Event Ledger
 **Goal**: Log integrity events securely.

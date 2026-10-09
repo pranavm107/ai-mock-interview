@@ -51,3 +51,22 @@ export interface CodingDashboardData {
     topicsPracticed: string[];
   };
 }
+
+export type CodingIntegritySessionStatus = "ACTIVE" | "TERMINATED" | "ENDED";
+
+export interface CodingIntegritySession {
+  sessionId: string;
+  userId: string;
+  problemId: string;
+  language: string;
+  mode: string;
+  status: CodingIntegritySessionStatus;
+  strikeCount: number;
+  maxStrikes: number;
+  recentSignalIds: string[]; // Bounded deduplication mechanism
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  terminatedAt?: Timestamp;
+  lastProcessedSignalId?: string;
+  lastProcessedSignalAt?: Timestamp;
+}

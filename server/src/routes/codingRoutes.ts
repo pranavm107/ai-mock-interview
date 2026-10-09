@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getDashboardData, getProblemBySlug } from '../controllers/codingController';
 import { executeCode, runTests, submitCode, getSubmissions } from '../controllers/executionController';
+import { createIntegritySession, getIntegritySession, processIntegritySignal, endIntegritySession } from '../controllers/integrityController';
 import { requireAuth } from '@clerk/express';
 
 const router = Router();
@@ -13,5 +14,11 @@ router.get('/submissions', requireAuth(), getSubmissions);
 router.post('/execute', requireAuth(), executeCode);
 router.post('/run-tests', requireAuth(), runTests);
 router.post('/submit', requireAuth(), submitCode);
+
+// Integrity endpoints
+router.post('/integrity/session', requireAuth(), createIntegritySession);
+router.get('/integrity/session/:sessionId', requireAuth(), getIntegritySession);
+router.post('/integrity/session/:sessionId/signal', requireAuth(), processIntegritySignal);
+router.post('/integrity/session/:sessionId/end', requireAuth(), endIntegritySession);
 
 export default router;
