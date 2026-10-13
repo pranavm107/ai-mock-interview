@@ -69,4 +69,77 @@ export interface CodingIntegritySession {
   terminatedAt?: Timestamp;
   lastProcessedSignalId?: string;
   lastProcessedSignalAt?: Timestamp;
+  lastHeartbeatAt?: Timestamp;
+}
+
+export type IntegrityEventType =
+  | 'TAB_SWITCH'
+  | 'WINDOW_BLUR'
+  | 'FULLSCREEN_EXIT'
+  | 'NAVIGATION_ATTEMPT'
+  | 'HEARTBEAT_FAILURE'
+  | 'COPY_DETECTED'
+  | 'PASTE_DETECTED'
+  | 'CUT_DETECTED'
+  | 'TAB_RETURN'
+  | 'WINDOW_FOCUS'
+  | 'LARGE_CODE_INSERTION';
+
+export interface CodingIntegrityEvent {
+  eventId: string;
+  sessionId: string;
+  userId: string;
+  type: IntegrityEventType;
+  occurredAt?: string;
+  receivedAt: Timestamp;
+  strikeCountAtEvent: number;
+  sessionStatusAtEvent: CodingIntegritySessionStatus;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export type CodingMalpracticeIncidentType = 'STRIKE_LIMIT_EXCEEDED';
+export type CodingMalpracticeSeverity = 'HIGH';
+export type CodingMalpracticeStatus = 'OPEN' | 'REVIEWED' | 'DISMISSED' | 'CONFIRMED';
+
+export interface CodingMalpracticeRecord {
+  recordId: string;
+  sessionId: string;
+  userId: string;
+  incidentType: CodingMalpracticeIncidentType;
+  severity: CodingMalpracticeSeverity;
+  status: CodingMalpracticeStatus;
+  summary: string;
+  evidenceEventIds: string[];
+  createdAt: Timestamp | any;
+  updatedAt: Timestamp | any;
+  reviewedAt?: Timestamp | any;
+  reviewedBy?: string;
+  resolutionNote?: string;
+}
+
+export interface AIAnalysisResult {
+  explanation: string;
+  correctnessIssues: string[];
+  complexity: {
+    time: string;
+    space: string;
+    reasoning: string;
+  };
+  readability: string;
+  suggestions: string[];
+}
+
+export interface CodingReadinessData {
+  score: number;
+  level: 'Getting Started' | 'Building Foundations' | 'Interview Ready';
+  factors: {
+    successScore: number;
+    difficultyScore: number;
+    topicScore: number;
+    consistencyScore: number;
+  };
+  strengths: string[];
+  improvementAreas: string[];
+  recommendation: string;
+  isNewUser: boolean;
 }

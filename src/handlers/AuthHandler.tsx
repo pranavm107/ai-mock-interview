@@ -25,9 +25,11 @@ const AuthHandler: React.FC<AuthHandlerProps> = ({ children }) => {
         // Mark this user as checked immediately to prevent race conditions
         hasCheckedRef.current = user.id;
 
-        // Delegate all Firestore logic to our dedicated user service
-        await syncUser(user);
-        
+        // Delegate all Firestore logic to our dedicated user service with a 2-second timeout
+        await Promise.race([
+          syncUser(user),
+          new Promise((resolve) => setTimeout(resolve, 2000))
+        ]);
       } catch (error) {
         console.error('Error syncing user to Firestore:', error);
         // Reset the ref so we can try again if it failed

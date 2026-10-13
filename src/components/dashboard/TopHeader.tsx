@@ -6,18 +6,19 @@ import { Sidebar } from './Sidebar';
 
 export const TopHeader: React.FC = () => {
   return (
-    <header className="sticky top-0 z-20 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200 px-6 h-16 flex items-center justify-between shadow-sm">
-      <div className="flex items-center gap-4">
-        {/* Mobile Sidebar Trigger */}
-        <div className="md:hidden">
+    <header className="sticky top-0 z-20 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-6 h-16 flex items-center justify-between shadow-sm">
+      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+        {/* Mobile Sidebar Trigger & Brand */}
+        <div className="md:hidden flex items-center gap-2">
           <Sheet>
             <SheetTrigger className="p-2 -ml-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
-              <Menu size={24} />
+              <Menu size={22} />
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-[280px]">
               <Sidebar />
             </SheetContent>
           </Sheet>
+          <span className="font-bold text-base tracking-tight text-slate-900">PrepPilot AI</span>
         </div>
 
         {/* Global Search */}
@@ -36,20 +37,20 @@ export const TopHeader: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-5">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors relative">
-          <Bell size={20} />
+          <Bell size={19} />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
 
         <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors hidden sm:block">
-          <HelpCircle size={20} />
+          <HelpCircle size={19} />
         </button>
 
-        <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+        <div className="h-6 w-px bg-slate-200 mx-0.5 hidden sm:block"></div>
 
-        <div className="md:hidden">
-            <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: 'w-8 h-8' } }} />
+        <div className="md:hidden flex items-center pl-1">
+          <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: 'w-8 h-8' } }} />
         </div>
       </div>
     </header>

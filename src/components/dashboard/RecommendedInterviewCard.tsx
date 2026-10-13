@@ -56,7 +56,7 @@ export const RecommendedInterviewCard: React.FC<{ recentInterviews?: any[] }> = 
             <span>AI Recommended</span>
           </div>
           <Badge variant="secondary" className="bg-amber-50 text-amber-600 border border-amber-200/50">
-            Medium
+            {unfinished.difficulty || 'Medium'}
           </Badge>
         </div>
         

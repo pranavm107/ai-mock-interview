@@ -82,7 +82,7 @@ const ReturningUserDashboard = ({ metadata }: { metadata?: any }) => {
     <ContinueLearningCard metadata={metadata} />
 
     {/* Stats Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
       <StatCard title="Overall Score" value={avgScoreStr} icon={Trophy} delay={0.1} />
       <StatCard title="Resume Uploaded" value={`${stats.totalResumes} Active`} icon={FileText} delay={0.2} />
       <StatCard title="Interviews Completed" value={`${stats.completedInterviews}`} icon={Target} delay={0.3} />
@@ -109,7 +109,7 @@ const ReturningUserDashboard = ({ metadata }: { metadata?: any }) => {
             ) : (
               <QuickActionCard title="Generate Interview" description="Custom role & skills" icon={Sparkles} to="/generate" colorClass="bg-blue-50 text-blue-600" />
             )}
-            <QuickActionCard title="Mock Coding" description="Technical practice" icon={BrainCircuit} to="/generate" colorClass="bg-indigo-50 text-indigo-600" />
+            <QuickActionCard title="Mock Coding" description="Technical practice" icon={BrainCircuit} to="/coding" colorClass="bg-indigo-50 text-indigo-600" />
             <QuickActionCard title="Interview History" description="Review feedback" icon={History} to="/history" colorClass="bg-purple-50 text-purple-600" />
           </div>
         </div>

@@ -68,7 +68,6 @@ export const sandboxRunner = {
       const startTime = Date.now();
       await container.start();
 
-
       let stdout = '';
       let stderr = '';
       let totalOutputSize = 0;

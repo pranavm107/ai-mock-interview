@@ -62,7 +62,8 @@ describe('IntegrityDetectionService', () => {
     (document as any).visibilityState = 'visible';
     document.dispatchEvent(new Event('visibilitychange'));
 
-    expect(signals.length).toBe(1);
+    expect(signals.length).toBe(2);
+    expect(signals[1].type).toBe('TAB_RETURN');
   });
 
   it('Test 5 - Window blur: dispatches WINDOW_BLUR', () => {
@@ -78,7 +79,8 @@ describe('IntegrityDetectionService', () => {
     window.dispatchEvent(new Event('blur'));
     window.dispatchEvent(new Event('focus'));
 
-    expect(signals.length).toBe(1);
+    expect(signals.length).toBe(2);
+    expect(signals[1].type).toBe('WINDOW_FOCUS');
   });
 
   it('Test 7 - Fullscreen exit: dispatches only when active', () => {
@@ -168,6 +170,76 @@ describe('IntegrityDetectionService', () => {
       detector.stop();
       detector.stop();
     }).not.toThrow();
+  });
+
+  it('Test 15 - reportEditorPaste dispatches PASTE_DETECTED when active', () => {
+    detector.start();
+    detector.reportEditorPaste();
+    
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('PASTE_DETECTED');
+    expect(signals[0].metadata).toEqual({ targetTag: 'MONACO_EDITOR' });
+  });
+
+  it('Test 16 - reportEditorPaste ignores when inactive', () => {
+    detector.reportEditorPaste();
+    
+    expect(signals.length).toBe(0);
+  });
+
+  it('Test 17 - Deduplication: suppress WINDOW_FOCUS right after TAB_RETURN', () => {
+    detector.start();
+    (document as any).visibilityState = 'visible';
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('focus')); // Should be suppressed
+
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('TAB_RETURN');
+  });
+
+  it('Test 18 - reportLargeInsertion dispatches LARGE_CODE_INSERTION', () => {
+    detector.start();
+    detector.reportLargeInsertion(100);
+
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('LARGE_CODE_INSERTION');
+    expect(signals[0].metadata).toEqual({ length: 100 });
+  });
+
+  it('Test 19 - Deduplication: suppress LARGE_CODE_INSERTION right after PASTE_DETECTED', () => {
+    detector.start();
+    detector.reportEditorPaste();
+    detector.reportLargeInsertion(100);
+
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('PASTE_DETECTED');
+  });
+
+  it('Test 21 - Deduplication: suppress FULLSCREEN_EXIT right after WINDOW_BLUR', () => {
+    detector.start();
+    window.dispatchEvent(new Event('blur'));
+
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: null,
+      configurable: true
+    });
+    document.dispatchEvent(new Event('fullscreenchange'));
+
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('WINDOW_BLUR');
+  });
+
+  it('Test 22 - Deduplication: suppress WINDOW_BLUR right after FULLSCREEN_EXIT', () => {
+    detector.start();
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: null,
+      configurable: true
+    });
+    document.dispatchEvent(new Event('fullscreenchange'));
+    window.dispatchEvent(new Event('blur'));
+
+    expect(signals.length).toBe(1);
+    expect(signals[0].type).toBe('FULLSCREEN_EXIT');
   });
 
 });

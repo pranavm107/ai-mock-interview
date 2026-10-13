@@ -72,8 +72,10 @@ A language may only become selectable when its execution environment is actually
 
 ## 9. EVALUATION AUTHORITY
 Deterministic execution is the source of truth (`Execution Engine -> Ground Truth`).
-AI is NOT the source of truth for: Accepted, Wrong Answer, Compilation Error, Runtime Error, Timeout, Memory Limit.
-AI provides: explanation, code review, complexity feedback, learning suggestions, improvement guidance.
+AI is NOT the source of truth for: Accepted, Wrong Answer, Compilation Error, Runtime Error, Timeout, Memory Limit, Session Lock Status, or Integrity Strikes.
+AI provides advisory output: explanation, code review, complexity feedback, learning suggestions, improvement guidance.
+AI generated suggestions must never automatically execute.
+AI failure must never alter a previously computed or currently executing deterministic evaluation.
 
 ## 10. HIDDEN TEST SECURITY
 Hidden test cases must never be exposed to the frontend.
@@ -84,6 +86,11 @@ Integrity Mode is a separate subsystem.
 Conceptual architecture: `Coding Session -> Integrity Service -> Integrity Events -> Server-side Strike State -> Warnings -> Termination`.
 The browser is responsible for detecting/reporting signals. The server is responsible for authoritative state.
 
+**C17 Active Session Invariant**:
+- A user may have at most ONE active protected integrity session at a time.
+- Enforcement uses the `codingActiveSessionLocks` collection atomically coordinated in Firestore transactions.
+- Client claims and heartbeat age must never automatically release locks. Recovery relies on strict transactional reads of the locked session state.
+
 ## 12. THREE-STRIKE POLICY
 Violation 1: Warning.
 Violation 2: Final warning.
@@ -91,7 +98,7 @@ Violation 3: Terminate session + mark malpractice.
 This must be enforced server-side.
 
 ## 13. INTEGRITY EVENTS
-Future implementation may support: `TAB_SWITCH`, `WINDOW_BLUR`, `PASTE_ATTEMPT`, `COPY_ATTEMPT`, `CUT_ATTEMPT`, `FULLSCREEN_EXIT`, `NAVIGATION_ATTEMPT`, `LARGE_CODE_INSERTION`, `HEARTBEAT_FAILURE`.
+Future implementation may support: `TAB_SWITCH`, `WINDOW_BLUR`, `PASTE_DETECTED`, `COPY_DETECTED`, `CUT_DETECTED`, `FULLSCREEN_EXIT`, `NAVIGATION_ATTEMPT`, `LARGE_CODE_INSERTION`, `HEARTBEAT_FAILURE`.
 Not every browser event automatically equals a violation. Avoid false positives. Duplicate browser signals representing one user action must be deduplicated.
 
 ## 14. PRIVACY / TRANSPARENCY

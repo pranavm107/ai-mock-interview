@@ -44,6 +44,8 @@ export interface SubmissionResult {
 }
 
 export class EvaluationService {
+  private activeUserEvaluations = new Set<string>();
+
   private normalizeOutput(output: string): string {
     return output.replace(/\r\n/g, '\n').trimEnd();
   }
@@ -67,14 +69,21 @@ export class EvaluationService {
     problemSlug: string,
     source: string,
     language: string,
-    isSubmission: boolean
+    isSubmission: boolean,
+    sessionId?: string
   ): Promise<SubmissionResult> {
-    const problemSnapshot = await db.collection('codingProblems').doc(problemSlug).get();
-    if (!problemSnapshot.exists) {
-      throw new Error('Problem not found');
+    if (this.activeUserEvaluations.has(userId)) {
+      throw new Error('CONCURRENT_EVALUATION: Please wait for your previous evaluation to finish.');
     }
+    this.activeUserEvaluations.add(userId);
 
-    const problem = problemSnapshot.data() as CodingProblem;
+    try {
+      const problemSnapshot = await db.collection('codingProblems').doc(problemSlug).get();
+      if (!problemSnapshot.exists) {
+        throw new Error('Problem not found');
+      }
+
+      const problem = problemSnapshot.data() as CodingProblem;
     let testCases = problem.testCases || [];
 
     if (!isSubmission) {
@@ -150,10 +159,8 @@ export class EvaluationService {
           resultData.error = execResult.stderr;
         }
       } else {
-        // Even for hidden, we might return the error string for runtime errors without exposing input/output
         if (execResult.stderr) {
-           // Provide basic error string but NO expected/input output
-           resultData.error = execResult.stderr;
+           resultData.error = "A runtime error occurred during this hidden test case.";
         }
       }
 
@@ -179,6 +186,14 @@ export class EvaluationService {
     };
 
     if (isSubmission) {
+      if (sessionId) {
+        const { integrityService } = await import('./integrityService');
+        const session = await integrityService.getSession(sessionId, userId);
+        if (session.status !== 'ACTIVE') {
+          throw new Error('Integrity session was terminated during evaluation.');
+        }
+      }
+
       await db.collection('codingSubmissions').add({
         userId,
         problemId: problem.id || problemSlug,
@@ -194,6 +209,9 @@ export class EvaluationService {
     }
 
     return submissionResult;
+    } finally {
+      this.activeUserEvaluations.delete(userId);
+    }
   }
 }
 

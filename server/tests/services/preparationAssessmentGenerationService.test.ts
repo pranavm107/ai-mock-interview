@@ -64,7 +64,7 @@ describe('preparationAssessmentGenerationService - generatePreparationAssessment
     vi.mocked(callGroq).mockResolvedValue('{ "invalid": "json" }');
 
     await expect(generatePreparationAssessment('user-1', 'technical-mcqs', 'React', 'MEDIUM', 1, 'TIMED'))
-      .rejects.toThrow('Assessment generation failed');
+      .rejects.toThrow('Failed to generate valid assessment from AI provider');
 
     expect(callGroq).toHaveBeenCalledTimes(2);
     expect(assessmentService.markAssessmentFailed).toHaveBeenCalledWith('mock-doc-id');
@@ -91,7 +91,7 @@ describe('preparationAssessmentGenerationService - generatePreparationAssessment
     vi.mocked(callGroq).mockResolvedValue(JSON.stringify(mockGroqResponse));
 
     await expect(generatePreparationAssessment('user-1', 'aptitude', 'Math', 'EASY', 1, 'PRACTICE'))
-      .rejects.toThrow('Assessment generation failed');
+      .rejects.toThrow('Failed to generate valid assessment from AI provider');
       
     expect(assessmentService.markAssessmentFailed).toHaveBeenCalled();
   });

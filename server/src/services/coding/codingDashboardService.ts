@@ -1,26 +1,36 @@
 import { db } from '../../config/firebaseAdmin';
 import { CodingDailyAssignment, CodingDashboardData, CodingProblem } from '../../types/coding';
 import { FieldValue } from 'firebase-admin/firestore';
+import { codingAnalyticsService } from './codingAnalyticsService';
 
 const DAILY_ASSIGNMENT_CONFIG = {
   recentProblemWindowDays: 14,
 };
 
 export class CodingDashboardService {
-  /**
-   * Retrieves the full dashboard data.
-   */
   async getDashboardData(userId: string, timezone: string): Promise<CodingDashboardData> {
     const dateKey = this.getDateKeyForTimezone(timezone);
     
-    // Attempt to get or create today's assignment idempotently
-    const dailyAssignment = await this.getOrCreateDailyAssignment(userId, dateKey, timezone);
+    // 1. Fetch all existing assignments ONCE using .select to minimize payload
+    const allAssignmentsSnapshot = await db.collection('codingDailyAssignments')
+      .where('userId', '==', userId)
+      .select('problemId', 'topic', 'assignedAt', 'status', 'difficulty')
+      .get();
     
-    // Fetch recent activity
-    const recentTasks = await this.getRecentActivity(userId);
+    const allTasks = allAssignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CodingDailyAssignment));
     
-    // Fetch progress metrics
-    const progress = await this.getProgressMetrics(userId);
+    // 2. Attempt to get or create today's assignment idempotently, passing allTasks
+    const dailyAssignment = await this.getOrCreateDailyAssignment(userId, dateKey, timezone, allTasks);
+    
+    // 3. If a new assignment was created, add it to our in-memory list for metrics
+    if (dailyAssignment && !allTasks.find(t => t.id === dailyAssignment.id)) {
+      const { problem, ...assignmentData } = dailyAssignment;
+      allTasks.push(assignmentData as CodingDailyAssignment);
+    }
+    
+    // 4. Compute recent tasks and progress in-memory
+    const recentTasks = await this.getRecentActivityFromList(allTasks);
+    const progress = this.getProgressMetricsFromList(allTasks);
     
     return {
       dailyAssignment,
@@ -51,7 +61,7 @@ export class CodingDashboardService {
   /**
    * Deterministically assigns or retrieves the daily challenge.
    */
-  private async getOrCreateDailyAssignment(userId: string, dateKey: string, timezone: string): Promise<(CodingDailyAssignment & { problem?: CodingProblem }) | null> {
+  private async getOrCreateDailyAssignment(userId: string, dateKey: string, timezone: string, allTasks: CodingDailyAssignment[]): Promise<(CodingDailyAssignment & { problem?: CodingProblem }) | null> {
     const assignmentId = `${userId}_${dateKey}`;
     const assignmentRef = db.collection('codingDailyAssignments').doc(assignmentId);
 
@@ -66,7 +76,7 @@ export class CodingDashboardService {
         }
 
         // If it doesn't exist, we must generate a new assignment deterministically
-        const newAssignmentData = await this.generateNewAssignment(userId, dateKey, timezone);
+        const newAssignmentData = await this.generateNewAssignment(userId, dateKey, timezone, allTasks);
         
         if (!newAssignmentData) {
           // No active problems exist
@@ -97,8 +107,8 @@ export class CodingDashboardService {
   /**
    * Generates a new assignment deterministically based on simple rules.
    */
-  private async generateNewAssignment(userId: string, dateKey: string, timezone: string): Promise<Omit<CodingDailyAssignment, 'id'> | null> {
-    const problemsRef = db.collection('codingProblems').where('isActive', '==', true);
+  private async generateNewAssignment(userId: string, dateKey: string, timezone: string, allTasks: CodingDailyAssignment[]): Promise<Omit<CodingDailyAssignment, 'id'> | null> {
+    const problemsRef = db.collection('codingProblems').where('isActive', '==', true).select('difficulty', 'topics');
     const problemsSnapshot = await problemsRef.get();
     
     if (problemsSnapshot.empty) {
@@ -107,44 +117,60 @@ export class CodingDashboardService {
 
     const allProblems = problemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CodingProblem));
     
+    // Fetch user's actual coding analytics (history, solved problems, etc)
+    const analytics = await codingAnalyticsService.getUserAnalytics(userId, timezone);
+    const solvedProblemIds = new Set(analytics.solvedProblemIds);
+    
     // Fetch user's recent assignments to avoid them
     const recentDate = new Date();
     recentDate.setDate(recentDate.getDate() - DAILY_ASSIGNMENT_CONFIG.recentProblemWindowDays);
     
-    const allAssignmentsSnapshot = await db.collection('codingDailyAssignments')
-      .where('userId', '==', userId)
-      .get();
-
-    const recentProblemIds = new Set<string>();
-    const pastTopics = new Set<string>();
+    const recentAssignedProblemIds = new Set<string>();
+    const pastAssignedTopics = new Set<string>();
     
-    allAssignmentsSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      pastTopics.add(data.topic);
+    allTasks.forEach(data => {
+      pastAssignedTopics.add(data.topic);
       
       const assignedAt = data.assignedAt?.toDate ? data.assignedAt.toDate() : new Date(data.assignedAt);
       if (assignedAt >= recentDate) {
-        recentProblemIds.add(data.problemId);
+        recentAssignedProblemIds.add(data.problemId);
       }
     });
     
-    // Candidate filtering
-    let candidates = allProblems.filter(p => !recentProblemIds.has(p.id));
+    // Candidate filtering: Exclude solved problems and recently assigned problems
+    let candidates = allProblems.filter(p => !solvedProblemIds.has(p.id) && !recentAssignedProblemIds.has(p.id));
     
     if (candidates.length === 0) {
-      // Fallback: pick any active problem if all were done recently
-      candidates = allProblems;
+      // Fallback 1: If exhausted because of recent window, allow recently assigned but UNsolved
+      candidates = allProblems.filter(p => !solvedProblemIds.has(p.id));
+      
+      if (candidates.length === 0) {
+        // Fallback 2: The user has literally solved everything. Pick a hard problem they solved long ago, or just any problem.
+        candidates = allProblems; 
+      }
     }
 
-    // New user check: fewer than 5 assignments total?
-    const isNewUser = allAssignmentsSnapshot.size < 5;
+    // Determine target difficulty based on performance
+    // Simple progression logic: if they've solved mostly Easy, give Medium. If they've solved mostly Medium, give Hard.
+    const easyCount = analytics.difficultyBreakdown['EASY'] || 0;
+    const medCount = analytics.difficultyBreakdown['MEDIUM'] || 0;
+    
+    let targetDifficulty: "EASY" | "MEDIUM" | "HARD" = "EASY";
+    if (easyCount >= 5 && medCount < 10) {
+      targetDifficulty = "MEDIUM";
+    } else if (medCount >= 10) {
+      targetDifficulty = "HARD";
+    }
+
+    // New user check: No solved problems yet?
+    const isNewUser = analytics.totalSolved === 0;
 
     let selectedProblem: CodingProblem;
     let reason = "A daily challenge selected based on your recent activity.";
 
     if (isNewUser) {
       // Prefer EASY foundational topics for new users
-      const easyFoundational = candidates.filter(p => p.difficulty === 'EASY' && (p.topics.includes('Arrays') || p.topics.includes('Strings') || p.topics.includes('Hash Maps')));
+      const easyFoundational = candidates.filter(p => p.difficulty === 'EASY' && (p.topics?.includes('Arrays') || p.topics?.includes('Strings') || p.topics?.includes('Hash Maps')));
       if (easyFoundational.length > 0) {
         selectedProblem = this.pickRandomDeterministic(easyFoundational, userId, dateKey);
         reason = "A beginner-friendly starting challenge to build your foundational problem-solving skills.";
@@ -153,20 +179,21 @@ export class CodingDashboardService {
         reason = "Your next daily coding challenge to practice your skills.";
       }
     } else {
-      // Find weak or unpracticed topics by analyzing past assignments
-      const pastTopics = new Set<string>();
-      allAssignmentsSnapshot.docs.forEach(doc => {
-        pastTopics.add(doc.data().topic);
-      });
-
-      const unpracticedCandidates = candidates.filter(p => p.topics.some(t => !pastTopics.has(t)));
+      // First try to match target difficulty AND unpracticed topics
+      const allPastTopics = new Set([...Object.keys(analytics.topicBreakdown), ...pastAssignedTopics]);
+      const targetCandidates = candidates.filter(p => p.difficulty === targetDifficulty);
+      const unpracticedTarget = targetCandidates.filter(p => (p.topics || []).some(t => !allPastTopics.has(t)));
       
-      if (unpracticedCandidates.length > 0) {
-        selectedProblem = this.pickRandomDeterministic(unpracticedCandidates, userId, dateKey);
-        reason = `Recommended because ${selectedProblem.topics[0]} is a topic you haven't practiced recently.`;
+      if (unpracticedTarget.length > 0) {
+        selectedProblem = this.pickRandomDeterministic(unpracticedTarget, userId, dateKey);
+        reason = `Recommended because ${(selectedProblem.topics || [])[0] || 'this'} is a topic you haven't mastered at the ${targetDifficulty.toLowerCase()} level.`;
+      } else if (targetCandidates.length > 0) {
+        selectedProblem = this.pickRandomDeterministic(targetCandidates, userId, dateKey);
+        reason = `Recommended to strengthen your understanding of ${(selectedProblem.topics || [])[0] || 'core concepts'} at your current skill level.`;
       } else {
+        // Fallback: any candidate
         selectedProblem = this.pickRandomDeterministic(candidates, userId, dateKey);
-        reason = `Recommended to strengthen your understanding of ${selectedProblem.topics[0] || 'core concepts'}.`;
+        reason = "A daily challenge to keep your skills sharp.";
       }
     }
 
@@ -174,7 +201,7 @@ export class CodingDashboardService {
       userId,
       dateKey,
       problemId: selectedProblem.id,
-      topic: selectedProblem.topics[0] || "General",
+      topic: (selectedProblem.topics || [])[0] || "General",
       difficulty: selectedProblem.difficulty,
       reason,
       status: "NOT_STARTED",
@@ -210,23 +237,17 @@ export class CodingDashboardService {
   }
 
   /**
-   * Retrieves the most recent activity (up to 5 items).
+   * Retrieves the most recent activity (up to 5 items) from the in-memory list.
    */
-  private async getRecentActivity(userId: string): Promise<(CodingDailyAssignment & { problem?: CodingProblem })[]> {
-    const snapshot = await db.collection('codingDailyAssignments')
-      .where('userId', '==', userId)
-      .get();
-
-    const allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CodingDailyAssignment));
-    
+  private async getRecentActivityFromList(allTasks: CodingDailyAssignment[]): Promise<(CodingDailyAssignment & { problem?: CodingProblem })[]> {
     // Sort descending by assignedAt
-    allTasks.sort((a, b) => {
+    const sortedTasks = [...allTasks].sort((a, b) => {
       const dateA = a.assignedAt?.toDate ? a.assignedAt.toDate().getTime() : new Date(a.assignedAt).getTime();
       const dateB = b.assignedAt?.toDate ? b.assignedAt.toDate().getTime() : new Date(b.assignedAt).getTime();
       return dateB - dateA;
     });
 
-    const recentTasksData = allTasks.slice(0, 5);
+    const recentTasksData = sortedTasks.slice(0, 5);
 
     const tasks = await Promise.all(recentTasksData.map(async data => {
       const problem = await this.getProblemDetails(data.problemId);
@@ -237,19 +258,14 @@ export class CodingDashboardService {
   }
 
   /**
-   * Aggregates basic progress metrics.
+   * Aggregates basic progress metrics from the in-memory list.
    */
-  private async getProgressMetrics(userId: string) {
-    const snapshot = await db.collection('codingDailyAssignments')
-      .where('userId', '==', userId)
-      .get();
-      
+  private getProgressMetricsFromList(allTasks: CodingDailyAssignment[]) {
     let problemsAssigned = 0;
     let problemsCompleted = 0;
     const topicsPracticed = new Set<string>();
     
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
+    allTasks.forEach(data => {
       problemsAssigned++;
       if (data.status === 'COMPLETED') {
         problemsCompleted++;

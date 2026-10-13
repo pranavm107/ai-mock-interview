@@ -51,14 +51,21 @@ export type CodingIntegrityState =
   | "STARTING"
   | "ACTIVE"
   | "ENDING"
-  | "ENDED";
+  | "ENDED"
+  | "CONFLICT";
 
 export type IntegrityEventType =
   | "TAB_SWITCH"
   | "WINDOW_BLUR"
   | "FULLSCREEN_EXIT"
   | "NAVIGATION_ATTEMPT"
-  | "HEARTBEAT_FAILURE";
+  | "HEARTBEAT_FAILURE"
+  | "COPY_DETECTED"
+  | "PASTE_DETECTED"
+  | "CUT_DETECTED"
+  | "TAB_RETURN"
+  | "WINDOW_FOCUS"
+  | "LARGE_CODE_INSERTION";
 
 export interface IntegritySignal {
   id: string;
@@ -97,6 +104,8 @@ export interface ServerIntegritySession {
   status: IntegritySessionStatus;
   strikeCount: number;
   maxStrikes: number;
+  lastHeartbeatAt?: string;
+  isStale?: boolean;
 }
 
 export interface IntegritySignalRequest {
@@ -110,5 +119,62 @@ export interface IntegritySignalResponse {
   session: ServerIntegritySession;
 }
 
+export type CodingMalpracticeIncidentType = 'STRIKE_LIMIT_EXCEEDED';
+export type CodingMalpracticeSeverity = 'HIGH';
+export type CodingMalpracticeStatus = 'OPEN' | 'REVIEWED' | 'DISMISSED' | 'CONFIRMED';
 
+export interface CodingMalpracticeRecord {
+  recordId: string;
+  sessionId: string;
+  userId: string;
+  incidentType: CodingMalpracticeIncidentType;
+  severity: CodingMalpracticeSeverity;
+  status: CodingMalpracticeStatus;
+  summary: string;
+  evidenceEventIds: string[];
+  createdAt: any;
+  updatedAt: any;
+  reviewedAt?: any;
+  reviewedBy?: string;
+  resolutionNote?: string;
+}
 
+export interface AIAnalysisResult {
+  explanation: string;
+  correctnessIssues: string[];
+  complexity: {
+    time: string;
+    space: string;
+    reasoning: string;
+  };
+  readability: string;
+  suggestions: string[];
+}
+
+export interface CodingAnalyticsData {
+  totalAttempts: number;
+  totalSolved: number;
+  uniqueProblemsAttempted: number;
+  acceptanceRate: number;
+  difficultyBreakdown: { [difficulty: string]: number };
+  topicBreakdown: { [topic: string]: number };
+  languageBreakdown: { [language: string]: number };
+  recentActivity: { date: string; attempts: number; solved: number }[];
+  solvedProblemIds?: string[];
+  attemptedProblemIds?: string[];
+}
+
+export interface CodingReadinessData {
+  score: number;
+  level: 'Getting Started' | 'Building Foundations' | 'Interview Ready';
+  factors: {
+    successScore: number;
+    difficultyScore: number;
+    topicScore: number;
+    consistencyScore: number;
+  };
+  strengths: string[];
+  improvementAreas: string[];
+  recommendation: string;
+  isNewUser: boolean;
+}

@@ -134,12 +134,12 @@ export const Sidebar: React.FC = () => {
 
       <button 
         onClick={toggleSidebar}
-        className="absolute -right-3.5 top-24 bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md hover:bg-slate-50 transition-all text-slate-400 hover:text-slate-600 z-40 flex items-center justify-center"
+        className="absolute -right-3.5 top-6 bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md hover:bg-slate-50 transition-all text-slate-400 hover:text-slate-600 z-40 flex items-center justify-center"
       >
         {isCollapsed ? <ChevronRight size={14} strokeWidth={3} /> : <ChevronLeft size={14} strokeWidth={3} />}
       </button>
 
-      <nav className="flex-1 px-4 py-2 space-y-4 overflow-y-auto">
+      <nav className="flex-1 min-h-0 px-4 py-2 space-y-4 overflow-y-auto">
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
             <AnimatePresence>
@@ -164,20 +164,20 @@ export const Sidebar: React.FC = () => {
                   <motion.div
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    className={`flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm border border-blue-100/50' 
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                     }`}
                   >
-                    <item.icon size={20} className={isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
+                    <item.icon size={19} className={isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
                     <AnimatePresence>
                       {!isCollapsed && (
                         <motion.span
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="whitespace-nowrap"
+                          className="whitespace-nowrap text-sm"
                         >
                           {item.name}
                         </motion.span>
@@ -194,21 +194,24 @@ export const Sidebar: React.FC = () => {
       <AnimatePresence>
         {!isCollapsed && (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="p-5 mx-4 mb-4 rounded-[20px] bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl relative overflow-hidden"
+            exit={{ opacity: 0, y: 10 }}
+            className="p-4 mx-4 mb-3 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg relative overflow-hidden shrink-0"
           >
-            <div className="absolute inset-0 bg-blue-500/20 blur-2xl"></div>
-            <div className="relative z-10 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <div className="bg-white/10 p-1.5 rounded-lg">
-                  <Zap size={16} className="text-yellow-400 fill-yellow-400" />
+            <div className="absolute inset-0 bg-blue-500/15 blur-xl"></div>
+            <div className="relative z-10 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-white/10 p-1 rounded-md">
+                    <Zap size={14} className="text-yellow-400 fill-yellow-400" />
+                  </div>
+                  <span className="font-semibold text-xs tracking-wide">PrepPilot Pro</span>
                 </div>
-                <span className="font-semibold text-sm">Upgrade to Pro</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300">New</span>
               </div>
-              <p className="text-[13px] text-slate-300 mb-2 leading-relaxed">Get unlimited interviews and advanced analytics.</p>
-              <button className="w-full bg-white text-slate-900 text-sm font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50 transition-all">
+              <p className="text-xs text-slate-300 leading-snug">Unlimited AI interviews & deep analytics.</p>
+              <button className="w-full mt-1 bg-white text-slate-900 text-xs font-semibold py-2 px-3 rounded-lg shadow-sm hover:bg-slate-100 transition-all">
                 Upgrade Now
               </button>
             </div>

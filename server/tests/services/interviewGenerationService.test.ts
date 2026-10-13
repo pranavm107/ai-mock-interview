@@ -36,7 +36,7 @@ describe('generateInterview (MCQ)', () => {
           question: "What is React?",
           expectedTopics: ["UI", "Components"],
           skillsEvaluated: ["React"],
-          followUps: [],
+          followUps: ["Why use it?"],
           options: [
             { id: "A", text: "A library" },
             { id: "B", text: "A database" },
@@ -47,13 +47,13 @@ describe('generateInterview (MCQ)', () => {
           explanation: "React is a JS library for UI."
         },
         {
-          section: "ROLE",
+          section: "RESUME",
           type: "TECHNICAL",
           difficulty: "HARD",
           question: "What is Node?",
           expectedTopics: ["Backend", "V8"],
           skillsEvaluated: ["Node.js"],
-          followUps: [],
+          followUps: ["How does the event loop work?"],
           options: [
             { id: "A", text: "A runtime" },
             { id: "B", text: "A database" },
@@ -67,10 +67,10 @@ describe('generateInterview (MCQ)', () => {
           section: "COMPANY",
           type: "BEHAVIORAL",
           difficulty: "MEDIUM",
-          question: "Why Google?",
+          question: "Why do you want to work at Google?",
           expectedTopics: ["Culture"],
           skillsEvaluated: ["Soft skills"],
-          followUps: [],
+          followUps: ["What specifically?"],
           options: [
             { id: "A", text: "Scale" },
             { id: "B", text: "Free food" },

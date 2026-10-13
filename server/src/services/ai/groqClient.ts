@@ -51,7 +51,7 @@ export const generateText = async (prompt: string, maxRetries = 2): Promise<stri
   throw new Error(`Failed to generate text after multiple attempts. Last error: ${lastError?.message || lastError}`);
 };
 
-export const generateJson = async (prompt: string, maxRetries = 3): Promise<string> => {
+export const generateJson = async (prompt: string, maxRetries = 3, options?: { signal?: AbortSignal }): Promise<string> => {
   let lastError: any;
   const groq = getGroqClient();
 
@@ -63,7 +63,7 @@ export const generateJson = async (prompt: string, maxRetries = 3): Promise<stri
           model: modelName,
           temperature: 0.1,
           response_format: { type: "json_object" },
-        });
+        }, { signal: options?.signal });
         
         const text = chatCompletion.choices[0]?.message?.content;
         if (!text) {
@@ -75,8 +75,8 @@ export const generateJson = async (prompt: string, maxRetries = 3): Promise<stri
         lastError = error;
         console.error(`Attempt ${attempt} with ${modelName} failed:`, error.message || error);
         
-        // Don't retry if it's a structural/auth error
-        if (error.status === 400 || error.status === 401 || error.status === 403) {
+        // Don't retry if it's a structural/auth error, or if aborted
+        if (error.name === 'AbortError' || error.message?.includes('aborted') || error.status === 400 || error.status === 401 || error.status === 403) {
            break; 
         }
 

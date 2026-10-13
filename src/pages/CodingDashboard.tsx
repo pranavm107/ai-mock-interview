@@ -5,6 +5,8 @@ import type { CodingDashboardData } from '../types/coding';
 import { codingFrontendService } from '../services/codingFrontendService';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { CodingAnalytics } from '../components/coding/CodingAnalytics';
+import { CodingReadiness } from '../components/coding/CodingReadiness';
 
 const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
   const colors = {
@@ -66,7 +68,7 @@ const CodingDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto animate-pulse">
+      <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto animate-pulse" aria-busy="true" aria-label="Loading dashboard">
         <div className="h-24 bg-slate-200 rounded-2xl w-full"></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 h-64 bg-slate-200 rounded-2xl"></div>
@@ -323,6 +325,18 @@ const CodingDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <CodingReadiness />
+      </div>
+
+      <div className="mt-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">Your Analytics</h2>
+          <p className="text-slate-500">Track your problem-solving journey and activity over time.</p>
+        </div>
+        <CodingAnalytics />
+      </div>
     </div>
   );
 };

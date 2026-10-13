@@ -9,9 +9,9 @@ import { SUPPORTED_LANGUAGES, getDefaultLanguage } from '../config/codingLanguag
 import type { CodingLanguage } from '../config/codingLanguages';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SubmissionResult, TestCaseResult } from '../types/evaluation';
-import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEnforcementState, ServerIntegritySession } from '../types/coding';
+import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEnforcementState, ServerIntegritySession, AIAnalysisResult } from '../types/coding';
 import { createIntegrityDetector, IntegrityDetectionService } from '../services/coding/integrityDetectionService';
-import { createServerIntegritySession, getServerIntegritySession, processServerIntegritySignal, endServerIntegritySession } from '../services/coding/integrityApiService';
+import { createServerIntegritySession, getServerIntegritySession, processServerIntegritySignal, endServerIntegritySession, heartbeatServerIntegritySession } from '../services/coding/integrityApiService';
 
 const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
   const colors = {
@@ -46,7 +46,10 @@ const CodingWorkspace: React.FC = () => {
   const [outputState, setOutputState] = useState<'IDLE' | 'RUNNING' | 'FINISHED' | 'EVALUATED'>('IDLE');
   const [outputMessage, setOutputMessage] = useState<string>('Run your code to see the output here.');
   const [evaluationResult, setEvaluationResult] = useState<SubmissionResult | null>(null);
-  const [activeTab, setActiveTab] = useState<'CONSOLE' | 'TESTS'>('CONSOLE');
+  const [activeTab, setActiveTab] = useState<'CONSOLE' | 'TESTS' | 'AI_ANALYSIS'>('CONSOLE');
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   // Integrity Session State
   const [sessionMode, setSessionMode] = useState<CodingSessionMode>('PRACTICE');
@@ -60,6 +63,11 @@ const CodingWorkspace: React.FC = () => {
   const [enforcementState, setEnforcementState] = useState<CodingEnforcementState>('ACTIVE');
   const [serverSession, setServerSession] = useState<ServerIntegritySession | null>(null);
   const [currentWarningMsg, setCurrentWarningMsg] = useState<string>('');
+  const [conflictSessionId, setConflictSessionId] = useState<string | null>(null);
+  const analysisRequestIdRef = useRef<number>(0);
+  const evaluationRequestIdRef = useRef<number>(0);
+  const [evaluationType, setEvaluationType] = useState<'RUN_TESTS' | 'SUBMIT' | null>(null);
+
   const mapSignalToWarningMsg = (signalType: string) => {
     switch (signalType) {
       case 'TAB_SWITCH': return 'Browser tab visibility changed.';
@@ -97,7 +105,7 @@ const CodingWorkspace: React.FC = () => {
               const token = await getToken();
               if (!token || !sessionId) return;
               
-              const res = await processServerIntegritySignal(sessionId, signal.id, signal.type, token);
+              const res = await processServerIntegritySignal(sessionId, signal.id, signal.type, token, signal.timestamp, signal.metadata);
               if (res.signalAccepted && !res.duplicate) {
                 const s = res.session;
                 setServerSession(s);
@@ -144,6 +152,41 @@ const CodingWorkspace: React.FC = () => {
       }
     };
   }, [integrityState, sessionId]);
+
+  // C16 Heartbeat lifecycle
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let isHeartbeating = false;
+    let isActive = true;
+
+    if (integrityState === 'ACTIVE' && sessionId) {
+      intervalId = setInterval(async () => {
+        if (isHeartbeating) return; // Prevent overlapping
+        isHeartbeating = true;
+        try {
+          const token = await getToken();
+          if (token && isActive) {
+            const s = await heartbeatServerIntegritySession(sessionId, token);
+            if (isActive) {
+              setServerSession(s);
+            }
+          }
+        } catch (e) {
+          // Network errors or inactive session shouldn't kill the UI directly in C16
+          console.error('Heartbeat failed', e);
+        } finally {
+          isHeartbeating = false;
+        }
+      }, 30000); // 30 seconds
+    }
+
+    return () => {
+      isActive = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [integrityState, sessionId, getToken]);
 
   const [leftWidth, setLeftWidth] = useState(() => {
     const saved = localStorage.getItem('coding-workspace-split');
@@ -223,6 +266,30 @@ const CodingWorkspace: React.FC = () => {
     });
   };
 
+  const handleEditorDidMount = (editor: any) => {
+    editor.onDidPaste(() => {
+      // If the session is active, the detector will exist and process it
+      detectorRef.current?.reportEditorPaste();
+    });
+
+    editor.onDidChangeModelContent((e: any) => {
+      if (!detectorRef.current) return;
+      let isBulkInsert = false;
+      let maxLen = 0;
+      
+      for (const change of e.changes) {
+        if (change.text && change.text.length > 50) { // 50+ chars is a bulk insertion
+          isBulkInsert = true;
+          maxLen = Math.max(maxLen, change.text.length);
+        }
+      }
+
+      if (isBulkInsert) {
+        detectorRef.current.reportLargeInsertion(maxLen);
+      }
+    });
+  };
+
   useEffect(() => {
     const fetchProblem = async () => {
       setLoading(true);
@@ -280,7 +347,8 @@ const CodingWorkspace: React.FC = () => {
       const result = await codingFrontendService.executeCode(token, {
         language: activeLanguage.id,
         sourceCode: code,
-        stdin: '' // No stdin support in UI yet, but API accepts it
+        stdin: '', // No stdin support in UI yet, but API accepts it
+        sessionId: integrityState === 'ACTIVE' && sessionId ? sessionId : undefined
       });
 
       setOutputState('FINISHED');
@@ -317,19 +385,35 @@ const CodingWorkspace: React.FC = () => {
     setOutputMessage('Running public tests...');
     setActiveTab('TESTS');
     setEvaluationResult(null);
+    setEvaluationType('RUN_TESTS');
     
+    const currentRequestId = ++evaluationRequestIdRef.current;
+
     try {
       const token = await getToken();
       if (!token) throw new Error("Authentication failed");
       
-      const result = await codingFrontendService.runTests(token, slug, code, activeLanguage.id);
-      setEvaluationResult(result);
-      setOutputState('EVALUATED');
+      const result = await codingFrontendService.runTests(
+        token, 
+        slug, 
+        code, 
+        activeLanguage.id,
+        integrityState === 'ACTIVE' && sessionId ? sessionId : undefined
+      );
+      
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setEvaluationResult(result);
+        setOutputState('EVALUATED');
+      }
     } catch (err: any) {
-      setOutputState('FINISHED');
-      setOutputMessage(err.message || 'An error occurred while running tests.');
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setOutputState('FINISHED');
+        setOutputMessage(err.message || 'An error occurred while running tests.');
+      }
     } finally {
-      setIsExecuting(false);
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setIsExecuting(false);
+      }
     }
   };
 
@@ -341,19 +425,71 @@ const CodingWorkspace: React.FC = () => {
     setOutputMessage('Evaluating submission...');
     setActiveTab('TESTS');
     setEvaluationResult(null);
+    setEvaluationType('SUBMIT');
     
+    const currentRequestId = ++evaluationRequestIdRef.current;
+
     try {
       const token = await getToken();
       if (!token) throw new Error("Authentication failed");
       
-      const result = await codingFrontendService.submitCode(token, slug, code, activeLanguage.id);
-      setEvaluationResult(result);
-      setOutputState('EVALUATED');
+      const result = await codingFrontendService.submitCode(
+        token, 
+        slug, 
+        code, 
+        activeLanguage.id,
+        integrityState === 'ACTIVE' && sessionId ? sessionId : undefined
+      );
+      
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setEvaluationResult(result);
+        setOutputState('EVALUATED');
+      }
     } catch (err: any) {
-      setOutputState('FINISHED');
-      setOutputMessage(err.message || 'An error occurred while evaluating the submission.');
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setOutputState('FINISHED');
+        setOutputMessage(err.message || 'An error occurred while evaluating the submission.');
+      }
     } finally {
-      setIsExecuting(false);
+      if (evaluationRequestIdRef.current === currentRequestId) {
+        setIsExecuting(false);
+      }
+    }
+  };
+
+  const handleAnalyzeCode = async () => {
+    if (enforcementState === 'TERMINATED') return;
+    if (!slug) return;
+    setIsAnalyzing(true);
+    setAiAnalysis(null);
+    setAiError(null);
+    setActiveTab('AI_ANALYSIS');
+    
+    const currentRequestId = ++analysisRequestIdRef.current;
+
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication failed");
+      
+      const result = await codingFrontendService.analyzeCode(
+        token, 
+        slug, 
+        code, 
+        activeLanguage.id,
+        integrityState === 'ACTIVE' && sessionId ? sessionId : undefined
+      );
+      
+      if (analysisRequestIdRef.current === currentRequestId) {
+        setAiAnalysis(result);
+      }
+    } catch (err: any) {
+      if (analysisRequestIdRef.current === currentRequestId) {
+        setAiError(err.message || 'An error occurred while analyzing the code.');
+      }
+    } finally {
+      if (analysisRequestIdRef.current === currentRequestId) {
+        setIsAnalyzing(false);
+      }
     }
   };
 
@@ -365,6 +501,7 @@ const CodingWorkspace: React.FC = () => {
     setEnforcementState('ACTIVE');
     setServerSession(null);
     setSessionId(null);
+    setConflictSessionId(null);
   };
 
   const handleConfirmIntegritySession = async () => {
@@ -394,9 +531,31 @@ const CodingWorkspace: React.FC = () => {
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(console.error);
       }
-      setIntegrityState('CONSENT_REQUIRED'); // revert back so they can see the error
-      setFullscreenError(err.message || 'Unable to enter fullscreen or create session. Please try again.');
+      
+      if (err.message === 'ACTIVE_SESSION_CONFLICT') {
+        setConflictSessionId(err.existingSessionId || null);
+        setIntegrityState('CONFLICT' as any);
+      } else {
+        setIntegrityState('CONSENT_REQUIRED'); // revert back so they can see the error
+        setFullscreenError(err.message || 'Unable to enter fullscreen or create session. Please try again.');
+      }
     }
+  };
+
+  const handleResolveConflictEndSession = async () => {
+    if (conflictSessionId) {
+      try {
+        const token = await getToken();
+        if (token) {
+          await endServerIntegritySession(conflictSessionId, token);
+        }
+      } catch (e) {
+        console.error('Failed to end conflicting session', e);
+      }
+    }
+    // Now try to start the session again
+    setConflictSessionId(null);
+    handleConfirmIntegritySession();
   };
 
   const handleCancelIntegrityFlow = () => {
@@ -539,6 +698,40 @@ const CodingWorkspace: React.FC = () => {
         </div>
       )}
 
+      {integrityState === 'CONFLICT' && (
+        <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+          <div className="bg-slate-900 p-8 rounded-xl max-w-md w-full border border-slate-800 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
+              <ShieldAlert size={32} className="text-red-500" />
+            </div>
+            
+            <h2 className="text-xl font-bold text-white mb-4">Active Session Conflict</h2>
+            
+            <div className="bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-700 w-full text-left">
+              <p className="text-slate-300 text-sm">
+                You already have an active coding session running in another tab or window. Our platform requires that you only have one protected session active at a time.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 w-full">
+              <button 
+                onClick={handleResolveConflictEndSession}
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2"
+              >
+                <XCircle size={16} /> End Old Session & Continue Here
+              </button>
+              
+              <button 
+                onClick={handleCancelIntegrityFlow}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
         {/* DEVELOPMENT DIAGNOSTIC PANEL (Floating) */}
@@ -604,10 +797,17 @@ const CodingWorkspace: React.FC = () => {
 
       {/* SPLITTER (Desktop only) */}
       <div
-        className="hidden md:flex w-1.5 hover:w-2 bg-transparent hover:bg-blue-500/50 cursor-col-resize z-10 items-center justify-center -ml-[3px] -mr-[3px] shrink-0 transition-colors"
+        className="hidden md:flex w-1.5 hover:w-2 bg-transparent hover:bg-blue-500/50 cursor-col-resize z-10 items-center justify-center -ml-[3px] -mr-[3px] shrink-0 transition-colors focus:outline-none focus:bg-blue-500/50"
         onMouseDown={handleMouseDown}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft') setLeftWidth(prev => Math.max(20, prev - 5));
+          else if (e.key === 'ArrowRight') setLeftWidth(prev => Math.min(80, prev + 5));
+        }}
         role="separator"
         aria-label="Resize workspace panels"
+        tabIndex={0}
+        aria-orientation="vertical"
+        aria-valuenow={leftWidth}
       >
         <div className="h-8 w-0.5 bg-slate-600 rounded-full" />
       </div>
@@ -626,6 +826,7 @@ const CodingWorkspace: React.FC = () => {
             value={code}
             onChange={(val) => setCode(val || '')}
             beforeMount={handleEditorWillMount}
+            onMount={handleEditorDidMount}
             theme="preppilot-dark"
             options={{
               minimap: { enabled: false },
@@ -644,37 +845,63 @@ const CodingWorkspace: React.FC = () => {
           />
         </div>
 
-        {/* HORIZONTAL SPLITTER (Desktop only) */}
+      {/* HORIZONTAL SPLITTER (Desktop only) */}
         <div
-          className="hidden md:flex h-1.5 hover:h-2 w-full bg-transparent hover:bg-blue-500/50 cursor-row-resize z-10 items-center justify-center shrink-0 transition-colors"
+          className="hidden md:flex h-1.5 hover:h-2 w-full bg-transparent hover:bg-blue-500/50 cursor-row-resize z-10 items-center justify-center shrink-0 transition-colors focus:outline-none focus:bg-blue-500/50"
           onMouseDown={handleVMouseDown}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowUp') setTopHeight(prev => Math.max(30, prev - 5));
+            else if (e.key === 'ArrowDown') setTopHeight(prev => Math.min(85, prev + 5));
+          }}
           role="separator"
           aria-label="Resize editor and output panels"
+          tabIndex={0}
+          aria-orientation="horizontal"
+          aria-valuenow={topHeight}
         >
           <div className="w-8 h-0.5 bg-slate-600 rounded-full" />
         </div>
 
         {/* Output Panel Header & Controls */}
         <div className="h-12 border-y border-slate-800 flex items-center justify-between px-2 md:px-4 shrink-0 bg-slate-900 overflow-x-auto custom-scrollbar">
-          <div className="flex items-center">
+          <div className="flex items-center" role="tablist" aria-label="Output Views">
             <button 
+              role="tab"
+              aria-selected={activeTab === 'CONSOLE'}
+              aria-controls="panel-console"
+              id="tab-console"
               onClick={() => setActiveTab('CONSOLE')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'CONSOLE' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}
             >
               Console
             </button>
             <button 
+              role="tab"
+              aria-selected={activeTab === 'TESTS'}
+              aria-controls="panel-tests"
+              id="tab-tests"
               onClick={() => setActiveTab('TESTS')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'TESTS' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}
             >
               Test Results
+            </button>
+            <button 
+              role="tab"
+              aria-selected={activeTab === 'AI_ANALYSIS'}
+              aria-controls="panel-ai"
+              id="tab-ai"
+              onClick={() => setActiveTab('AI_ANALYSIS')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'AI_ANALYSIS' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}
+            >
+              AI Feedback
             </button>
           </div>
           <div className="flex items-center gap-2">
             <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunCode}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              aria-busy={isExecuting && activeTab === 'CONSOLE'}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
             >
               {isExecuting && activeTab === 'CONSOLE' ? <Loader2 size={12} className="animate-spin text-emerald-400" /> : <Play size={12} className="text-emerald-400" />}
               Run Code
@@ -682,15 +909,26 @@ const CodingWorkspace: React.FC = () => {
             <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleRunTests}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              aria-busy={isExecuting && activeTab === 'TESTS'}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none"
             >
               {isExecuting && activeTab === 'TESTS' && outputMessage.includes('public') ? <Loader2 size={12} className="animate-spin text-blue-400" /> : <Beaker size={12} className="text-blue-400" />}
               Run Tests
             </button>
             <button
+              disabled={isAnalyzing || isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
+              onClick={handleAnalyzeCode}
+              aria-busy={isAnalyzing}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap focus-visible:ring-2 focus-visible:ring-purple-400 focus:outline-none"
+            >
+              {isAnalyzing ? <Loader2 size={12} className="animate-spin text-purple-400" /> : <Shield size={12} className="text-purple-400" />}
+              AI Feedback
+            </button>
+            <button
               disabled={isExecuting || enforcementState === 'TERMINATED' || enforcementState === 'WARNING' || enforcementState === 'FINAL_WARNING'}
               onClick={handleSubmit}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20 whitespace-nowrap"
+              aria-busy={isExecuting && activeTab === 'TESTS' && outputMessage.includes('Evaluat')}
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-white focus:outline-none"
             >
               {isExecuting && activeTab === 'TESTS' && outputMessage.includes('Evaluat') ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
               Submit
@@ -699,7 +937,7 @@ const CodingWorkspace: React.FC = () => {
         </div>
 
         {/* Output Area */}
-        <div className="flex-1 bg-[#09090b] p-4 overflow-y-auto custom-scrollbar font-mono text-sm relative">
+        <div className="flex-1 bg-[#09090b] p-4 overflow-y-auto custom-scrollbar font-mono text-sm relative" aria-live="polite" aria-atomic="true">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab + (activeTab === 'CONSOLE' ? outputState : '')}
@@ -725,7 +963,7 @@ const CodingWorkspace: React.FC = () => {
                 ) : (
                   <div className="text-slate-500">Run code to see console output.</div>
                 )
-              ) : (
+              ) : activeTab === 'TESTS' ? (
                 // TESTS TAB
                 outputState === 'IDLE' ? (
                   <div className="text-slate-500">Run tests or submit to see results here.</div>
@@ -736,6 +974,9 @@ const CodingWorkspace: React.FC = () => {
                   </div>
                 ) : outputState === 'EVALUATED' && evaluationResult ? (
                   <div className="flex flex-col gap-4 pb-8">
+                    <div className="text-slate-400 font-medium mb-1 tracking-wide uppercase text-xs">
+                      {evaluationType === 'SUBMIT' ? 'Submission Results' : 'Public Test Results'}
+                    </div>
                     <div className={`p-4 rounded border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
                       evaluationResult.status === 'ACCEPTED' ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-400' :
                       evaluationResult.status === 'WRONG_ANSWER' ? 'bg-red-950/30 border-red-900/50 text-red-400' :
@@ -750,8 +991,16 @@ const CodingWorkspace: React.FC = () => {
                          evaluationResult.status === 'OUTPUT_LIMIT_EXCEEDED' ? 'Output Limit Exceeded' :
                          'Runtime Error'}
                       </div>
-                      <div className="text-sm font-medium bg-black/20 px-3 py-1.5 rounded-full">
-                        {evaluationResult.passedTests} / {evaluationResult.totalTests} passed &nbsp;&bull;&nbsp; Score: {evaluationResult.score}
+                      <div className="text-sm font-medium bg-black/20 px-3 py-1.5 rounded-full flex flex-wrap gap-2 items-center">
+                        <span>{evaluationResult.passedTests} / {evaluationResult.totalTests} passed</span>
+                        <span className="opacity-50">&bull;</span>
+                        <span>Score: {evaluationResult.score}</span>
+                        {evaluationResult.executionTimeMs > 0 && (
+                          <>
+                            <span className="opacity-50">&bull;</span>
+                            <span>{evaluationResult.executionTimeMs}ms</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     
@@ -801,6 +1050,80 @@ const CodingWorkspace: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-slate-500">Run tests or submit to see results here.</div>
+                )
+              ) : (
+                // AI ANALYSIS TAB
+                isAnalyzing ? (
+                  <div className="text-purple-400 flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" />
+                    Analyzing code using AI...
+                  </div>
+                ) : aiError ? (
+                  <div className="text-red-400 p-4 rounded bg-red-950/20 border border-red-900/30 whitespace-pre-wrap">
+                    {aiError}
+                  </div>
+                ) : aiAnalysis ? (
+                  <div className="flex flex-col gap-6 pb-8 text-sm">
+                    <div className="p-3 bg-purple-950/20 border border-purple-900/30 rounded text-purple-300 flex items-start gap-2">
+                      <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                      <div className="text-xs leading-relaxed">
+                        <strong>Advisory Only:</strong> AI feedback is provided as an experimental learning aid. It does not determine your final score, pass/fail status, or integrity standing. Always rely on the deterministic <strong>Test Results</strong> for ground-truth execution outcomes. AI suggestions may occasionally be imperfect or hallucinate execution behavior.
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded border bg-slate-900/40 border-slate-800">
+                      <div className="font-semibold text-slate-300 mb-2">Code Explanation</div>
+                      <div className="text-slate-400 whitespace-pre-wrap">{aiAnalysis.explanation}</div>
+                    </div>
+                    
+                    {aiAnalysis.correctnessIssues.length > 0 && (
+                      <div className="p-4 rounded border bg-red-950/10 border-red-900/20">
+                        <div className="font-semibold text-red-300 mb-2 flex items-center gap-2">
+                          <AlertCircle size={16} /> Potential Issues
+                        </div>
+                        <ul className="list-disc list-inside text-slate-400 space-y-1">
+                          {aiAnalysis.correctnessIssues.map((issue, idx) => (
+                            <li key={idx}>{issue}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded border bg-slate-900/40 border-slate-800">
+                        <div className="font-semibold text-slate-300 mb-2">Time Complexity</div>
+                        <div className="text-blue-400 font-mono mb-2">{aiAnalysis.complexity.time}</div>
+                      </div>
+                      <div className="p-4 rounded border bg-slate-900/40 border-slate-800">
+                        <div className="font-semibold text-slate-300 mb-2">Space Complexity</div>
+                        <div className="text-blue-400 font-mono mb-2">{aiAnalysis.complexity.space}</div>
+                      </div>
+                      <div className="p-4 rounded border bg-slate-900/40 border-slate-800 md:col-span-2">
+                        <div className="font-semibold text-slate-300 mb-2">Complexity Reasoning</div>
+                        <div className="text-slate-400">{aiAnalysis.complexity.reasoning}</div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded border bg-slate-900/40 border-slate-800">
+                      <div className="font-semibold text-slate-300 mb-2">Readability & Style</div>
+                      <div className="text-slate-400 whitespace-pre-wrap">{aiAnalysis.readability}</div>
+                    </div>
+
+                    {aiAnalysis.suggestions.length > 0 && (
+                      <div className="p-4 rounded border bg-emerald-950/10 border-emerald-900/20">
+                        <div className="font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+                          <CheckCircle2 size={16} /> Improvement Suggestions
+                        </div>
+                        <ul className="list-disc list-inside text-slate-400 space-y-1">
+                          {aiAnalysis.suggestions.map((suggestion, idx) => (
+                            <li key={idx}>{suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-slate-500">Click "AI Feedback" to analyze your current code.</div>
                 )
               )}
             </motion.div>

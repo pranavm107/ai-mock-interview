@@ -9,6 +9,7 @@ export class ExecutionService {
   
   private activeExecutions = 0;
   private readonly MAX_CONCURRENT_EXECUTIONS = 10;
+  private activeUserExecutions = new Set<string>();
 
   constructor() {
     this.checkSandboxAvailability();
@@ -47,6 +48,10 @@ export class ExecutionService {
   }
 
   public async execute(userId: string, request: ExecutionRequest): Promise<ExecutionResult> {
+    if (this.activeUserExecutions.has(userId)) {
+      throw new Error('CONCURRENT_EXECUTION: Please wait for your previous execution to finish.');
+    }
+
     // 1. Validation limits
     if (Buffer.byteLength(request.sourceCode, 'utf8') > this.MAX_SOURCE_SIZE_BYTES) {
       throw new Error('Source code exceeds maximum allowed size (256KB)');
@@ -75,9 +80,11 @@ export class ExecutionService {
 
     if (request.language === 'python') {
       try {
+        this.activeUserExecutions.add(userId);
         this.activeExecutions++;
         return await sandboxRunner.executePython(request);
       } finally {
+        this.activeUserExecutions.delete(userId);
         this.activeExecutions--;
       }
     }

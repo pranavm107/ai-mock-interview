@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../config/api';
-import type { CodingDashboardData, CodingProblem } from '../types/coding';
+import type { CodingDashboardData, CodingProblem, CodingAnalyticsData } from '../types/coding';
 import type { ExecutionRequest, ExecutionResult } from '../../server/src/types/execution';
 
 export const codingFrontendService = {
@@ -16,6 +16,40 @@ export const codingFrontendService = {
       throw new Error('Failed to fetch coding dashboard data');
     }
     
+    const data = await response.json();
+    return data.data;
+  },
+
+  getAnalyticsData: async (token: string, timezone: string = 'UTC'): Promise<CodingAnalyticsData> => {
+    const response = await fetch(`${API_BASE_URL}/api/coding/analytics?timezone=${encodeURIComponent(timezone)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch coding analytics');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
+  getReadinessData: async (token: string, timezone: string = 'UTC'): Promise<import('../types/coding').CodingReadinessData> => {
+    const response = await fetch(`${API_BASE_URL}/api/coding/readiness?timezone=${encodeURIComponent(timezone)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch coding readiness');
+    }
+
     const data = await response.json();
     return data.data;
   },
@@ -37,7 +71,7 @@ export const codingFrontendService = {
     return data.data;
   },
 
-  executeCode: async (token: string, request: ExecutionRequest): Promise<ExecutionResult> => {
+  executeCode: async (token: string, request: ExecutionRequest & { sessionId?: string }): Promise<ExecutionResult> => {
     const response = await fetch(`${API_BASE_URL}/api/coding/execute`, {
       method: 'POST',
       headers: {
@@ -54,32 +88,46 @@ export const codingFrontendService = {
     return data.data;
   },
 
-  runTests: async (token: string, problemSlug: string, source: string, language: string) => {
+  runTests: async (token: string, problemSlug: string, source: string, language: string, sessionId?: string) => {
     const response = await fetch(`${API_BASE_URL}/api/coding/run-tests`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ problemSlug, source, language })
+      body: JSON.stringify({ problemSlug, source, language, sessionId })
     });
     const data = await response.json();
     if (!data.success) throw new Error(data.error || 'Failed to run tests');
     return data.data;
   },
 
-  submitCode: async (token: string, problemSlug: string, source: string, language: string) => {
+  submitCode: async (token: string, problemSlug: string, source: string, language: string, sessionId?: string) => {
     const response = await fetch(`${API_BASE_URL}/api/coding/submit`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ problemSlug, source, language })
+      body: JSON.stringify({ problemSlug, source, language, sessionId })
     });
     const data = await response.json();
     if (!data.success) throw new Error(data.error || 'Failed to submit code');
     return data.data;
+  },
+
+  analyzeCode: async (token: string, problemSlug: string, source: string, language: string, sessionId?: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/coding/analyze`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ problemSlug, source, language, sessionId })
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error || 'Failed to analyze code');
+    return data.data as import('../types/coding').AIAnalysisResult;
   },
 
   getSubmissions: async (token: string, problemSlug?: string) => {

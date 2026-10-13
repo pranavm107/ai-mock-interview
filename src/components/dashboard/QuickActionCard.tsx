@@ -28,7 +28,7 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({ title, descrip
           <div className={`p-3 rounded-xl ${colorClass}`}>
             <Icon size={24} className={colorClass.replace('bg-', 'text-').replace('-50', '-600')} />
           </div>
-          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border border-slate-100 shadow-sm">
             <ArrowRight size={16} className="text-slate-400 group-hover:text-blue-600" />
           </div>
         </div>
