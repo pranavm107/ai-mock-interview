@@ -16,24 +16,24 @@ const categories = [
 
 export const InterviewCategoriesList: React.FC = () => {
   return (
-    <div className="bg-white rounded-[20px] shadow-sm border border-slate-200 p-6 sm:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-900">Explore Categories</h2>
-        <button className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+    <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5">
+      <div className="flex items-center justify-between mb-3.5">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900">Explore Categories</h2>
+        <button className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
           View All
         </button>
       </div>
       
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 sm:gap-2.5">
         {categories.map((cat, idx) => (
           <button 
             key={idx}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-full hover:border-blue-300 hover:shadow-sm transition-all group"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-slate-50/80 hover:shadow-2xs transition-all group"
           >
-            <div className={`p-1.5 rounded-full ${cat.bg} ${cat.border} border group-hover:scale-110 transition-transform`}>
-              <cat.icon size={14} className={cat.color} />
+            <div className={`p-1 rounded-md ${cat.bg} ${cat.border} border group-hover:scale-105 transition-transform`}>
+              <cat.icon size={13} className={cat.color} />
             </div>
-            <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">
+            <span className="text-xs sm:text-sm font-medium text-slate-700 group-hover:text-slate-900">
               {cat.name}
             </span>
           </button>

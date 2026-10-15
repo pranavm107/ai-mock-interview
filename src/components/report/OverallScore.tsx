@@ -46,59 +46,59 @@ export const OverallScore: React.FC<Props> = ({ evaluation }) => {
   ];
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-      <div className="flex flex-col md:flex-row items-center gap-12">
+    <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
         
         {/* Left Side: Score Ring */}
         <div className="flex flex-col items-center justify-center shrink-0 w-full md:w-1/3">
-          <div className="relative w-48 h-48 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border-8 border-white shadow-lg">
+          <div className="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border-4 sm:border-6 border-white shadow-md">
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
               <circle
                 className="text-slate-100"
-                strokeWidth="8"
+                strokeWidth="7"
                 stroke="currentColor"
                 fill="transparent"
-                r="88"
-                cx="96"
-                cy="96"
+                r="70"
+                cx="80"
+                cy="80"
               />
               <motion.circle
                 className={evaluation.overallScore >= 80 ? 'text-emerald-500' : evaluation.overallScore >= 60 ? 'text-orange-500' : 'text-red-500'}
-                strokeWidth="8"
-                strokeDasharray={552.92}
-                strokeDashoffset={552.92 - (552.92 * evaluation.overallScore) / 100}
+                strokeWidth="7"
+                strokeDasharray={439.82}
+                strokeDashoffset={439.82 - (439.82 * evaluation.overallScore) / 100}
                 strokeLinecap="round"
                 stroke="currentColor"
                 fill="transparent"
-                r="88"
-                cx="96"
-                cy="96"
-                initial={{ strokeDashoffset: 552.92 }}
-                animate={{ strokeDashoffset: 552.92 - (552.92 * evaluation.overallScore) / 100 }}
+                r="70"
+                cx="80"
+                cy="80"
+                initial={{ strokeDashoffset: 439.82 }}
+                animate={{ strokeDashoffset: 439.82 - (439.82 * evaluation.overallScore) / 100 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               />
             </svg>
             <div className="text-center z-10 flex flex-col items-center justify-center">
               <div className="flex items-baseline">
-                <span className="text-5xl font-bold text-slate-800 tracking-tight">{displayScore}</span>
-                <span className="text-lg font-medium text-slate-500 ml-1">/100</span>
+                <span className="text-3xl sm:text-4xl font-bold text-slate-800 tracking-tight">{displayScore}</span>
+                <span className="text-sm font-medium text-slate-500 ml-0.5">/100</span>
               </div>
-              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-2">Overall Score</span>
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Overall Score</span>
             </div>
           </div>
           
-          <div className="mt-8 bg-slate-50 border border-slate-100 rounded-2xl p-5 w-full text-center">
-            <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Score Analysis</h4>
-            <ul className="space-y-1.5 text-slate-700 font-medium text-sm">
-              <li className="flex items-center justify-center gap-2">
+          <div className="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 sm:p-3.5 w-full text-center">
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Score Analysis</h4>
+            <ul className="space-y-1 text-slate-700 font-medium text-xs">
+              <li className="flex items-center justify-center gap-1.5">
                 <span className={evaluation.technicalScore >= 80 ? 'text-emerald-500' : 'text-orange-500'}>•</span> 
                 {evaluation.technicalScore >= 80 ? 'Excellent Technical Knowledge' : 'Needs Technical Review'}
               </li>
-              <li className="flex items-center justify-center gap-2">
+              <li className="flex items-center justify-center gap-1.5">
                 <span className={evaluation.communicationScore >= 80 ? 'text-emerald-500' : 'text-orange-500'}>•</span> 
                 {evaluation.communicationScore >= 80 ? 'Strong Communication' : 'Work on Clarity'}
               </li>
-              <li className="flex items-center justify-center gap-2">
+              <li className="flex items-center justify-center gap-1.5">
                 <span className={evaluation.timeManagementScore >= 80 ? 'text-emerald-500' : 'text-orange-500'}>•</span> 
                 {evaluation.timeManagementScore >= 80 ? 'Good Time Management' : 'Improve Answer Pacing'}
               </li>
@@ -107,19 +107,19 @@ export const OverallScore: React.FC<Props> = ({ evaluation }) => {
         </div>
 
         {/* Right Side: Radar Chart */}
-        <div className="flex-1 w-full h-[400px]">
-          <h3 className="text-lg font-bold text-slate-800 text-center mb-4">Performance Distribution</h3>
+        <div className="flex-1 w-full h-[260px] sm:h-[300px]">
+          <h3 className="text-sm sm:text-base font-bold text-slate-800 text-center mb-2">Performance Distribution</h3>
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+            <RadarChart cx="50%" cy="50%" outerRadius="68%" data={radarData}>
               <PolarGrid stroke="#e2e8f0" />
               <PolarAngleAxis 
                 dataKey="subject" 
-                tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
               />
               <PolarRadiusAxis 
                 angle={30} 
                 domain={[0, 100]} 
-                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                tick={{ fill: '#94a3b8', fontSize: 9 }}
               />
               <Radar 
                 name="Score" 

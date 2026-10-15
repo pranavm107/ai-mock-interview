@@ -83,40 +83,40 @@ export default function InterviewReview() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans p-6 overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans p-4 sm:p-5 pb-12 overflow-y-auto">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-5">
         
         {/* Header navigation */}
-        <div className="flex items-center justify-between mb-8">
-          <Link to={`/replay/${sessionId}`} className="flex items-center text-zinc-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Back to Replay
+        <div className="flex items-center justify-between">
+          <Link to={`/replay/${sessionId}`} className="flex items-center text-xs sm:text-sm text-zinc-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Replay
           </Link>
           <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-bold">Interview AI Coach</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Interview AI Coach</h1>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg flex items-center justify-between">
+          <div className="bg-red-500/10 border border-red-500/40 text-red-400 p-3 sm:p-3.5 rounded-lg flex items-center justify-between text-xs sm:text-sm">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-500 font-bold hover:text-red-400">&times;</button>
+            <button onClick={() => setError(null)} className="text-red-400 font-bold hover:text-red-300 cursor-pointer">&times;</button>
           </div>
         )}
 
         {!data && !loading && (
-          <div className="flex flex-col items-center justify-center py-24 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <PlaySquare className="w-16 h-16 text-zinc-700 mb-6" />
-            <h2 className="text-2xl font-bold text-zinc-200 mb-2">Ready for your AI Evaluation?</h2>
-            <p className="text-zinc-400 max-w-md text-center mb-8">
+          <div className="flex flex-col items-center justify-center py-12 sm:py-16 bg-zinc-900/50 border border-zinc-800 rounded-xl text-center px-4">
+            <PlaySquare className="w-12 h-12 text-zinc-700 mb-3" />
+            <h2 className="text-lg sm:text-xl font-bold text-zinc-200 mb-1.5">Ready for your AI Evaluation?</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-md mx-auto mb-5 leading-relaxed">
               We'll analyze your interview transcript, evaluating your technical skills, communication, and confidence to provide actionable feedback.
             </p>
             <button
               onClick={handleGenerateReview}
               disabled={generating}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white px-8 py-3 rounded-full font-bold transition-colors flex items-center shadow-lg shadow-blue-500/20"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white px-5 h-9 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center shadow-xs cursor-pointer"
             >
               {generating ? (
-                <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Generating Review...</>
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating Review...</>
               ) : (
                 'Generate Review'
               )}
@@ -126,7 +126,7 @@ export default function InterviewReview() {
 
         {data && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
               {/* Left Column: Overall Summary (2/3 width on large screens) */}
               <div className="lg:col-span-2">
                 <ReviewSummaryCard review={data.review} />
@@ -139,12 +139,12 @@ export default function InterviewReview() {
             </div>
 
             {/* Strengths & Weaknesses */}
-            <div className="py-2">
+            <div>
               <ReviewStrengthsWeaknesses review={data.review} />
             </div>
 
             {/* Detailed Question List */}
-            <div className="pt-6">
+            <div className="pt-2">
               <ReviewQuestionList questionReviews={data.questionReviews} />
             </div>
           </>

@@ -44,9 +44,9 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
           <button 
             aria-label="Start Mock Interview"
             onClick={() => onContinue(interview.id)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 hover:shadow-md transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 hover:shadow-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
-            Start Mock Interview <ArrowRight size={16} />
+            Start Mock Interview <ArrowRight size={14} />
           </button>
         );
       case 'In Progress':
@@ -54,9 +54,9 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
           <button 
             aria-label="Continue Interview"
             onClick={() => onContinue(interview.id)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 hover:shadow-md transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-orange-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-orange-600 hover:shadow-sm transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
           >
-            Continue Interview <Play size={16} />
+            Continue Interview <Play size={14} />
           </button>
         );
       case 'Completed':
@@ -64,9 +64,9 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
           <button 
             aria-label="View Report"
             onClick={() => onView(interview.id)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-100 text-slate-700 rounded-lg text-xs sm:text-sm font-semibold hover:bg-slate-200 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
           >
-            <Eye size={16} /> View Report
+            <Eye size={14} /> View Report
           </button>
         );
       case 'Cancelled':
@@ -74,9 +74,9 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
           <button 
             aria-label="Interview Cancelled"
             disabled
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-400 rounded-xl font-medium cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-100 text-slate-400 rounded-lg text-xs sm:text-sm font-semibold cursor-not-allowed"
           >
-            <AlertCircle size={16} /> Interview Cancelled
+            <AlertCircle size={14} /> Interview Cancelled
           </button>
         );
       default:
@@ -94,7 +94,7 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
         whileHover={{ scale: 1.02, y: -4 }}
-        className="bg-white border border-slate-200 rounded-[20px] p-5 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all group relative overflow-hidden flex flex-col h-full cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+        className="bg-white border border-slate-200 rounded-xl p-4 sm:p-4.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all group relative overflow-hidden flex flex-col h-full cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
         onClick={() => {
           if (interview.status === 'Completed' || interview.status === 'Cancelled') {
             onView(interview.id);
@@ -117,25 +117,25 @@ export const InterviewCard: React.FC<Props> = ({ interview, onDelete, onContinue
         }}
       >
         {/* Top Section */}
-        <div className="flex justify-between items-start mb-5">
-          <div className="flex items-center gap-3">
-            <CompanyLogo company={interview.company} size="md" />
+        <div className="flex justify-between items-start mb-3.5">
+          <div className="flex items-center gap-2.5">
+            <CompanyLogo company={interview.company} size="sm" />
             <div>
-              <h3 className="text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-blue-700 transition-colors" title={interview.role}>
+              <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-blue-700 transition-colors" title={interview.role}>
                 {interview.role}
               </h3>
-              <div className="text-sm font-medium text-slate-500 mt-0.5">
+              <div className="text-xs font-medium text-slate-500 mt-0.5">
                 {interview.company}
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0 ml-2">
+          <div className="flex flex-col items-end gap-1.5 shrink-0 ml-2">
             <InterviewStatusBadge status={interview.status} />
           </div>
         </div>
 
         {/* Progress Section */}
-        <div className="mb-6">
+        <div className="mb-4">
           <InterviewProgress 
             totalQuestions={interview.totalQuestions}
             currentQuestion={interview.currentQuestion}

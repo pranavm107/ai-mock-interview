@@ -102,98 +102,98 @@ const CodingDashboard: React.FC = () => {
   const isNewUser = progress.problemsAssigned === 0;
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-[24px] text-white shadow-xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-blue-500/20 blur-3xl pointer-events-none"></div>
+    <div className="flex flex-col gap-5 w-full max-w-6xl mx-auto pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 bg-gradient-to-r from-slate-900 to-slate-800 p-5 sm:p-6 rounded-xl text-white shadow-md relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-500/10 blur-2xl pointer-events-none"></div>
         <div className="relative z-10 max-w-2xl">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-            <Sparkles className="text-blue-400" />
+          <h1 className="text-xl sm:text-2xl font-bold mb-1.5 flex items-center gap-2.5">
+            <Sparkles className="text-blue-400" size={22} />
             Coding Practice
           </h1>
-          <p className="text-slate-300 text-lg leading-relaxed">
+          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
             Build your problem-solving skills through focused, personalized coding practice.
           </p>
         </div>
       </div>
 
       {!dailyAssignment ? (
-        <div className="bg-white p-12 rounded-[24px] border border-slate-200 shadow-sm text-center flex flex-col items-center">
-          <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
-            <Clock size={32} />
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-xs text-center flex flex-col items-center">
+          <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-blue-600">
+            <Clock size={24} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Coding Practice is getting ready</h2>
-          <p className="text-slate-500 max-w-md">
+          <h2 className="text-lg font-bold text-slate-900 mb-1.5">Coding Practice is getting ready</h2>
+          <p className="text-slate-500 text-xs sm:text-sm max-w-md">
             There aren't enough coding challenges available yet. Please check back soon as we add more content.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 space-y-5">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+              className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="text-blue-600" size={20} />
+              <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wide">
+                  <Calendar className="text-blue-600" size={16} />
                   TODAY'S CHALLENGE
                 </h2>
-                <span className="text-sm font-medium text-slate-500">
+                <span className="text-xs font-medium text-slate-500">
                   {formatDateKey(dailyAssignment.dateKey)}
                 </span>
               </div>
               
-              <div className="p-8 flex flex-col gap-6">
+              <div className="p-5 sm:p-6 flex flex-col gap-4">
                 {isNewUser && (
-                  <div className="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 border border-blue-100">
-                    <Sparkles size={18} className="text-blue-600" />
+                  <div className="bg-blue-50 text-blue-700 px-3.5 py-2.5 rounded-lg text-xs font-medium flex items-center gap-2 border border-blue-100">
+                    <Sparkles size={15} className="text-blue-600 shrink-0" />
                     Start Coding Practice: Your first challenge is ready. We'll personalize future challenges as you build history.
                   </div>
                 )}
                 
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2.5 mb-0.5">
                     <DifficultyBadge difficulty={dailyAssignment.difficulty} />
-                    <span className="text-sm font-semibold text-slate-500 flex items-center gap-1">
-                      <Hash size={14} />
+                    <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                      <Hash size={12} />
                       {dailyAssignment.topic}
                     </span>
                     {dailyAssignment.problem?.estimatedMinutes && (
-                      <span className="text-sm font-semibold text-slate-500 flex items-center gap-1">
-                        <Clock size={14} />
+                      <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                        <Clock size={12} />
                         {dailyAssignment.problem.estimatedMinutes} min
                       </span>
                     )}
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900">{dailyAssignment.problem?.title || 'Daily Challenge'}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">{dailyAssignment.problem?.title || 'Daily Challenge'}</h3>
                 </div>
 
-                <p className="text-slate-600 leading-relaxed text-base">
+                <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
                   {dailyAssignment.problem?.description || 'Complete your daily coding challenge.'}
                 </p>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-start gap-3">
-                  <Sparkles className="text-purple-500 shrink-0 mt-0.5" size={20} />
+                <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-100 flex items-start gap-2.5">
+                  <Sparkles className="text-purple-500 shrink-0 mt-0.5" size={16} />
                   <div>
-                    <span className="block text-sm font-bold text-slate-900 mb-1">Recommended for you</span>
-                    <span className="text-sm text-slate-600">{dailyAssignment.reason}</span>
+                    <span className="block text-xs font-bold text-slate-900 mb-0.5">Recommended for you</span>
+                    <span className="text-xs text-slate-600">{dailyAssignment.reason}</span>
                   </div>
                 </div>
 
-                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+                <div className="pt-3 flex items-center justify-between border-t border-slate-100">
                   <div className="flex items-center gap-2">
                     {dailyAssignment.status === 'COMPLETED' ? (
-                      <span className="flex items-center gap-2 text-green-600 font-semibold text-sm">
-                        <CheckCircle2 size={18} /> Completed
+                      <span className="flex items-center gap-1.5 text-green-600 font-semibold text-xs sm:text-sm">
+                        <CheckCircle2 size={16} /> Completed
                       </span>
                     ) : dailyAssignment.status === 'IN_PROGRESS' ? (
-                      <span className="flex items-center gap-2 text-yellow-600 font-semibold text-sm">
-                        <Play size={18} /> In Progress
+                      <span className="flex items-center gap-1.5 text-amber-600 font-semibold text-xs sm:text-sm">
+                        <Play size={16} /> In Progress
                       </span>
                     ) : (
-                      <span className="flex items-center gap-2 text-slate-500 font-semibold text-sm">
-                        <BookOpen size={18} /> Not Started
+                      <span className="flex items-center gap-1.5 text-slate-500 font-semibold text-xs sm:text-sm">
+                        <BookOpen size={16} /> Not Started
                       </span>
                     )}
                   </div>
@@ -204,50 +204,50 @@ const CodingDashboard: React.FC = () => {
                         navigate(`/coding/problem/${dailyAssignment.problem.slug}`);
                       }
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors group"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-blue-500 transition-colors group shadow-xs"
                   >
                     View Challenge
-                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 </div>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+              className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-slate-900">Recent Practice</h2>
+              <div className="px-5 py-3.5 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-900">Recent Practice</h2>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-5">
                 {recentTasks.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <p>Your coding activity will appear here<br/>as you complete challenges.</p>
+                  <div className="text-center py-6 text-slate-500 text-xs">
+                    <p>Your coding activity will appear here as you complete challenges.</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">
                     {recentTasks.map(task => (
-                      <div key={task.id} className="py-4 flex items-center justify-between group">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      <div key={task.id} className="py-3 flex items-center justify-between group">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
                             {task.problem?.title || 'Unknown Problem'}
                           </span>
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center gap-1.5 text-xs">
                             <DifficultyBadge difficulty={task.difficulty} />
-                            <span className="text-slate-500">&middot;</span>
-                            <span className="text-slate-500 font-medium">{task.topic}</span>
+                            <span className="text-slate-400">&middot;</span>
+                            <span className="text-slate-500 text-[11px] font-medium">{task.topic}</span>
                           </div>
                         </div>
                         <div>
                           {task.status === 'COMPLETED' ? (
-                            <span className="text-green-600 text-sm font-semibold flex items-center gap-1"><CheckCircle2 size={16}/> Completed</span>
+                            <span className="text-green-600 text-xs font-semibold flex items-center gap-1"><CheckCircle2 size={14}/> Completed</span>
                           ) : task.status === 'IN_PROGRESS' ? (
-                            <span className="text-yellow-600 text-sm font-semibold flex items-center gap-1"><Play size={16}/> In Progress</span>
+                            <span className="text-amber-600 text-xs font-semibold flex items-center gap-1"><Play size={14}/> In Progress</span>
                           ) : (
-                            <span className="text-slate-400 text-sm font-semibold">Not Started</span>
+                            <span className="text-slate-400 text-xs font-semibold">Not Started</span>
                           )}
                         </div>
                       </div>
@@ -258,63 +258,63 @@ const CodingDashboard: React.FC = () => {
             </motion.div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+              transition={{ delay: 0.15 }}
+              className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-slate-900">Progress</h2>
+              <div className="px-5 py-3.5 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-900">Progress</h2>
               </div>
-              <div className="p-6 flex flex-col gap-4">
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="p-4 sm:p-5 flex flex-col gap-3">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-slate-500">Assigned</span>
-                    <span className="text-2xl font-bold text-slate-900">{progress.problemsAssigned}</span>
+                    <span className="text-xs font-medium text-slate-500">Assigned</span>
+                    <span className="text-lg sm:text-xl font-bold text-slate-900">{progress.problemsAssigned}</span>
                   </div>
-                  <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                    <Calendar size={20} />
+                  <div className="h-8 w-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                    <Calendar size={16} />
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-slate-500">Completed</span>
-                    <span className="text-2xl font-bold text-slate-900">{progress.problemsCompleted}</span>
+                    <span className="text-xs font-medium text-slate-500">Completed</span>
+                    <span className="text-lg sm:text-xl font-bold text-slate-900">{progress.problemsCompleted}</span>
                   </div>
-                  <div className="h-10 w-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                    <CheckCircle2 size={20} />
+                  <div className="h-8 w-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle2 size={16} />
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-slate-500">Topics</span>
-                    <span className="text-2xl font-bold text-slate-900">{progress.topicsPracticed.length}</span>
+                    <span className="text-xs font-medium text-slate-500">Topics</span>
+                    <span className="text-lg sm:text-xl font-bold text-slate-900">{progress.topicsPracticed.length}</span>
                   </div>
-                  <div className="h-10 w-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
-                    <Hash size={20} />
+                  <div className="h-8 w-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                    <Hash size={16} />
                   </div>
                 </div>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden"
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-slate-900">Topics Practiced</h2>
+              <div className="px-5 py-3.5 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-900">Topics Practiced</h2>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-5">
                 {progress.topicsPracticed.length === 0 ? (
-                  <p className="text-slate-500 text-sm text-center py-4">No topics practiced yet.</p>
+                  <p className="text-slate-500 text-xs text-center py-2">No topics practiced yet.</p>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {progress.topicsPracticed.map(topic => (
-                      <span key={topic} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg border border-slate-200">
+                      <span key={topic} className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md border border-slate-200">
                         {topic}
                       </span>
                     ))}
@@ -326,14 +326,14 @@ const CodingDashboard: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-8">
+      <div className="mt-5">
         <CodingReadiness />
       </div>
 
-      <div className="mt-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">Your Analytics</h2>
-          <p className="text-slate-500">Track your problem-solving journey and activity over time.</p>
+      <div className="mt-5">
+        <div className="mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900">Your Analytics</h2>
+          <p className="text-slate-500 text-xs sm:text-sm">Track your problem-solving journey and activity over time.</p>
         </div>
         <CodingAnalytics />
       </div>

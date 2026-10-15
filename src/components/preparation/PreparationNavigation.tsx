@@ -22,19 +22,19 @@ export const PreparationNavigation: React.FC = () => {
   ];
 
   return (
-    <div className="flex overflow-x-auto hide-scrollbar border-b border-slate-200 mb-8 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+    <div className="flex overflow-x-auto hide-scrollbar border-b border-slate-200 mb-4 sm:mb-5 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
       <div className="flex space-x-1 p-1 w-full max-w-full">
         {navItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
               item.isActive
                 ? 'bg-blue-50 text-blue-700 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
             }`}
           >
-            <item.icon size={16} className={item.isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={item.isActive ? 2.5 : 2} />
+            <item.icon size={15} className={item.isActive ? 'text-blue-600' : 'text-slate-400'} strokeWidth={item.isActive ? 2.5 : 2} />
             {item.name}
           </Link>
         ))}

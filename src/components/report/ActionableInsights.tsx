@@ -12,51 +12,51 @@ export const ActionableInsights: React.FC<Props> = ({ strengths, weaknesses, imp
   return (
     <div className="space-y-8">
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {/* Strengths */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><TrendingUp size={24} /></div>
-            <h3 className="text-xl font-bold text-slate-800">Key Strengths</h3>
+        <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp size={18} /></div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">Key Strengths</h3>
           </div>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {strengths.map((str, i) => (
-              <li key={i} className="flex gap-3 text-slate-700 font-medium">
-                <span className="text-emerald-500 mt-1">•</span> {str}
+              <li key={i} className="flex gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+                <span className="text-emerald-500 mt-0.5">•</span> {str}
               </li>
             ))}
-            {strengths.length === 0 && <li className="text-slate-500 italic text-sm">Not enough data to determine strengths.</li>}
+            {strengths.length === 0 && <li className="text-slate-500 italic text-xs">Not enough data to determine strengths.</li>}
           </ul>
         </div>
 
         {/* Weaknesses */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-rose-50 text-rose-600 rounded-xl"><TrendingDown size={24} /></div>
-            <h3 className="text-xl font-bold text-slate-800">Areas for Improvement</h3>
+        <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="p-2 bg-rose-50 text-rose-600 rounded-lg"><TrendingDown size={18} /></div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">Areas for Improvement</h3>
           </div>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {weaknesses.map((wk, i) => (
-              <li key={i} className="flex gap-3 text-slate-700 font-medium">
-                <span className="text-rose-500 mt-1">•</span> {wk}
+              <li key={i} className="flex gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
+                <span className="text-rose-500 mt-0.5">•</span> {wk}
               </li>
             ))}
-            {weaknesses.length === 0 && <li className="text-slate-500 italic text-sm">No critical weaknesses detected.</li>}
+            {weaknesses.length === 0 && <li className="text-slate-500 italic text-xs">No critical weaknesses detected.</li>}
           </ul>
         </div>
       </div>
 
       {/* Improvement Roadmap */}
-      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-8 text-white shadow-lg overflow-hidden relative">
+      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-xl p-5 sm:p-6 text-white shadow-md overflow-hidden relative">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-30"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <Compass size={28} className="text-indigo-300" />
-            <h3 className="text-2xl font-bold">Your Improvement Roadmap</h3>
+          <div className="flex items-center gap-2.5 mb-5">
+            <Compass size={22} className="text-indigo-300" />
+            <h3 className="text-lg sm:text-xl font-bold">Your Improvement Roadmap</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Short Term */}
             <div>
               <h4 className="text-indigo-200 font-semibold mb-4 text-sm uppercase tracking-wider flex items-center gap-2">

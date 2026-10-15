@@ -204,13 +204,13 @@ export default function InterviewReplay() {
         </div>
 
         {/* Center Content */}
-        <div className="flex-1 flex flex-col h-full p-6 bg-slate-50 dark:bg-slate-900 overflow-hidden">
-          <div className="w-full max-w-4xl mx-auto flex flex-col h-full gap-6">
-            <div className="flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 overflow-hidden">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
+        <div className="flex-1 flex flex-col h-full p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-900 overflow-hidden">
+          <div className="w-full max-w-4xl mx-auto flex flex-col h-full gap-3 sm:gap-3.5">
+            <div className="flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-4 sm:p-5 overflow-hidden">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-3">
                 Question {currentQuestion.index + 1}: {currentQuestion.text}
               </h2>
-              
+
               <ReplayTranscript 
                 transcript={currentQuestion.answer?.transcript || []} 
                 currentTimeMs={playerState.currentTimeMs} 

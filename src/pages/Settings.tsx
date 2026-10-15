@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const Settings: React.FC = () => {
   return (
-    <div className="pb-24">
+    <div className="pb-12 max-w-4xl mx-auto space-y-4 sm:space-y-5">
       <PageHeader 
         title="Settings" 
         description="Manage your account preferences, notification settings, and billing information."
@@ -13,19 +13,19 @@ const Settings: React.FC = () => {
       />
       
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="max-w-4xl bg-white p-8 rounded-[20px] shadow-sm border border-slate-200"
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className="bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-200/90"
       >
-        <p className="text-slate-600 mb-8 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 mb-5 leading-relaxed">
           Application settings will appear here. This space will include toggles for email notifications, privacy settings, and subscription management.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-slate-50 rounded-xl border border-slate-100 opacity-60 flex items-center px-6">
-              <div className="w-48 h-4 bg-slate-200 rounded-full"></div>
+            <div key={i} className="h-12 bg-slate-50 rounded-lg border border-slate-100 opacity-60 flex items-center px-4">
+              <div className="w-36 h-3 bg-slate-200 rounded-full"></div>
             </div>
           ))}
         </div>

@@ -205,7 +205,7 @@ const SuggestedInterviewPage: React.FC = () => {
   }
 
   return (
-    <div className="pb-24">
+    <div className="pb-12 max-w-4xl mx-auto space-y-4 sm:space-y-5">
       <PageHeader 
         title="AI Recommended Interview" 
         description="Review your personalized interview plan generated from your recent performance and career goals."
@@ -213,23 +213,23 @@ const SuggestedInterviewPage: React.FC = () => {
       />
       
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="max-w-4xl mx-auto"
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className="w-full"
       >
         {state.status === "loading" && (
-          <div className="bg-white p-16 text-center rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-6 min-h-[350px]">
-            <Loader2 size={48} className="text-blue-600 animate-spin" />
-            <div className="h-8 overflow-hidden relative w-full max-w-sm">
+          <div className="bg-white p-8 text-center rounded-xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+            <Loader2 size={36} className="text-blue-600 animate-spin" />
+            <div className="h-6 overflow-hidden relative w-full max-w-sm">
               <AnimatePresence mode="wait">
                 <motion.p 
                   key={loadingTextIndex}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-lg font-medium text-slate-700 absolute inset-0 text-center"
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="text-xs sm:text-sm font-medium text-slate-700 absolute inset-0 text-center"
                 >
                   {loadingMessages[loadingTextIndex]}
                 </motion.p>
@@ -239,13 +239,13 @@ const SuggestedInterviewPage: React.FC = () => {
         )}
 
         {state.status === "api_error" && (
-          <div className="bg-white p-12 text-center rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-4 min-h-[350px]">
-            <AlertCircle size={48} className="text-rose-500 mb-2" />
-            <h3 className="text-xl font-bold text-slate-800">API Error</h3>
-            <p className="text-slate-500 max-w-sm mx-auto">We couldn't generate your recommendation.</p>
+          <div className="bg-white p-8 text-center rounded-xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center space-y-3 min-h-[260px]">
+            <AlertCircle size={36} className="text-rose-500 mb-1" />
+            <h3 className="text-base font-semibold text-slate-800">API Error</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">We couldn't generate your recommendation.</p>
             <button 
               onClick={fetchRecommendation}
-              className="mt-6 px-8 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors"
+              className="mt-3 px-5 h-8.5 bg-red-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-red-700 transition-colors shadow-xs cursor-pointer"
             >
               Try Again
             </button>
@@ -253,13 +253,13 @@ const SuggestedInterviewPage: React.FC = () => {
         )}
 
         {state.status === "auth_error" && (
-          <div className="bg-white p-12 text-center rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-4 min-h-[350px]">
-            <AlertCircle size={48} className="text-slate-400 mb-2" />
-            <h3 className="text-xl font-bold text-slate-800">Authentication Error</h3>
-            <p className="text-slate-500 max-w-sm mx-auto">Your session has expired.</p>
+          <div className="bg-white p-8 text-center rounded-xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center space-y-3 min-h-[260px]">
+            <AlertCircle size={36} className="text-slate-400 mb-1" />
+            <h3 className="text-base font-semibold text-slate-800">Authentication Error</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">Your session has expired.</p>
             <button 
               onClick={() => navigate('/sign-in')}
-              className="mt-6 px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+              className="mt-3 px-5 h-8.5 bg-blue-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
             >
               Sign In Again
             </button>
@@ -267,13 +267,13 @@ const SuggestedInterviewPage: React.FC = () => {
         )}
 
         {state.status === "ai_error" && (
-          <div className="bg-white p-12 text-center rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-4 min-h-[350px]">
-            <Sparkles size={48} className="text-slate-300 mb-2" />
-            <h3 className="text-xl font-bold text-slate-800">AI Unavailable</h3>
-            <p className="text-slate-500 max-w-sm mx-auto">We couldn't prepare an AI recommendation right now.</p>
+          <div className="bg-white p-8 text-center rounded-xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center space-y-3 min-h-[260px]">
+            <Sparkles size={36} className="text-slate-300 mb-1" />
+            <h3 className="text-base font-semibold text-slate-800">AI Unavailable</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">We couldn't prepare an AI recommendation right now.</p>
             <button 
               onClick={() => navigate('/generate')}
-              className="mt-6 px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+              className="mt-3 px-5 h-8.5 bg-blue-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
             >
               Create Custom Interview
             </button>
@@ -281,13 +281,13 @@ const SuggestedInterviewPage: React.FC = () => {
         )}
 
         {state.status === "incomplete_profile" && (
-          <div className="bg-white p-12 text-center rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-4 min-h-[350px]">
-            <Sparkles size={48} className="text-amber-400 mb-2" />
-            <h3 className="text-xl font-bold text-slate-800">Incomplete Profile</h3>
-            <p className="text-slate-500 max-w-sm mx-auto">We need more information to create a personalized interview.</p>
+          <div className="bg-white p-8 text-center rounded-xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center space-y-3 min-h-[260px]">
+            <Sparkles size={36} className="text-amber-400 mb-1" />
+            <h3 className="text-base font-semibold text-slate-800">Incomplete Profile</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">We need more information to create a personalized interview.</p>
             <button 
               onClick={() => navigate('/profile')}
-              className="mt-6 px-8 py-3 bg-amber-500 text-white font-semibold rounded-xl hover:bg-amber-600 transition-colors"
+              className="mt-3 px-5 h-8.5 bg-amber-500 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-amber-600 transition-colors shadow-xs cursor-pointer"
             >
               Complete Profile
             </button>

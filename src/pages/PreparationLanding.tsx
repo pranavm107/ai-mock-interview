@@ -130,26 +130,26 @@ export const PreparationLanding: React.FC = () => {
   };
 
   return (
-    <div className="pb-24 max-w-7xl mx-auto space-y-12">
+    <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5">
       <div>
         <PreparationNavigation />
-        <div className="mt-8 mb-4">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Preparation</h1>
-          <p className="text-slate-600 text-lg">Prepare smarter. Track your progress and improve your weak areas.</p>
+        <div className="mt-4 mb-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Preparation</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Prepare smarter. Track your progress and improve your weak areas.</p>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 size={40} className="animate-spin text-indigo-500 mb-4" />
-          <p className="text-slate-500">Loading your personalized dashboard...</p>
+        <div className="flex flex-col items-center justify-center py-16">
+          <Loader2 size={32} className="animate-spin text-indigo-500 mb-3" />
+          <p className="text-xs sm:text-sm text-slate-500">Loading your personalized dashboard...</p>
         </div>
       ) : error ? (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-12 text-center max-w-2xl mx-auto mt-12">
-          <XCircle size={48} className="mx-auto text-rose-500 mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to load dashboard</h2>
-          <p className="text-slate-600 mb-6">{error}</p>
-          <button onClick={fetchDashboardData} className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 sm:p-8 text-center max-w-xl mx-auto mt-6">
+          <XCircle size={36} className="mx-auto text-rose-500 mb-2.5" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1">Failed to load dashboard</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mb-4">{error}</p>
+          <button onClick={fetchDashboardData} className="px-4 h-8.5 bg-indigo-600 text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-indigo-700 transition-colors cursor-pointer">
             Try Again
           </button>
         </div>
@@ -158,31 +158,31 @@ export const PreparationLanding: React.FC = () => {
           {/* Progress Summary */}
           {data.analytics && data.analytics.overall && data.analytics.overall.totalCompleted > 0 ? (
             <section>
-              <h2 className="text-xl font-bold text-slate-900 mb-4">Your Preparation Progress</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center">
-                  <p className="text-4xl font-bold text-indigo-600 mb-1">{data.analytics.overall.totalCompleted}</p>
-                  <p className="text-sm font-semibold text-slate-500">Completed</p>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Your Preparation Progress</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/90 shadow-xs flex flex-col justify-center items-center text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-indigo-600 mb-0.5">{data.analytics.overall.totalCompleted}</p>
+                  <p className="text-xs font-semibold text-slate-500">Completed</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center">
-                  <p className="text-4xl font-bold text-blue-600 mb-1">{Math.round(data.analytics.overall.averageScore)}%</p>
-                  <p className="text-sm font-semibold text-slate-500">Average Score</p>
+                <div className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/90 shadow-xs flex flex-col justify-center items-center text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600 mb-0.5">{Math.round(data.analytics.overall.averageScore)}%</p>
+                  <p className="text-xs font-semibold text-slate-500">Average Score</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center">
-                  <p className="text-4xl font-bold text-emerald-600 mb-1">{Math.round(data.analytics.overall.bestScore)}%</p>
-                  <p className="text-sm font-semibold text-slate-500">Best Score</p>
+                <div className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/90 shadow-xs flex flex-col justify-center items-center text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-emerald-600 mb-0.5">{Math.round(data.analytics.overall.bestScore)}%</p>
+                  <p className="text-xs font-semibold text-slate-500">Best Score</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center">
-                  <p className="text-4xl font-bold text-purple-600 mb-1">{Math.round(data.analytics.overall.averageAccuracy)}%</p>
-                  <p className="text-sm font-semibold text-slate-500">Accuracy</p>
+                <div className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200/90 shadow-xs flex flex-col justify-center items-center text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-purple-600 mb-0.5">{Math.round(data.analytics.overall.averageAccuracy)}%</p>
+                  <p className="text-xs font-semibold text-slate-500">Accuracy</p>
                 </div>
               </div>
             </section>
           ) : (
-            <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 text-center">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">Start your preparation journey</h2>
-              <p className="text-slate-600 mb-6">Complete your first assessment to receive personalized AI recommendations and track your progress.</p>
-              <Link to="/preparation/practice" className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+            <section className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 text-center">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5">Start your preparation journey</h2>
+              <p className="text-xs sm:text-sm text-slate-500 mb-4 max-w-md mx-auto">Complete your first assessment to receive personalized AI recommendations and track your progress.</p>
+              <Link to="/preparation/practice" className="inline-flex items-center justify-center px-5 h-9 bg-blue-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-xs">
                 Start Your First Assessment
               </Link>
             </section>
@@ -190,44 +190,44 @@ export const PreparationLanding: React.FC = () => {
 
           {/* Quick Actions */}
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/preparation/practice" className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group block">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Play size={20} className="ml-1" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              <Link to="/preparation/practice" className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group block">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <Play size={16} className="ml-0.5" />
                 </div>
-                <h3 className="font-bold text-slate-900 mb-1">Start Practice</h3>
-                <p className="text-sm text-slate-500">Practice a new topic or category</p>
+                <h3 className="font-bold text-sm text-slate-900 mb-0.5">Start Practice</h3>
+                <p className="text-xs text-slate-500">Practice a new topic or category</p>
               </Link>
-              <Link to="/preparation/analytics" className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group block">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <BarChart2 size={20} />
+              <Link to="/preparation/analytics" className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group block">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <BarChart2 size={16} />
                 </div>
-                <h3 className="font-bold text-slate-900 mb-1">View Analytics</h3>
-                <p className="text-sm text-slate-500">Track your performance trends</p>
+                <h3 className="font-bold text-sm text-slate-900 mb-0.5">View Analytics</h3>
+                <p className="text-xs text-slate-500">Track your performance trends</p>
               </Link>
-              <Link to="/preparation/recommendations" className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-purple-300 hover:shadow-md transition-all group block">
-                <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Sparkles size={20} />
+              <Link to="/preparation/recommendations" className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm hover:border-purple-300 hover:shadow-md transition-all group block">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <Sparkles size={16} />
                 </div>
-                <h3 className="font-bold text-slate-900 mb-1">AI Recommendations</h3>
-                <p className="text-sm text-slate-500">Get your next focus area</p>
+                <h3 className="font-bold text-sm text-slate-900 mb-0.5">AI Recommendations</h3>
+                <p className="text-xs text-slate-500">Get your next focus area</p>
               </Link>
             </div>
           </section>
 
           {/* Recommended for You */}
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">Recommended for You</h2>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Recommended for You</h2>
             {data.recommendations && data.recommendations.hasEnoughData && data.recommendations.recommendation ? (
-              <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Sparkles size={120} />
+              <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-xl p-5 sm:p-6 text-white shadow-md relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                  <Sparkles size={80} />
                 </div>
                 <div className="relative z-10 max-w-3xl">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     {data.recommendations.recommendation.focusAreas[0] && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                         data.recommendations.recommendation.focusAreas[0].priority === 'HIGH' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' :
                         data.recommendations.recommendation.focusAreas[0].priority === 'MEDIUM' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
                         'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
@@ -236,95 +236,94 @@ export const PreparationLanding: React.FC = () => {
                       </span>
                     )}
                     {data.recommendations.recommendation.focusAreas[0] && (
-                      <span className="text-indigo-200 font-medium text-sm">
+                      <span className="text-indigo-200 font-medium text-xs">
                         Current Accuracy: {data.recommendations.recommendation.focusAreas[0].accuracy}%
                       </span>
                     )}
                   </div>
-                  <h3 className="text-2xl font-bold mb-3">{data.recommendations.recommendation.focusAreas[0]?.topic || 'General Practice'}</h3>
-                  <p className="text-indigo-100 mb-6 leading-relaxed">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2">{data.recommendations.recommendation.focusAreas[0]?.topic || 'General Practice'}</h3>
+                  <p className="text-indigo-100 text-xs sm:text-sm mb-4 leading-relaxed">
                     {data.recommendations.recommendation.focusAreas[0]?.reason || 'Your recent performance suggests focusing on this area will yield the highest improvement.'}
                   </p>
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-2.5">
                     <Link 
                       to={`/preparation/${getCategorySlug(data.recommendations.recommendation.nextAssessment?.category)}?topic=${encodeURIComponent(data.recommendations.recommendation.nextAssessment?.topic || '')}&difficulty=${encodeURIComponent(data.recommendations.recommendation.nextAssessment?.difficulty || 'Medium')}`}
-                      className="px-6 py-3 bg-white text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-sm"
+                      className="px-4 py-2 bg-white text-indigo-900 text-xs sm:text-sm font-semibold rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
                     >
                       Start Practice
                     </Link>
-                    <Link to="/preparation/recommendations" className="px-6 py-3 bg-indigo-800/50 text-white font-medium rounded-xl hover:bg-indigo-800 transition-colors border border-indigo-700/50">
+                    <Link to="/preparation/recommendations" className="px-4 py-2 bg-indigo-800/50 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-indigo-800 transition-colors border border-indigo-700/50">
                       View AI Recommendations
                     </Link>
                   </div>
                 </div>
               </div>
             ) : data.analytics && data.analytics.overall && data.analytics.overall.totalCompleted > 0 ? (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
+              <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-1">AI Recommendations unavailable right now.</h3>
-                  <p className="text-slate-500 text-sm">You can still continue practicing or view your existing progress.</p>
+                  <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-0.5">AI Recommendations unavailable right now.</h3>
+                  <p className="text-slate-500 text-xs sm:text-sm">You can still continue practicing or view your existing progress.</p>
                 </div>
-                <div className="flex gap-4">
-                  <Link to="/preparation/practice" className="px-4 py-2 bg-slate-50 text-slate-700 font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">Start Practice</Link>
-                  <Link to="/preparation/analytics" className="px-4 py-2 bg-slate-50 text-slate-700 font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors hidden sm:block">View Analytics</Link>
+                <div className="flex gap-2.5 shrink-0">
+                  <Link to="/preparation/practice" className="px-3.5 py-1.5 bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">Start Practice</Link>
+                  <Link to="/preparation/analytics" className="px-3.5 py-1.5 bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors hidden sm:block">View Analytics</Link>
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-50 rounded-2xl p-8 border border-slate-200 text-center">
-                <Sparkles size={32} className="mx-auto text-slate-400 mb-3" />
-                <h3 className="font-bold text-slate-700 mb-2">Start Your Preparation Journey</h3>
-                <p className="text-slate-500 text-sm mb-4">Complete your first assessment to receive personalized AI recommendations.</p>
-                <Link to="/preparation/practice" className="inline-flex items-center px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors text-sm">
+              <div className="bg-slate-50/80 rounded-xl p-6 sm:p-8 border border-slate-200 text-center">
+                <Sparkles size={28} className="mx-auto text-slate-400 mb-2.5" />
+                <h3 className="font-bold text-sm sm:text-base text-slate-700 mb-1">Start Your Preparation Journey</h3>
+                <p className="text-slate-500 text-xs sm:text-sm mb-3.5 max-w-sm mx-auto">Complete your first assessment to receive personalized AI recommendations.</p>
+                <Link to="/preparation/practice" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm shadow-2xs">
                   Start Practice
                 </Link>
               </div>
             )}
           </section>
 
-
           {/* Recent Activity */}
           <section>
-            <div className="flex justify-between items-end mb-4">
-              <h2 className="text-xl font-bold text-slate-900">Recent Activity</h2>
+            <div className="flex justify-between items-end mb-3">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">Recent Activity</h2>
               {data.recent.length > 0 && (
-                <Link to="/preparation/history" className="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                <Link to="/preparation/history" className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700">
                   View History
                 </Link>
               )}
             </div>
             
             {data.recent.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {data.recent.map((assessment) => {
                   // Find score from analytics trend if available
                   const trendData = data.analytics?.trend?.find((t: any) => t.assessmentId === assessment.id);
                   const displayScore = trendData ? trendData.accuracy : undefined;
                   
                   return (
-                    <div key={assessment.id} className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-300 transition-colors">
-                      <div className="flex items-start gap-4">
-                        <div className="mt-1">
+                    <div key={assessment.id} className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5">
                           {getStatusIcon(assessment.status)}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-900">{assessment.title}</h4>
-                          <p className="text-sm text-slate-500">
+                          <h4 className="font-semibold text-xs sm:text-sm text-slate-900">{assessment.title}</h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
                             {assessment.category || 'General'} {assessment.topic && `• ${assessment.topic}`} • {new Date(assessment.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-1 sm:mt-0">
                         {assessment.status === 'COMPLETED' && displayScore !== undefined && (
                           <div className="text-right">
-                            <p className="text-sm font-semibold text-slate-500">Accuracy</p>
-                            <p className="font-bold text-slate-900">{displayScore}%</p>
+                            <p className="text-[11px] font-semibold text-slate-500">Accuracy</p>
+                            <p className="font-bold text-xs sm:text-sm text-slate-900">{displayScore}%</p>
                           </div>
                         )}
                         
                         <Link 
                           to={assessment.status === 'COMPLETED' ? `/preparation/results/${assessment.id}` : `/preparation/assessment/${assessment.id}`}
-                          className="px-4 py-2 bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors whitespace-nowrap"
+                          className="px-3 py-1.5 bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors whitespace-nowrap"
                         >
                           {assessment.status === 'COMPLETED' ? 'View Results' : 'Continue'}
                         </Link>
@@ -334,11 +333,11 @@ export const PreparationLanding: React.FC = () => {
                 })}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm text-center">
-                <History size={32} className="mx-auto text-slate-400 mb-3" />
-                <h3 className="font-bold text-slate-700 mb-2">No assessments yet</h3>
-                <p className="text-slate-500 text-sm mb-4">Start your first practice assessment to begin tracking your preparation progress.</p>
-                <Link to="/preparation/practice" className="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors text-sm">
+              <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-xs text-center">
+                <History size={28} className="mx-auto text-slate-400 mb-2.5" />
+                <h3 className="font-bold text-sm sm:text-base text-slate-700 mb-1">No assessments yet</h3>
+                <p className="text-slate-500 text-xs sm:text-sm mb-3.5 max-w-sm mx-auto">Start your first practice assessment to begin tracking your preparation progress.</p>
+                <Link to="/preparation/practice" className="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors text-xs sm:text-sm">
                   Start Practice
                 </Link>
               </div>

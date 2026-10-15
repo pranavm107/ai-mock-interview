@@ -14,9 +14,9 @@ export const AchievementCard: React.FC<{ achievements?: any[], stats?: any }> = 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.5 }}
-      className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
     >
-      <h2 className="text-lg font-bold text-slate-900 mb-6">Achievements & Goals</h2>
+      <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-4">Achievements & Goals</h2>
       
       <div className="space-y-6">
         <div>

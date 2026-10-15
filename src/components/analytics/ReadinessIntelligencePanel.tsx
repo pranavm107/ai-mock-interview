@@ -64,33 +64,33 @@ export const ReadinessIntelligencePanel: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 mb-8">
+    <div className="space-y-4 mb-4 sm:mb-5">
       {/* Header & Readiness Score */}
-      <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl shadow-xl overflow-hidden text-white">
-        <div className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-xl shadow-xs overflow-hidden text-white">
+        <div className="p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2 text-indigo-300 font-medium tracking-wider uppercase text-sm">
-              <BrainCircuit className="w-5 h-5" />
+            <div className="flex items-center space-x-1.5 mb-1.5 text-indigo-300 font-medium tracking-wider uppercase text-xs">
+              <BrainCircuit className="w-4 h-4" />
               <span>PrepPilot Intelligence</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Interview Readiness</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Interview Readiness</h2>
             
-            <div className="flex flex-wrap items-center gap-4 mt-6 text-sm text-slate-300">
+            <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-slate-300">
               <div className="flex items-center">
-                <ShieldCheck className="w-4 h-4 mr-1 text-emerald-400" />
+                <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-400" />
                 Confidence: <span className="text-white ml-1 font-medium">{profile.confidence}</span>
               </div>
-              <div className="flex items-center bg-white/10 px-3 py-1 rounded-full">
+              <div className="flex items-center bg-white/10 px-2.5 py-0.5 rounded-full text-[11px]">
                 Based on {profile.evidence.interviews} interviews & {profile.evidence.assessments} assessments
               </div>
             </div>
           </div>
           
-          <div className="flex-shrink-0 relative">
-            <div className="w-40 h-40 rounded-full border-8 border-indigo-500/30 flex flex-col items-center justify-center relative bg-indigo-800/40 backdrop-blur-sm shadow-inner">
-              <span className="text-5xl font-black">{profile.readinessScore}</span>
-              <span className="text-indigo-200 text-sm font-medium mt-1">/ 100</span>
-              <div className="absolute -bottom-4 bg-indigo-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap border border-indigo-400">
+          <div className="shrink-0 relative">
+            <div className="w-24 h-24 rounded-full border-4 border-indigo-500/30 flex flex-col items-center justify-center relative bg-indigo-800/40 backdrop-blur-sm shadow-inner">
+              <span className="text-2xl font-bold leading-none">{profile.readinessScore}</span>
+              <span className="text-indigo-200 text-[10px] font-medium mt-0.5">/ 100</span>
+              <div className="absolute -bottom-2 bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-semibold shadow-xs whitespace-nowrap border border-indigo-400">
                 {profile.readinessState}
               </div>
             </div>
@@ -98,16 +98,16 @@ export const ReadinessIntelligencePanel: React.FC = () => {
         </div>
         
         {/* Components Bar */}
-        <div className="bg-white/5 border-t border-white/10 px-8 py-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white/5 border-t border-white/10 px-4 py-2.5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {profile.components.map((comp, idx) => (
               <div key={idx} className="flex flex-col">
-                <span className="text-slate-400 text-xs font-medium uppercase">{comp.label}</span>
-                <div className="flex items-center mt-1">
-                  <div className="h-2 w-full bg-slate-700 rounded-full overflow-hidden mr-3">
+                <span className="text-slate-400 text-[10px] font-medium uppercase">{comp.label}</span>
+                <div className="flex items-center mt-0.5">
+                  <div className="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden mr-2">
                     <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${comp.score}%` }}></div>
                   </div>
-                  <span className="font-semibold text-sm">{comp.score}</span>
+                  <span className="font-semibold text-xs">{comp.score}</span>
                 </div>
               </div>
             ))}
@@ -115,33 +115,33 @@ export const ReadinessIntelligencePanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
         {/* Weaknesses */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="border-b border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center text-slate-800 font-bold">
-              <AlertTriangle className="w-5 h-5 text-amber-500 mr-2" />
+        <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
+          <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center text-slate-800 text-xs sm:text-sm font-semibold">
+              <AlertTriangle className="w-4 h-4 text-amber-500 mr-1.5" />
               Top Areas to Improve
             </div>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-3.5 sm:p-4 space-y-2">
             {profile.weaknesses.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">No significant weaknesses detected yet!</p>
+              <p className="text-slate-500 text-xs text-center py-3">No significant weaknesses detected yet!</p>
             ) : (
               profile.weaknesses.slice(0, 4).map((w: WeaknessCard, idx: number) => (
-                <div key={idx} className="border border-slate-100 rounded-lg p-4 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-slate-50">
-                  <div>
-                    <h4 className="font-bold text-slate-900">{w.topic}</h4>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                <div key={idx} className="border border-slate-100 rounded-lg p-2.5 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-colors hover:bg-slate-50">
+                  <div className="min-w-0">
+                    <h4 className="font-semibold text-xs sm:text-sm text-slate-900 truncate">{w.topic}</h4>
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
                       <span>Performance: <span className="font-bold text-slate-700">{w.performance}%</span></span>
                       <span>•</span>
                       <span>{w.evidenceCount.interviews + w.evidenceCount.assessments} sessions</span>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:items-end gap-2">
+                  <div className="flex flex-col sm:items-end gap-1 shrink-0">
                     <TrendBadge trend={w.trend} />
-                    <Link to={`/preparation/practice?topic=${encodeURIComponent(w.topic)}`} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center">
-                      Practice Now <ArrowRight className="w-3 h-3 ml-1" />
+                    <Link to={`/preparation/practice?topic=${encodeURIComponent(w.topic)}`} className="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center">
+                      Practice Now <ArrowRight className="w-3 h-3 ml-0.5" />
                     </Link>
                   </div>
                 </div>
@@ -151,24 +151,24 @@ export const ReadinessIntelligencePanel: React.FC = () => {
         </div>
 
         {/* Strengths & Priorities */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="border-b border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center text-slate-800 font-bold">
-                <Zap className="w-5 h-5 text-amber-400 mr-2" />
+        <div className="space-y-3.5 sm:space-y-4">
+          <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
+            <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center text-slate-800 text-xs sm:text-sm font-semibold">
+                <Zap className="w-4 h-4 text-amber-500 mr-1.5" />
                 Your Strong Areas
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-3.5 sm:p-4">
               {profile.strengths.length === 0 ? (
-                <p className="text-slate-500 text-center py-4">Complete more sessions to identify strengths.</p>
+                <p className="text-slate-500 text-xs text-center py-3">Complete more sessions to identify strengths.</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {profile.strengths.slice(0, 5).map((s: StrengthCard, idx: number) => (
-                    <div key={idx} className="px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      <span className="font-semibold text-emerald-900 text-sm">{s.topic}</span>
-                      <span className="text-emerald-700 text-xs font-bold ml-1">{s.performance}%</span>
+                    <div key={idx} className="px-2.5 py-1.5 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="font-medium text-emerald-900 text-xs">{s.topic}</span>
+                      <span className="text-emerald-700 text-xs font-bold ml-0.5">{s.performance}%</span>
                     </div>
                   ))}
                 </div>
@@ -176,20 +176,20 @@ export const ReadinessIntelligencePanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="border-b border-slate-200 bg-indigo-50 px-6 py-4">
-              <h3 className="font-bold text-indigo-900 flex items-center">
-                <Target className="w-5 h-5 mr-2 text-indigo-600" />
+          <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
+            <div className="border-b border-slate-200 bg-indigo-50/70 px-4 py-2.5">
+              <h3 className="font-semibold text-xs sm:text-sm text-indigo-950 flex items-center">
+                <Target className="w-4 h-4 mr-1.5 text-indigo-600" />
                 Action Plan Priorities
               </h3>
             </div>
             <div className="p-0 divide-y divide-slate-100">
               {profile.priorities.map((p, idx) => (
-                <div key={idx} className="px-6 py-4 flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0">
+                <div key={idx} className="px-4 py-2.5 flex items-center">
+                  <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold mr-2.5 shrink-0">
                     {p.priority}
                   </div>
-                  <span className="font-medium text-slate-800 text-sm">{p.title}</span>
+                  <span className="font-medium text-slate-800 text-xs">{p.title}</span>
                 </div>
               ))}
             </div>

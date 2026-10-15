@@ -71,15 +71,15 @@ const Achievements: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="pb-24 space-y-8 animate-pulse">
+      <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5 animate-pulse">
         <PageHeader title="Achievements" description="Loading your milestones..." icon={Trophy} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-200 rounded-[20px]"></div>)}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-4">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-200 rounded-xl"></div>)}
         </div>
-        <div className="h-48 bg-slate-200 rounded-3xl mb-8"></div>
-        <div className="h-12 bg-slate-200 rounded-xl mb-6 w-full max-w-md"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-40 bg-slate-200 rounded-2xl"></div>)}
+        <div className="h-36 bg-slate-200 rounded-xl mb-4"></div>
+        <div className="h-9 bg-slate-200 rounded-lg mb-4 w-full max-w-md"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-32 bg-slate-200 rounded-xl"></div>)}
         </div>
       </div>
     );
@@ -87,16 +87,16 @@ const Achievements: React.FC = () => {
 
   if (error) {
     return (
-      <div className="pb-24 space-y-8">
+      <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5">
         <PageHeader title="Achievements" description="Track your milestones" icon={Trophy} />
-        <div className="bg-white rounded-3xl border border-red-100 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6 text-red-500">
-            <AlertCircle size={32} />
+        <div className="bg-white rounded-xl border border-red-100 p-8 text-center flex flex-col items-center justify-center min-h-[260px]">
+          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-500">
+            <AlertCircle size={24} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Unable to load achievements</h2>
-          <p className="text-slate-500 mb-8 max-w-sm">{error}</p>
-          <Button onClick={() => refetch()} variant="outline" className="gap-2 rounded-xl" disabled={loading}>
-            <RefreshCcw size={16} className={loading ? "animate-spin" : ""} /> {loading ? "Retrying..." : "Retry"}
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1">Unable to load achievements</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mb-4 max-w-sm">{error}</p>
+          <Button onClick={() => refetch()} variant="outline" className="gap-2 rounded-lg h-8.5 px-4 text-xs" disabled={loading}>
+            <RefreshCcw size={14} className={loading ? "animate-spin" : ""} /> {loading ? "Retrying..." : "Retry"}
           </Button>
         </div>
       </div>
@@ -104,7 +104,7 @@ const Achievements: React.FC = () => {
   }
 
   return (
-    <div className="pb-24 space-y-8">
+    <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5">
       <AppBreadcrumb items={[
         { label: 'Progress' },
         { label: 'Achievements', path: '/achievements' }
@@ -126,9 +126,9 @@ const Achievements: React.FC = () => {
           <>
             <FeaturedAchievement achievement={featuredAchievement} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mb-6">
               {/* Main Grid */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-5">
                 <AchievementFilters 
                   statusFilter={statusFilter}
                   setStatusFilter={setStatusFilter}
@@ -137,7 +137,7 @@ const Achievements: React.FC = () => {
                 />
 
                 {filteredAchievements.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     {filteredAchievements.map((achievement, i) => (
                       <AchievementCard 
                         key={achievement.key} 
@@ -148,12 +148,12 @@ const Achievements: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-slate-50 rounded-2xl p-12 text-center border border-slate-100">
-                    <p className="text-slate-500 mb-4">No achievements match your current filters.</p>
+                  <div className="bg-slate-50 rounded-xl p-8 text-center border border-slate-100">
+                    <p className="text-slate-500 mb-3 text-sm">No achievements match your current filters.</p>
                     <Button 
                       variant="outline" 
                       onClick={() => { setStatusFilter('ALL'); setCategoryFilter('ALL'); }}
-                      className="rounded-xl"
+                      className="rounded-lg text-xs"
                     >
                       Clear Filters
                     </Button>
@@ -162,16 +162,16 @@ const Achievements: React.FC = () => {
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-8">
-                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4">Almost There</h3>
+              <div className="space-y-5">
+                <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-100 shadow-sm">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Almost There</h3>
                   {almostThere.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {almostThere.map(achievement => {
                         const safeProgress = Math.max(0, Math.min(100, achievement.progressPercentage || 0));
                         return (
                           <div key={achievement.key} onClick={() => setSelectedAchievement(achievement)} className="cursor-pointer group">
-                            <div className="flex justify-between text-sm font-medium mb-1">
+                            <div className="flex justify-between text-xs sm:text-sm font-medium mb-1">
                               <span className="text-slate-700 group-hover:text-blue-600 transition-colors">{achievement.title}</span>
                               <span className="text-slate-500">{safeProgress}%</span>
                             </div>
@@ -186,22 +186,22 @@ const Achievements: React.FC = () => {
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-500">Start practicing to begin unlocking achievements.</p>
+                    <p className="text-xs sm:text-sm text-slate-500">Start practicing to begin unlocking achievements.</p>
                   )}
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4">Recently Unlocked</h3>
+                <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-100 shadow-sm">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Recently Unlocked</h3>
                   {recentlyUnlocked.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {recentlyUnlocked.map(achievement => (
-                        <div key={achievement.key} onClick={() => setSelectedAchievement(achievement)} className="flex items-center gap-3 cursor-pointer group">
-                          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 group-hover:bg-blue-100 transition-colors">
-                            <Trophy size={18} />
+                        <div key={achievement.key} onClick={() => setSelectedAchievement(achievement)} className="flex items-center gap-2.5 cursor-pointer group">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 group-hover:bg-blue-100 transition-colors">
+                            <Trophy size={15} />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{achievement.title}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{achievement.title}</p>
+                            <p className="text-[11px] text-slate-500">
                               {new Date(achievement.unlockedAt!).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                             </p>
                           </div>
@@ -210,12 +210,12 @@ const Achievements: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-center">
-                      <p className="text-sm text-slate-500 mb-4">No achievements unlocked yet.</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mb-3">No achievements unlocked yet.</p>
                       <Button 
                         onClick={() => navigate('/generate')} 
                         variant="outline" 
                         size="sm"
-                        className="w-full rounded-xl"
+                        className="w-full rounded-lg text-xs"
                       >
                         Start Practicing
                       </Button>

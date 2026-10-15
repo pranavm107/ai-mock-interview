@@ -194,45 +194,45 @@ export const PreparationAssessment: React.FC = () => {
           <button 
             onClick={() => handleSubmit(false)}
             disabled={submitting || isTimeUp}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-all flex items-center disabled:opacity-50"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-4 rounded-lg shadow-sm transition-all flex items-center text-xs sm:text-sm disabled:opacity-50"
           >
-            {submitting ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
+            {submitting ? <Loader2 size={15} className="animate-spin mr-1.5" /> : <CheckCircle2 size={15} className="mr-1.5" />}
             Submit Assessment
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-6">
         
         {/* Main Question Area */}
         <div className="lg:col-span-3">
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-6 min-h-[400px] flex flex-col">
-            <div className="flex justify-between items-center mb-6 text-sm font-semibold text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 shadow-sm mb-4 min-h-[320px] flex flex-col">
+            <div className="flex justify-between items-center mb-4 text-xs sm:text-sm font-semibold text-slate-500">
               <span>Question {currentIndex + 1} of {questions.length}</span>
-              {currentQ.difficulty && <span className="px-2 py-1 bg-slate-100 rounded-md text-xs">{currentQ.difficulty}</span>}
+              {currentQ.difficulty && <span className="px-2 py-0.5 bg-slate-100 rounded text-xs">{currentQ.difficulty}</span>}
             </div>
             
-            <h2 className="text-xl font-bold text-slate-800 mb-8 leading-relaxed">
+            <h2 className="text-base sm:text-lg font-bold text-slate-800 mb-4 leading-snug">
               {currentQ.question}
             </h2>
 
-            <div className="space-y-3 mt-auto">
+            <div className="space-y-2.5 mt-auto">
               {currentQ.options.map(opt => {
                 const isSelected = answers[currentQ.id] === opt.id;
                 return (
                   <button
                     key={opt.id}
                     onClick={() => handleSelectAnswer(opt.id)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
-                      isSelected ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-blue-300'
+                    className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-2.5 ${
+                      isSelected ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'
                     }`}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 ${
                       isSelected ? 'border-blue-600 bg-blue-600' : 'border-slate-300'
                     }`}>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                      {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                     </div>
-                    <span className={`font-medium ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>
+                    <span className={`text-xs sm:text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>
                       {opt.text}
                     </span>
                   </button>
@@ -246,28 +246,28 @@ export const PreparationAssessment: React.FC = () => {
             <button 
               onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
               disabled={currentIndex === 0}
-              className="flex items-center px-5 py-3 rounded-xl font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="flex items-center px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
             >
-              <ArrowLeft size={18} className="mr-2" /> Previous
+              <ArrowLeft size={15} className="mr-1.5" /> Previous
             </button>
             <button 
               onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
               disabled={currentIndex === questions.length - 1}
-              className="flex items-center px-5 py-3 rounded-xl font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="flex items-center px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
             >
-              Next <ArrowRight size={18} className="ml-2" />
+              Next <ArrowRight size={15} className="ml-1.5" />
             </button>
           </div>
         </div>
 
         {/* Sidebar Palette */}
         <div className="lg:col-span-1">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm sticky top-6">
-            <h3 className="font-bold text-slate-900 mb-4">Progress</h3>
-            <div className="w-full bg-slate-100 rounded-full h-2.5 mb-2">
-              <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${(answeredCount / questions.length) * 100}%` }}></div>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm sticky top-6">
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-3">Progress</h3>
+            <div className="w-full bg-slate-100 rounded-full h-2 mb-2">
+              <div className="bg-blue-600 h-2 rounded-full transition-all duration-500" style={{ width: `${(answeredCount / questions.length) * 100}%` }}></div>
             </div>
-            <p className="text-sm text-slate-500 font-semibold mb-6">{answeredCount} of {questions.length} answered</p>
+            <p className="text-xs text-slate-500 font-semibold mb-4">{answeredCount} of {questions.length} answered</p>
 
             <div className="grid grid-cols-5 gap-2">
               {questions.map((q, idx) => {

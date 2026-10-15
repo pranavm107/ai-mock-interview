@@ -22,19 +22,19 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({ title, descrip
         transition={{ duration: 0.4, delay }}
         whileHover={{ y: -4, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="bg-white border border-slate-200 rounded-[20px] p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full flex flex-col justify-between"
+        className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group h-full flex flex-col justify-between"
       >
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl ${colorClass}`}>
-            <Icon size={24} className={colorClass.replace('bg-', 'text-').replace('-50', '-600')} />
+        <div className="flex items-start justify-between mb-3">
+          <div className={`p-2 rounded-lg ${colorClass}`}>
+            <Icon size={18} className={colorClass.replace('bg-', 'text-').replace('-50', '-600')} />
           </div>
-          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border border-slate-100 shadow-sm">
-            <ArrowRight size={16} className="text-slate-400 group-hover:text-blue-600" />
+          <div className="w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border border-slate-100 shadow-sm">
+            <ArrowRight size={14} className="text-slate-400 group-hover:text-blue-600" />
           </div>
         </div>
         
         <div>
-          <h3 className="font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+          <h3 className="font-bold text-sm text-slate-900 mb-0.5 group-hover:text-blue-600 transition-colors">
             {title}
           </h3>
           <p className="text-xs text-slate-500 font-medium leading-relaxed">

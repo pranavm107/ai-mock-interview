@@ -82,49 +82,49 @@ const CodingProblemDetails: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-6 pb-20">
+    <div className="max-w-4xl mx-auto flex flex-col gap-4 pb-10">
       <button 
         onClick={() => navigate('/coding')}
-        className="self-start flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium transition-colors"
+        className="self-start flex items-center gap-1.5 text-slate-500 hover:text-slate-900 text-xs sm:text-sm font-medium transition-colors"
       >
-        <ArrowLeft size={18} /> Back to Practice
+        <ArrowLeft size={16} /> Back to Practice
       </button>
 
-      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-slate-100 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
             <DifficultyBadge difficulty={problem.difficulty} />
             {problem.estimatedMinutes && (
-              <span className="flex items-center gap-1.5 text-slate-500 text-sm font-semibold">
-                <Clock size={16} /> {problem.estimatedMinutes} min
+              <span className="flex items-center gap-1 text-slate-500 text-xs font-medium">
+                <Clock size={13} /> {problem.estimatedMinutes} min
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">{problem.title}</h1>
-          <div className="flex flex-wrap gap-2 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{problem.title}</h1>
+          <div className="flex flex-wrap gap-1.5 mt-0.5">
             {problem.topics.map(topic => (
-              <span key={topic} className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                <Hash size={12} /> {topic}
+              <span key={topic} className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                <Hash size={11} /> {topic}
               </span>
             ))}
           </div>
         </div>
         
-        <div className="p-8 flex flex-col gap-8">
+        <div className="p-5 sm:p-6 flex flex-col gap-5">
           <div className="prose prose-slate max-w-none">
-            <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-wrap">{problem.description}</p>
+            <p className="text-slate-700 leading-relaxed text-sm sm:text-base whitespace-pre-wrap">{problem.description}</p>
           </div>
 
           {problem.examples && problem.examples.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-xl font-bold text-slate-900">Examples</h3>
-              <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-wide text-xs text-slate-400">Examples</h3>
+              <div className="flex flex-col gap-3">
                 {problem.examples.map((ex, index) => (
-                  <div key={index} className="bg-slate-50 border border-slate-200 rounded-xl p-5 font-mono text-sm">
-                    <div className="mb-2"><strong className="text-slate-900 font-sans">Input:</strong> <span className="text-blue-700">{ex.input}</span></div>
-                    <div className="mb-2"><strong className="text-slate-900 font-sans">Output:</strong> <span className="text-green-700">{ex.output}</span></div>
+                  <div key={index} className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 font-mono text-xs sm:text-sm">
+                    <div className="mb-1.5"><strong className="text-slate-900 font-sans">Input:</strong> <span className="text-blue-700 ml-1">{ex.input}</span></div>
+                    <div className="mb-1.5"><strong className="text-slate-900 font-sans">Output:</strong> <span className="text-emerald-700 ml-1">{ex.output}</span></div>
                     {ex.explanation && (
-                      <div><strong className="text-slate-900 font-sans">Explanation:</strong> <span className="text-slate-600 font-sans">{ex.explanation}</span></div>
+                      <div className="mt-1 pt-1 border-t border-slate-200"><strong className="text-slate-900 font-sans">Explanation:</strong> <span className="text-slate-600 font-sans ml-1">{ex.explanation}</span></div>
                     )}
                   </div>
                 ))}
@@ -133,11 +133,11 @@ const CodingProblemDetails: React.FC = () => {
           )}
 
           {problem.constraints && problem.constraints.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-xl font-bold text-slate-900">Constraints</h3>
-              <ul className="list-disc pl-5 flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide">Constraints</h3>
+              <ul className="list-disc pl-4 flex flex-col gap-1.5">
                 {problem.constraints.map((constraint, i) => (
-                  <li key={i} className="text-slate-700 font-mono text-sm bg-slate-100 inline-block px-2 py-0.5 rounded-md w-fit border border-slate-200">
+                  <li key={i} className="text-slate-700 font-mono text-xs bg-slate-100 inline-block px-2 py-0.5 rounded w-fit border border-slate-200">
                     {constraint}
                   </li>
                 ))}
@@ -147,16 +147,16 @@ const CodingProblemDetails: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-end sticky bottom-6 z-10">
+      <div className="flex justify-end sticky bottom-4 z-10">
         <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           onClick={() => {
             navigate(`/coding/problem/${problem.slug}/workspace`);
           }}
-          className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white text-lg font-bold rounded-2xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/40 transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-500 transition-all"
         >
-          <Code2 size={24} />
+          <Code2 size={16} />
           Start Coding
         </motion.button>
       </div>

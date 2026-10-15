@@ -48,7 +48,7 @@ const InterviewReportPage: React.FC = () => {
   }
 
   return (
-    <div className="pb-24 max-w-5xl mx-auto space-y-12">
+    <div className="pb-20 max-w-5xl mx-auto space-y-6 sm:space-y-8">
       <div>
         <div className="print:hidden">
           <AppBreadcrumb items={[
@@ -65,14 +65,14 @@ const InterviewReportPage: React.FC = () => {
           />
           <button 
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors print:hidden"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold rounded-lg transition-colors print:hidden"
           >
-            <Download size={18} /> Export PDF
+            <Download size={15} /> Export PDF
           </button>
         </div>
       </div>
 
-      <div className="space-y-12 print:space-y-8">
+      <div className="space-y-6 sm:space-y-8 print:space-y-6">
         {report.overallEvaluation.summary && (
           <ReportSummary summary={report.overallEvaluation.summary} />
         )}

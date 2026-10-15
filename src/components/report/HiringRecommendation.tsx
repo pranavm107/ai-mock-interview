@@ -33,28 +33,28 @@ export const HiringRecommendation: React.FC<Props> = ({ recommendation }) => {
   };
 
   return (
-    <div className={`rounded-3xl p-8 border ${borderColor} ${bgColor} shadow-sm`}>
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-2xl ${iconBg} ${iconColor}`}>
-            <Icon size={28} />
+    <div className={`rounded-xl p-4 sm:p-5 border ${borderColor} ${bgColor} shadow-xs`}>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${iconBg} ${iconColor}`}>
+            <Icon size={22} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Recruiter Verdict</h3>
-            <div className="text-2xl font-bold text-slate-800">{recommendation.verdict}</div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-0.5">Recruiter Verdict</h3>
+            <div className="text-xl sm:text-2xl font-bold text-slate-800">{recommendation.verdict}</div>
           </div>
         </div>
-        <div className="flex bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm gap-1">
+        <div className="flex bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs gap-1">
           {renderStars(recommendation.rating)}
         </div>
       </div>
       
-      <div className="bg-white/60 rounded-2xl p-6 border border-white/40">
-        <h4 className="text-sm font-semibold text-slate-800 mb-3 uppercase tracking-wider">Reasons</h4>
-        <ul className="space-y-2">
+      <div className="bg-white/70 rounded-lg p-3.5 sm:p-4 border border-white/50">
+        <h4 className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Evaluation Reasons</h4>
+        <ul className="space-y-1.5">
           {recommendation.reasons.map((reason, i) => (
-            <li key={i} className="flex gap-3 text-slate-700">
-              <span className={`mt-1 font-bold ${iconColor}`}>•</span>
+            <li key={i} className="flex gap-2.5 text-xs sm:text-sm text-slate-700">
+              <span className={`font-bold ${iconColor}`}>•</span>
               <span className="leading-relaxed">{reason}</span>
             </li>
           ))}

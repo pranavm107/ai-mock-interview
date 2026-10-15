@@ -53,12 +53,12 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ performanceData = 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
+      className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Performance Trend</h2>
-          <p className="text-sm text-slate-500 mt-1">Your average score over time</p>
+          <h2 className="text-base sm:text-lg font-bold text-slate-900">Performance Trend</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Your average score over time</p>
         </div>
         {hasEnoughData && (
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${
