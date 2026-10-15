@@ -57,7 +57,7 @@ export const useAchievements = (): UseAchievementsReturn => {
     } catch (err: any) {
       if (!signal.aborted) {
         console.error('Failed to load achievements:', err);
-        setError('We couldn\'t load your achievements right now. Please try again.');
+        setError(err.message || 'We couldn\'t load your achievements right now. Please try again.');
       }
     } finally {
       if (!signal.aborted) {

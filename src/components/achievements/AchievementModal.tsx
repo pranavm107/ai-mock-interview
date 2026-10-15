@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Flame, Target, Star, FileText, Lock, X, Check, Award, Badge, Medal, Briefcase } from 'lucide-react';
+import { Trophy, Flame, Target, Star, FileText, FileCheck, Lock, X, Check, Award, Badge, Medal, Briefcase } from 'lucide-react';
 import type { AchievementWithProgress, AchievementRarity } from '../../types/achievement';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -35,19 +35,17 @@ interface AchievementModalProps {
   onClose: () => void;
 }
 
-const getIcon = (iconName: string) => {
-  switch (iconName) {
-    case 'trophy': return Trophy;
-    case 'flame': return Flame;
-    case 'target': return Target;
-    case 'star': return Star;
-    case 'file': return FileText;
-    case 'award': return Award;
-    case 'badge': return Badge;
-    case 'medal': return Medal;
-    case 'briefcase': return Briefcase;
-    default: return Trophy;
-  }
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  'trophy': Trophy,
+  'flame': Flame,
+  'target': Target,
+  'star': Star,
+  'file': FileText,
+  'file-check': FileCheck,
+  'award': Award,
+  'badge': Badge,
+  'medal': Medal,
+  'briefcase': Briefcase,
 };
 
 const getRarityColor = (rarity: AchievementRarity, unlocked: boolean) => {
@@ -82,7 +80,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ achievement,
 
   if (!achievement) return null;
 
-  const Icon = getIcon(achievement.icon);
+  const Icon = ICON_MAP[achievement.icon] || Trophy;
   const isUnlocked = achievement.unlocked;
   const rarityColors = getRarityColor(achievement.rarity, isUnlocked);
   const safeProgress = Math.max(0, Math.min(100, achievement.progressPercentage || 0));

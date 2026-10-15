@@ -17,9 +17,23 @@ import { achievementService } from './achievementService';
  */
 export class AchievementRuleEngine {
   
+  public async syncAllForUser(userId: string): Promise<AchievementEvaluationResult> {
+    const allDefinitions = await achievementService.getAchievementDefinitions();
+    return this.evaluateDefinitionsForUser(userId, allDefinitions);
+  }
+
   public async evaluateAchievementEvent(
     userId: string,
     event: AchievementEvent
+  ): Promise<AchievementEvaluationResult> {
+    const allDefinitions = await achievementService.getAchievementDefinitions();
+    const relevantDefinitions = this.filterDefinitionsByEvent(allDefinitions, event);
+    return this.evaluateDefinitionsForUser(userId, relevantDefinitions);
+  }
+
+  private async evaluateDefinitionsForUser(
+    userId: string,
+    definitions: AchievementDefinition[]
   ): Promise<AchievementEvaluationResult> {
     const result: AchievementEvaluationResult = {
       evaluated: 0,
@@ -27,28 +41,16 @@ export class AchievementRuleEngine {
       unlocked: []
     };
 
-    try {
-      // 1. Fetch all active achievement definitions
-      const allDefinitions = await achievementService.getAchievementDefinitions();
-      
-      // 2. Filter definitions based on event type
-      const relevantDefinitions = this.filterDefinitionsByEvent(allDefinitions, event);
-      if (relevantDefinitions.length === 0) return result;
+    if (definitions.length === 0) return result;
 
-      // 3. Pre-fetch required user data to avoid N+1 queries
-      // We only fetch what is needed based on the relevant definitions
-      const requiredReqTypes = new Set(relevantDefinitions.map(d => d.requirementType));
-      
+    try {
+      const requiredReqTypes = new Set(definitions.map(d => d.requirementType));
       const evaluationContext = await this.buildEvaluationContext(userId, requiredReqTypes);
 
-      result.evaluated = relevantDefinitions.length;
+      result.evaluated = definitions.length;
 
-      // 4. Process each relevant definition in a batch/transaction approach
-      // To ensure idempotency and prevent race conditions, we use Firestore transactions
-      // Since a transaction limits to 500 writes, and we are updating at most a few achievements, it's safe.
-      
       await db.runTransaction(async (transaction) => {
-        for (const definition of relevantDefinitions) {
+        for (const definition of definitions) {
           const docId = `${userId}_${definition.key}`;
           const achievementRef = db.collection('userAchievements').doc(docId);
           
@@ -57,18 +59,20 @@ export class AchievementRuleEngine {
           let currentProgress = 0;
           let isUnlocked = false;
           let createdAt = new Date().toISOString();
+          let existingUnlockedAt: string | null = null;
           
           if (docSnapshot.exists) {
             const data = docSnapshot.data() as UserAchievement;
             currentProgress = data.progress;
             isUnlocked = data.unlocked;
             createdAt = data.createdAt;
+            existingUnlockedAt = data.unlockedAt;
           }
 
-          // If already unlocked, skip evaluation
+          // If already unlocked, skip evaluation to preserve original unlockedAt
           if (isUnlocked) continue;
 
-          // 5. Calculate new progress based on rule
+          // Calculate new progress based on rule
           const newProgress = this.calculateProgress(definition, evaluationContext);
           
           // If progress hasn't changed, skip
@@ -76,7 +80,7 @@ export class AchievementRuleEngine {
 
           const target = definition.requirementValue;
           const newlyUnlocked = newProgress >= target;
-          const newUnlockedAt = newlyUnlocked ? new Date().toISOString() : null;
+          const newUnlockedAt = newlyUnlocked ? (existingUnlockedAt || new Date().toISOString()) : null;
 
           const updateData: UserAchievement = {
             userId,
@@ -97,10 +101,8 @@ export class AchievementRuleEngine {
           }
         }
       });
-
     } catch (error) {
-      console.error(`[AchievementRuleEngine] Error evaluating event ${event.type} for user ${userId}:`, error);
-      // We don't rethrow to avoid breaking the primary workflow
+      console.error(`[AchievementRuleEngine] Error evaluating achievements for user ${userId}:`, error);
     }
 
     return result;
@@ -139,35 +141,88 @@ export class AchievementRuleEngine {
       
       if (reqTypes.has(RequirementType.STREAK_DAYS)) {
         const streakData = calculateLongestStreak(sessions);
-        // Depending on design, streak achievements might want longest streak
         context.longestStreak = streakData.longestStreak;
       }
     }
 
     if (reqTypes.has(RequirementType.SCORE_THRESHOLD)) {
-      const reviews = await listInterviewReviewsByUser(userId);
       let maxScore = 0;
-      for (const review of reviews) {
-        if (review.overallScore && review.overallScore > maxScore) {
-          maxScore = review.overallScore;
+
+      // 1. Check sessions
+      const sessions = context.sessions || await listSessionsByUser(userId);
+      context.sessions = sessions;
+      for (const session of sessions) {
+        const sScore = (session as any).overallScore ?? (session as any).score;
+        if (typeof sScore === 'number' && sScore > maxScore) {
+          maxScore = sScore;
         }
       }
+
+      // 2. Check interview reports
+      try {
+        const reportsSnapshot = await db.collection('interviewReports').where('userId', '==', userId).get();
+        reportsSnapshot.forEach(doc => {
+          const r = doc.data();
+          const rScore = r.overallEvaluation?.overallScore;
+          if (typeof rScore === 'number' && rScore > maxScore) {
+            maxScore = rScore;
+          }
+        });
+      } catch (err) {
+        console.warn('Error reading reports for score achievements:', err);
+      }
+
+      // 3. Check legacy reviews
+      try {
+        const reviews = await listInterviewReviewsByUser(userId);
+        for (const review of reviews) {
+          if (review.overallScore && review.overallScore > maxScore) {
+            maxScore = review.overallScore;
+          }
+        }
+      } catch (err) {
+        // Fallback
+      }
+
       context.highestScore = maxScore;
     }
 
-    if (reqTypes.has(RequirementType.RESUME_ADDED) || reqTypes.has(RequirementType.ATS_SCORE)) {
+    if (reqTypes.has(RequirementType.PROFILE_COMPLETION) || reqTypes.has(RequirementType.RESUME_ADDED) || reqTypes.has(RequirementType.ATS_SCORE)) {
       const snapshot = await db.collection('resumes').where('userId', '==', userId).get();
       context.hasResume = !snapshot.empty;
       
       let maxAts = 0;
+      let isProfileComplete = false;
+
       snapshot.forEach(doc => {
         const data = doc.data();
         const ats = data.analysis?.aiAnalysis?.atsScore || data.analysis?.atsScore || 0;
         if (ats > maxAts) {
           maxAts = ats;
         }
+
+        const sr = data.analysis?.structuredResume;
+        if (sr && (sr.candidate?.headline || sr.candidate?.summary || (sr.experience && sr.experience.length > 0) || (sr.education && sr.education.length > 0))) {
+          isProfileComplete = true;
+        }
       });
+
+      if (!isProfileComplete) {
+        try {
+          const userDoc = await db.collection('users').doc(userId).get();
+          if (userDoc.exists) {
+            const uData = userDoc.data();
+            if (uData?.profileCompleted || (uData?.name && uData?.email && uData?.targetRole)) {
+              isProfileComplete = true;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       context.highestAtsScore = maxAts;
+      context.isProfileComplete = isProfileComplete;
     }
 
     return context;
@@ -191,8 +246,7 @@ export class AchievementRuleEngine {
         return context.highestAtsScore || 0;
       
       case RequirementType.PROFILE_COMPLETION:
-        // Not explicitly implemented in the codebase yet.
-        return 0;
+        return context.isProfileComplete ? 1 : 0;
         
       default:
         return 0;

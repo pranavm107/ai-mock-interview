@@ -179,6 +179,27 @@ export const generateInterviewReport = async (
 
   const { updateInterviewSession } = await import('../runtime/sessionStorageService');
   await updateInterviewSession(session.id, updatedSessionData);
+
+  // Trigger achievement evaluation on session completion and score calculation
+  try {
+    const { achievementRuleEngine } = await import('../achievementRuleEngine');
+    const { AchievementEventType } = await import('../../types/achievement');
+    await achievementRuleEngine.evaluateAchievementEvent(session.userId, {
+      type: AchievementEventType.INTERVIEW_COMPLETED,
+      userId: session.userId,
+      sourceId: session.id
+    });
+    if (typeof scores.overallEvaluation.overallScore === 'number') {
+      await achievementRuleEngine.evaluateAchievementEvent(session.userId, {
+        type: AchievementEventType.INTERVIEW_SCORED,
+        userId: session.userId,
+        sourceId: session.id,
+        score: scores.overallEvaluation.overallScore
+      });
+    }
+  } catch (achErr) {
+    console.warn('[ReportGenerationService] Failed to evaluate achievements:', achErr);
+  }
   
   return report;
 };

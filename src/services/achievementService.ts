@@ -12,7 +12,8 @@ export const fetchUserAchievements = async (token: string, signal?: AbortSignal)
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch achievements');
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || `Failed to fetch achievements (Status ${response.status})`);
   }
 
   return response.json();

@@ -38,7 +38,7 @@ const Achievements: React.FC = () => {
       const bRemaining = Math.max(0, b.requirementValue - b.progress);
       return aRemaining - bRemaining;
     })[0];
-  }, [lockedAchievements, unlockedAchievements]);
+  }, [lockedAchievements]);
 
   const recentlyUnlocked = useMemo(() => {
     return [...unlockedAchievements]
@@ -72,6 +72,10 @@ const Achievements: React.FC = () => {
   if (loading) {
     return (
       <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5 animate-pulse">
+        <AppBreadcrumb items={[
+          { label: 'Progress' },
+          { label: 'Achievements', path: '/achievements' }
+        ]} />
         <PageHeader title="Achievements" description="Loading your milestones..." icon={Trophy} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-4">
           {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-200 rounded-xl"></div>)}
@@ -88,6 +92,10 @@ const Achievements: React.FC = () => {
   if (error) {
     return (
       <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5">
+        <AppBreadcrumb items={[
+          { label: 'Progress' },
+          { label: 'Achievements', path: '/achievements' }
+        ]} />
         <PageHeader title="Achievements" description="Track your milestones" icon={Trophy} />
         <div className="bg-white rounded-xl border border-red-100 p-8 text-center flex flex-col items-center justify-center min-h-[260px]">
           <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-500">

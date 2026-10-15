@@ -44,6 +44,14 @@ export class AchievementService {
    * Generates the aggregated Phase B3 API response for the user's achievements.
    */
   async getAchievementsForUser(userId: string): Promise<{ summary: import('../types/achievement').AchievementSummary, achievements: import('../types/achievement').AchievementWithProgress[] }> {
+    // 1. Sync achievements with current user records to ensure no events were missed
+    try {
+      const { achievementRuleEngine } = await import('./achievementRuleEngine');
+      await achievementRuleEngine.syncAllForUser(userId);
+    } catch (err) {
+      console.warn('[AchievementService] Failed to sync achievements for user:', err);
+    }
+
     const definitions = await this.getAchievementDefinitions();
     const userAchievements = await this.getUserAchievements(userId);
 
