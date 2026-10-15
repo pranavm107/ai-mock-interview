@@ -9,7 +9,16 @@ interface PerformanceTrendChartProps {
 export const PerformanceTrendChart: React.FC<PerformanceTrendChartProps> = ({ data }) => {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all h-96 flex flex-col">
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">Performance Trend</h3>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Performance Trend</h3>
+          {data.length === 1 ? (
+            <p className="text-xs text-slate-500 mt-0.5">1 session recorded &bull; complete more sessions to see progression</p>
+          ) : (
+            <p className="text-xs text-slate-500 mt-0.5">Historical interview scores over time</p>
+          )}
+        </div>
+      </div>
       <div className="flex-1 w-full min-h-0 relative">
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -20,6 +29,7 @@ export const PerformanceTrendChart: React.FC<PerformanceTrendChartProps> = ({ da
             <Tooltip 
               contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', color: '#0F172A', borderRadius: '0.5rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
               itemStyle={{ color: '#2563EB' }}
+              formatter={(value: any) => [`${value}/100`, 'Score']}
             />
             <Line 
               type="monotone" 

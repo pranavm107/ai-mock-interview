@@ -30,6 +30,10 @@ export const DifficultyChart: React.FC<DifficultyChartProps> = ({ data }) => {
             <Tooltip 
               contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', color: '#0F172A', borderRadius: '0.5rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
               cursor={{ fill: '#F1F5F9' }}
+              formatter={(value: any, _name: any, item: any) => {
+                const count = item?.payload?.interviewCount;
+                return [`${value}/100 (${count} ${count === 1 ? 'interview' : 'interviews'})`, 'Avg Score'];
+              }}
             />
             <Bar dataKey="averageScore" radius={[4, 4, 0, 0]} name="Avg Score">
               {data.map((entry, index) => (

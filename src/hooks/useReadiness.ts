@@ -29,7 +29,8 @@ export const useReadiness = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch readiness intelligence');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `Failed to fetch readiness intelligence (Status ${response.status})`);
       }
 
       const json = await response.json();

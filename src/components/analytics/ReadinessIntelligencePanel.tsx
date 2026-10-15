@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Target, TrendingUp, AlertTriangle, ShieldCheck, Zap, ArrowRight, Activity, BatteryCharging, BrainCircuit } from 'lucide-react';
 import { useReadiness } from '../../hooks/useReadiness';
 import { Link } from 'react-router-dom';
@@ -38,7 +37,13 @@ export const ReadinessIntelligencePanel: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center">
         <AlertTriangle className="h-10 w-10 text-red-500 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-slate-900">We couldn't load your readiness profile right now.</h3>
-        <p className="text-slate-500 mt-2">{error}</p>
+        <p className="text-slate-500 mt-2 text-sm">{error}</p>
+        <button
+          onClick={() => fetchReadiness()}
+          className="mt-4 inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -81,16 +86,16 @@ export const ReadinessIntelligencePanel: React.FC = () => {
                 Confidence: <span className="text-white ml-1 font-medium">{profile.confidence}</span>
               </div>
               <div className="flex items-center bg-white/10 px-2.5 py-0.5 rounded-full text-[11px]">
-                Based on {profile.evidence.interviews} interviews & {profile.evidence.assessments} assessments
+                Based on {profile.evidence.interviews} evaluated {profile.evidence.interviews === 1 ? 'interview report' : 'interview reports'} & {profile.evidence.assessments} {profile.evidence.assessments === 1 ? 'assessment' : 'assessments'}
               </div>
             </div>
           </div>
           
-          <div className="shrink-0 relative">
+          <div className="shrink-0 relative flex flex-col items-center">
             <div className="w-24 h-24 rounded-full border-4 border-indigo-500/30 flex flex-col items-center justify-center relative bg-indigo-800/40 backdrop-blur-sm shadow-inner">
               <span className="text-2xl font-bold leading-none">{profile.readinessScore}</span>
               <span className="text-indigo-200 text-[10px] font-medium mt-0.5">/ 100</span>
-              <div className="absolute -bottom-2 bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-semibold shadow-xs whitespace-nowrap border border-indigo-400">
+              <div className="absolute -bottom-2.5 bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold shadow-xs whitespace-nowrap border border-indigo-400 max-w-[130px] truncate text-center">
                 {profile.readinessState}
               </div>
             </div>
@@ -99,19 +104,23 @@ export const ReadinessIntelligencePanel: React.FC = () => {
         
         {/* Components Bar */}
         <div className="bg-white/5 border-t border-white/10 px-4 py-2.5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {profile.components.map((comp, idx) => (
-              <div key={idx} className="flex flex-col">
-                <span className="text-slate-400 text-[10px] font-medium uppercase">{comp.label}</span>
-                <div className="flex items-center mt-0.5">
-                  <div className="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden mr-2">
-                    <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${comp.score}%` }}></div>
+          {profile.components.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {profile.components.map((comp, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <span className="text-slate-400 text-[10px] font-medium uppercase truncate">{comp.label}</span>
+                  <div className="flex items-center mt-0.5">
+                    <div className="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden mr-2">
+                      <div className="h-full bg-indigo-400 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, Math.max(0, comp.score))}%` }}></div>
+                    </div>
+                    <span className="font-semibold text-xs">{comp.score}</span>
                   </div>
-                  <span className="font-semibold text-xs">{comp.score}</span>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 text-center py-1">Complete additional mock interviews to unlock dimension breakdowns.</p>
+          )}
         </div>
       </div>
 
