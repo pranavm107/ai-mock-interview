@@ -9,6 +9,7 @@ import { useInterview } from '../hooks/useInterview';
 import { useResume } from '../hooks/useResume';
 import { generateInterviewSlug } from '../utils/slugHelper';
 import { API_BASE_URL } from '../config/api';
+import { useSettings } from '../hooks/useSettings';
 import type { InterviewType, InterviewDifficulty, ExperienceLevel } from '../types';
 
 interface SmartSetupResult {
@@ -48,6 +49,9 @@ const Generate: React.FC = () => {
     Lead: 'Senior',
   };
 
+  const { settings } = useSettings();
+  const hasUserModifiedSelection = React.useRef(false);
+
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<SmartSetupResult | null>(null);
@@ -68,13 +72,29 @@ const Generate: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  // Sync saved interview preferences on load if user hasn't made explicit manual choices
+  React.useEffect(() => {
+    if (!recommendation && !hasUserModifiedSelection.current && settings?.interview) {
+      const preferredDiff = settings.interview.defaultDifficulty === 'Beginner' ? 'Easy' : settings.interview.defaultDifficulty;
+      const preferredType = settings.interview.defaultInterviewType;
+      setFormData(prev => ({
+        ...prev,
+        ...(preferredDiff && { difficulty: preferredDiff as InterviewDifficulty }),
+        ...(preferredType && { interviewType: preferredType as InterviewType }),
+      }));
+    }
+  }, [settings, recommendation]);
+
   const handleReset = () => {
+    hasUserModifiedSelection.current = false;
+    const preferredDiff = settings?.interview?.defaultDifficulty === 'Beginner' ? 'Easy' : (settings?.interview?.defaultDifficulty || 'Medium');
+    const preferredType = settings?.interview?.defaultInterviewType || 'Technical';
     setFormData({
       resumeId: resumes.length > 0 ? (resumes.find(r => r.isDefault)?.id || resumes[0].id) : '',
       company: '',
       role: '',
-      interviewType: 'Technical',
-      difficulty: 'Medium',
+      interviewType: preferredType as InterviewType,
+      difficulty: preferredDiff as InterviewDifficulty,
       experienceLevel: 'Mid',
       language: 'English',
       duration: 30,
@@ -464,7 +484,10 @@ const Generate: React.FC = () => {
               </div>
               <select 
                 value={formData.interviewType}
-                onChange={e => setFormData({...formData, interviewType: e.target.value as any})}
+                onChange={e => {
+                  hasUserModifiedSelection.current = true;
+                  setFormData({...formData, interviewType: e.target.value as any});
+                }}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Technical">Technical</option>
@@ -509,7 +532,10 @@ const Generate: React.FC = () => {
               </div>
               <select 
                 value={formData.difficulty}
-                onChange={e => setFormData({...formData, difficulty: e.target.value as any})}
+                onChange={e => {
+                  hasUserModifiedSelection.current = true;
+                  setFormData({...formData, difficulty: e.target.value as any});
+                }}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Easy">Easy</option>

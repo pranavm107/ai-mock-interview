@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, cleanup } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import CodingWorkspace from '../../pages/CodingWorkspace';
 import * as integrityApiService from '../../services/coding/integrityApiService';
@@ -13,6 +13,7 @@ import * as codingFrontendService from '../../services/codingFrontendService';
 // Mock dependencies
 vi.mock('@clerk/clerk-react', () => ({
   useAuth: vi.fn(),
+  UserButton: () => <div data-testid="user-button" />,
 }));
 
 vi.mock('@monaco-editor/react', () => {
@@ -91,6 +92,7 @@ describe('CodingWorkspace - C16 Heartbeat Lifecycle', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
@@ -130,7 +132,7 @@ describe('CodingWorkspace - C16 Heartbeat Lifecycle', () => {
     expect(integrityApiService.heartbeatServerIntegritySession).not.toHaveBeenCalled();
 
     // Start integrity session
-    const startBtn = screen.getByText(/Start Integrity Mode/i);
+    const startBtn = screen.getByText(/Integrity Mode/i);
     act(() => {
       startBtn.click();
     });
@@ -140,7 +142,7 @@ describe('CodingWorkspace - C16 Heartbeat Lifecycle', () => {
       checkbox.click();
     });
 
-    const confirmBtn = screen.getByText(/Start Integrity Session/i);
+    const confirmBtn = screen.getByText(/Start Session/i);
     await act(async () => {
       confirmBtn.click();
     });
@@ -204,9 +206,9 @@ describe('CodingWorkspace - C16 Heartbeat Lifecycle', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'setTimeout', 'clearInterval', 'clearTimeout'] });
 
     // Start session
-    act(() => screen.getByText(/Start Integrity Mode/i).click());
+    act(() => screen.getByText(/Integrity Mode/i).click());
     act(() => screen.getByRole('checkbox').click());
-    await act(async () => screen.getByText(/Start Integrity Session/i).click());
+    await act(async () => screen.getByText(/Start Session/i).click());
 
     // Trigger first heartbeat
     await act(async () => {
@@ -265,9 +267,9 @@ describe('CodingWorkspace - C16 Heartbeat Lifecycle', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'setTimeout', 'clearInterval', 'clearTimeout'] });
 
     // Start session
-    act(() => screen.getByText(/Start Integrity Mode/i).click());
+    act(() => screen.getByText(/Integrity Mode/i).click());
     act(() => screen.getByRole('checkbox').click());
-    await act(async () => screen.getByText(/Start Integrity Session/i).click());
+    await act(async () => screen.getByText(/Start Session/i).click());
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 

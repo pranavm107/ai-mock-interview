@@ -16,7 +16,8 @@ vi.mock('@monaco-editor/react', () => {
 
 // Mock Clerk and Services
 vi.mock('@clerk/clerk-react', () => ({
-  useAuth: () => ({ getToken: vi.fn().mockResolvedValue('token') })
+  useAuth: () => ({ getToken: vi.fn().mockResolvedValue('token') }),
+  UserButton: () => <div data-testid="user-button" />,
 }));
 
 vi.mock('../../services/codingFrontendService', () => ({
@@ -64,7 +65,7 @@ describe('CodingWorkspace Accessibility', () => {
     });
 
     const consoleTab = screen.getByRole('tab', { name: /Console/i });
-    const testsTab = screen.getByRole('tab', { name: /Test Results/i });
+    const testsTab = screen.getByRole('tab', { name: /^Tests$/i });
     const aiTab = screen.getByRole('tab', { name: /AI Feedback/i });
 
     expect(consoleTab).toHaveAttribute('aria-selected', 'true');
@@ -108,6 +109,9 @@ describe('CodingWorkspace Accessibility', () => {
     
     // Simulate keyboard resize
     fireEvent.keyDown(vSplitter, { key: 'ArrowLeft' });
-    expect(Number(vSplitter.getAttribute('aria-valuenow'))).toBe(Math.max(20, initialVal - 5));
+    await waitFor(() => {
+      const updatedSplitter = container.querySelector('[aria-label="Resize workspace panels"]');
+      expect(Number(updatedSplitter?.getAttribute('aria-valuenow'))).toBe(Math.max(20, initialVal - 5));
+    });
   });
 });

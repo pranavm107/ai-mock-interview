@@ -47,6 +47,7 @@ import analyticsRoutes from './routes/analyticsRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import codingRoutes from './routes/codingRoutes';
+import settingsRoutes from './routes/settingsRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -61,6 +62,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/coding', codingRoutes);
+app.use('/api/settings', settingsRoutes);
 
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);

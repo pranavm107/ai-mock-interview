@@ -13,6 +13,7 @@ import type { CodingSessionMode, CodingIntegrityState, IntegritySignal, CodingEn
 import { createIntegrityDetector, IntegrityDetectionService } from '../services/coding/integrityDetectionService';
 import { createServerIntegritySession, getServerIntegritySession, processServerIntegritySignal, endServerIntegritySession, heartbeatServerIntegritySession } from '../services/coding/integrityApiService';
 import { useUiStore } from '../stores/uiStore';
+import { useSettings } from '../hooks/useSettings';
 
 const DifficultyBadge: React.FC<{ difficulty: string }> = ({ difficulty }) => {
   const colors = {
@@ -41,12 +42,26 @@ const CodingWorkspace: React.FC = () => {
     return () => setFocusMode(false);
   }, [setFocusMode]);
   
+  const { settings } = useSettings();
+  const hasUserChangedLanguage = useRef(false);
+
   const [problem, setProblem] = useState<CodingProblem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [activeLanguage, setActiveLanguage] = useState<CodingLanguage>(getDefaultLanguage());
   const [code, setCode] = useState<string>(activeLanguage.starterCode);
+
+  // Sync preferred coding language from saved settings if user hasn't explicitly chosen
+  useEffect(() => {
+    if (!hasUserChangedLanguage.current && settings?.coding?.defaultLanguage) {
+      const match = SUPPORTED_LANGUAGES.find(l => l.id === settings.coding.defaultLanguage);
+      if (match && match.id !== activeLanguage.id) {
+        setActiveLanguage(match);
+        setCode(match.starterCode);
+      }
+    }
+  }, [settings, activeLanguage.id]);
   
   // States for placeholder execution
   const [isExecuting, setIsExecuting] = useState(false);
@@ -326,6 +341,7 @@ const CodingWorkspace: React.FC = () => {
 
   // Handle language switch and draft state locally
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    hasUserChangedLanguage.current = true;
     const langId = e.target.value;
     const lang = SUPPORTED_LANGUAGES.find(l => l.id === langId);
     if (lang) {
@@ -888,7 +904,7 @@ const CodingWorkspace: React.FC = () => {
               theme="preppilot-dark"
               options={{
                 minimap: { enabled: false },
-                fontSize: 13,
+                fontSize: settings?.coding?.editorFontSize || 13,
                 lineHeight: 20,
                 fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                 padding: { top: 12, bottom: 12 },
@@ -896,7 +912,7 @@ const CodingWorkspace: React.FC = () => {
                 smoothScrolling: true,
                 cursorBlinking: "smooth",
                 wordWrap: "off",
-                tabSize: 4,
+                tabSize: settings?.coding?.tabSize || 4,
                 insertSpaces: true,
                 renderWhitespace: "selection",
                 bracketPairColorization: { enabled: true }
