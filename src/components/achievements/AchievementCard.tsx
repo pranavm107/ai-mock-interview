@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Flame, Target, Star, FileText, Lock, Check, Award, Badge, Medal, Briefcase } from 'lucide-react';
+import { Trophy, Flame, Target, Star, FileText, FileCheck, Lock, Check, Award, Badge, Medal, Briefcase } from 'lucide-react';
 import type { AchievementWithProgress, AchievementRarity } from '../../types/achievement';
 
 interface AchievementCardProps {
@@ -9,19 +9,17 @@ interface AchievementCardProps {
   index?: number;
 }
 
-const getIcon = (iconName: string) => {
-  switch (iconName) {
-    case 'trophy': return Trophy;
-    case 'flame': return Flame;
-    case 'target': return Target;
-    case 'star': return Star;
-    case 'file': return FileText;
-    case 'award': return Award;
-    case 'badge': return Badge;
-    case 'medal': return Medal;
-    case 'briefcase': return Briefcase;
-    default: return Trophy;
-  }
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  'trophy': Trophy,
+  'flame': Flame,
+  'target': Target,
+  'star': Star,
+  'file': FileText,
+  'file-check': FileCheck,
+  'award': Award,
+  'badge': Badge,
+  'medal': Medal,
+  'briefcase': Briefcase,
 };
 
 const getRarityColor = (rarity: AchievementRarity, unlocked: boolean) => {
@@ -36,7 +34,7 @@ const getRarityColor = (rarity: AchievementRarity, unlocked: boolean) => {
 };
 
 export const AchievementCard: React.FC<AchievementCardProps> = ({ achievement, onClick, index = 0 }) => {
-  const Icon = getIcon(achievement.icon);
+  const Icon = ICON_MAP[achievement.icon] || Trophy;
   const remaining = Math.max(0, achievement.requirementValue - achievement.progress);
   const safeProgress = Math.max(0, Math.min(100, achievement.progressPercentage || 0));
 

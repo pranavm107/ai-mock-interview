@@ -30,38 +30,38 @@ export const SkillMatrix: React.FC<Props> = ({ skills }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-slate-100 text-slate-600 rounded-xl">
-          <Layers size={20} />
+    <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="p-1.5 bg-slate-100 text-slate-600 rounded-lg">
+          <Layers size={18} />
         </div>
-        <h3 className="text-xl font-bold text-slate-800">Skill Matrix</h3>
+        <h3 className="text-base sm:text-lg font-bold text-slate-800">Skill Matrix</h3>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-200">
-              <th className="pb-4 pt-2 font-semibold text-slate-500 uppercase tracking-wider text-sm">Skill</th>
-              <th className="pb-4 pt-2 font-semibold text-slate-500 uppercase tracking-wider text-sm">Proficiency</th>
-              <th className="pb-4 pt-2 font-semibold text-slate-500 uppercase tracking-wider text-sm text-right pr-4">Rating</th>
+            <tr className="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <th className="pb-2.5 pt-1">Skill</th>
+              <th className="pb-2.5 pt-1">Proficiency</th>
+              <th className="pb-2.5 pt-1 text-right pr-3">Rating</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
             {skills.length === 0 ? (
               <tr>
-                <td colSpan={3} className="py-6 text-center text-slate-500 italic">No specific technical skills were extracted during this session.</td>
+                <td colSpan={3} className="py-5 text-center text-slate-500 italic">No specific technical skills were extracted during this session.</td>
               </tr>
             ) : (
               skills.map((skill, index) => (
-                <tr key={index} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-4 font-medium text-slate-800">{skill.skillName}</td>
-                  <td className="py-4">
-                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold uppercase tracking-wider">
+                <tr key={index} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-2.5 font-medium text-slate-800">{skill.skillName}</td>
+                  <td className="py-2.5">
+                    <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-xs font-semibold uppercase tracking-wider">
                       {skill.proficiencyLevel}
                     </span>
                   </td>
-                  <td className="py-4 flex justify-end gap-1 pr-4">
+                  <td className="py-2.5 flex justify-end gap-0.5 pr-3">
                     {renderStars(getRating(skill.proficiencyLevel))}
                   </td>
                 </tr>

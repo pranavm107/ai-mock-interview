@@ -23,7 +23,7 @@ const Resume: React.FC = () => {
   };
 
   return (
-    <div className="pb-24">
+    <div className="pb-12 max-w-6xl mx-auto space-y-4 sm:space-y-5">
       <AppBreadcrumb items={[
         { label: 'Library' },
         { label: 'Resume Manager', path: '/resume' }
@@ -35,46 +35,46 @@ const Resume: React.FC = () => {
       />
       
       {error && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl flex items-center gap-3 text-destructive">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm font-medium">{error}</p>
+        <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg flex items-center gap-2.5 text-rose-700">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <p className="text-xs sm:text-sm font-medium">{error}</p>
         </div>
       )}
 
       {warning && (
-        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center gap-3 text-yellow-600 dark:text-yellow-500">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm font-medium">{warning}</p>
+        <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-center gap-2.5 text-amber-700">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <p className="text-xs sm:text-sm font-medium">{warning}</p>
         </div>
       )}
 
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-5">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="bg-card border border-border/50 p-6 rounded-2xl shadow-sm"
+          transition={{ duration: 0.3 }}
+          className="bg-white border border-slate-200/90 p-4 sm:p-5 rounded-xl shadow-xs"
         >
-          <h2 className="text-lg font-semibold text-foreground mb-4">Upload New Resume</h2>
+          <h2 className="text-xs sm:text-sm font-semibold text-slate-900 mb-3">Upload New Resume</h2>
           <ResumeUpload onUpload={handleUpload} isUploading={isUploading} />
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-foreground">Your Resumes</h2>
-            <div className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm sm:text-base font-semibold text-slate-900">Your Resumes</h2>
+            <div className="text-xs text-slate-500">
               {resumes.length} {resumes.length === 1 ? 'resume' : 'resumes'}
             </div>
           </div>
           
           {loading && resumes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-              <p>Loading resumes...</p>
+            <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+              <Loader2 className="w-6 h-6 animate-spin mb-3 text-blue-600" />
+              <p className="text-xs sm:text-sm">Loading resumes...</p>
             </div>
           ) : (
             <ResumeList 

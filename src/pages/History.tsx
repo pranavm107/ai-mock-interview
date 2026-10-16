@@ -119,7 +119,7 @@ const History: React.FC = () => {
   };
 
   return (
-    <div className="pb-24 space-y-8">
+    <div className="pb-20 space-y-5 sm:space-y-6">
       <AppBreadcrumb items={[
         { label: 'Progress' },
         { label: 'History', path: '/history' }
@@ -131,19 +131,19 @@ const History: React.FC = () => {
       />
       
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
       >
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-700">
-            <AlertCircle className="shrink-0 mt-0.5" size={18} />
-            <p className="text-sm font-medium">{error}</p>
+          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5 text-red-700">
+            <AlertCircle className="shrink-0 mt-0.5" size={16} />
+            <p className="text-xs sm:text-sm font-medium">{error}</p>
           </div>
         )}
 
         {!loading && interviews.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-5 sm:mb-6">
              <StatCard title="Total" value={stats.total.toString()} icon={Target} delay={0.1} />
              <StatCard title="Completed" value={stats.completed.toString()} icon={CheckCircle} delay={0.2} />
              <StatCard title="In Progress" value={stats.inProgress.toString()} icon={Activity} delay={0.3} />
@@ -169,23 +169,23 @@ const History: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-white rounded-3xl border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-sm relative overflow-hidden"
+            className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[280px] shadow-sm relative overflow-hidden"
           >
             {/* Background decoration */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-50/50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-50/50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
             
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-blue-200/50">
-              <FileQuestion size={40} className="text-blue-600" />
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center mb-4 shadow-inner border border-blue-200/50">
+              <FileQuestion size={28} className="text-blue-600" />
             </div>
             
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 tracking-tight">No Interviews Yet</h2>
-            <p className="text-slate-500 max-w-md mx-auto mb-8 text-base md:text-lg">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 tracking-tight">No Interviews Yet</h2>
+            <p className="text-slate-500 max-w-md mx-auto mb-6 text-xs sm:text-sm">
               Create your first AI-powered mock interview to begin practicing for your dream role.
             </p>
             
             <Button 
               onClick={() => navigate('/generate')}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-14 px-8 font-semibold text-base shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-9 sm:h-10 px-5 font-semibold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               Generate Interview
             </Button>

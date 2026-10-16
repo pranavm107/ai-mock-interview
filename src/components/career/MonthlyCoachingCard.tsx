@@ -17,29 +17,29 @@ export const MonthlyCoachingCard: React.FC<MonthlyCoachingCardProps> = ({ coachi
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+      transition={{ delay: 0.25 }}
+      className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-slate-100 p-2 rounded-xl">
-          <LineChart className="w-5 h-5 text-slate-700" />
+      <div className="flex items-center gap-2 mb-3.5">
+        <div className="bg-slate-100 p-1.5 rounded-lg">
+          <LineChart className="w-4 h-4 text-slate-700" />
         </div>
-        <h3 className="text-lg font-bold text-slate-800">Monthly Summary</h3>
+        <h3 className="text-xs sm:text-sm font-semibold text-slate-800">Monthly Summary</h3>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-3">
         <div>
-          <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> Key Metrics
+          <h4 className="text-[11px] font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1">
+            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /> Key Metrics
           </h4>
-          <ul className="space-y-2">
-            <li className="text-sm text-slate-700 flex items-start gap-2">
+          <ul className="space-y-1">
+            <li className="text-xs sm:text-sm text-slate-700 flex items-start gap-1.5">
               <span className="text-blue-500 font-bold">•</span>
               Completed {coaching.totalInterviews} interviews
             </li>
-            <li className="text-sm text-slate-700 flex items-start gap-2">
+            <li className="text-xs sm:text-sm text-slate-700 flex items-start gap-1.5">
               <span className="text-blue-500 font-bold">•</span>
               Maintained an average score of {coaching.averageScore}
             </li>
@@ -47,18 +47,18 @@ export const MonthlyCoachingCard: React.FC<MonthlyCoachingCardProps> = ({ coachi
         </div>
         
         <div>
-          <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-green-500" /> Improvement Trends
+          <h4 className="text-[11px] font-semibold text-slate-500 uppercase mb-2 flex items-center gap-1">
+            <TrendingUp className="w-3 h-3 text-green-500" /> Improvement Trends
           </h4>
-          <div className="flex flex-wrap gap-2">
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${coaching.communicationTrend === 'Improving' ? 'bg-green-50 text-green-700 border-green-100' : coaching.communicationTrend === 'Declining' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-slate-50 text-slate-700 border-slate-100'}`}>
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${coaching.communicationTrend === 'Improving' ? 'bg-green-50 text-green-700 border-green-100' : coaching.communicationTrend === 'Declining' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-slate-50 text-slate-700 border-slate-100'}`}>
               Performance: {coaching.communicationTrend}
             </span>
           </div>
         </div>
 
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-          <p className="text-sm text-slate-600 italic">
+        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+          <p className="text-xs text-slate-600 italic leading-relaxed">
             "{coaching.summary}"
           </p>
         </div>

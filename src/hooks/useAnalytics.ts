@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import type { AnalyticsResponse } from '../types/analytics';
+import { API_BASE_URL } from '../config/api';
 
 export const useAnalytics = () => {
   const { getToken } = useAuth();
@@ -18,7 +19,7 @@ export const useAnalytics = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics`, {
+      const response = await fetch(`${API_BASE_URL}/api/analytics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -26,7 +27,8 @@ export const useAnalytics = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `Failed to fetch analytics (Status ${response.status})`);
       }
 
       const result = await response.json();

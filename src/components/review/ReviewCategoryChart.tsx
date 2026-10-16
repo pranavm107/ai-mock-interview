@@ -17,16 +17,16 @@ export function ReviewCategoryChart({ review }: ReviewCategoryChartProps) {
   ];
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800 shadow-xl overflow-hidden h-full">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-zinc-100">Category Analysis</CardTitle>
+    <Card className="bg-zinc-900/60 border-zinc-800 shadow-xs overflow-hidden h-full rounded-xl">
+      <CardHeader className="p-4 sm:p-5 pb-2">
+        <CardTitle className="text-base sm:text-lg font-semibold text-zinc-100">Category Analysis</CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[220px] sm:h-[240px] p-2 sm:p-4 pt-0">
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
             <PolarGrid stroke="#3f3f46" />
-            <PolarAngleAxis dataKey="subject" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#52525b' }} axisLine={false} />
+            <PolarAngleAxis dataKey="subject" tick={{ fill: '#a1a1aa', fontSize: 10 }} />
+            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#52525b', fontSize: 9 }} axisLine={false} />
             <Radar
               name="Score"
               dataKey="A"
@@ -35,7 +35,7 @@ export function ReviewCategoryChart({ review }: ReviewCategoryChartProps) {
               fillOpacity={0.5}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#f4f4f5' }}
+              contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#f4f4f5', fontSize: 12, borderRadius: 8 }}
               itemStyle={{ color: '#60a5fa' }}
             />
           </RadarChart>

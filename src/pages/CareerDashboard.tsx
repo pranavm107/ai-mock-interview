@@ -91,25 +91,25 @@ export default function CareerDashboard() {
   if (!data) return <CareerEmpty onGenerate={handleGenerate} isGenerating={isGenerating} />;
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 sm:space-y-5 pb-12">
       <AppBreadcrumb items={[
         { label: 'Career Coach', path: '/career' }
       ]} />
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-5">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Career Coach</h1>
-          <p className="text-slate-500 mt-1">Your personalized roadmap to getting hired.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Career Coach</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Your personalized roadmap to getting hired.</p>
         </div>
         <button 
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold py-2 px-4 rounded-xl shadow-sm text-sm disabled:opacity-50"
+          className="self-start sm:self-auto bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium h-8.5 px-3.5 rounded-lg shadow-xs text-xs sm:text-sm disabled:opacity-50 transition-colors"
         >
           {isGenerating ? 'Regenerating...' : 'Refresh AI Coach'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
         <CareerScoreCard 
           score={data.score?.totalScore || 0} 
           trend={data.trends?.trend || 'Stable'}
@@ -122,17 +122,17 @@ export default function CareerDashboard() {
         <QuickActionsCard />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
         <WeeklyCoachingCard coaching={data.weekly} />
         <MonthlyCoachingCard coaching={data.monthly} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         <LearningRoadmapCard roadmap={data.roadmap} />
         <DailyGoalsCard goals={data.daily} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         <SkillProgressCard recommendedSkills={data.profile.strengths || []} skills={data.skills || {}} />
         <RecentInterviewCard recent={data.recentPerformance} />
       </div>

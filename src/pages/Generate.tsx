@@ -9,6 +9,7 @@ import { useInterview } from '../hooks/useInterview';
 import { useResume } from '../hooks/useResume';
 import { generateInterviewSlug } from '../utils/slugHelper';
 import { API_BASE_URL } from '../config/api';
+import { useSettings } from '../hooks/useSettings';
 import type { InterviewType, InterviewDifficulty, ExperienceLevel } from '../types';
 
 interface SmartSetupResult {
@@ -48,6 +49,9 @@ const Generate: React.FC = () => {
     Lead: 'Senior',
   };
 
+  const { settings } = useSettings();
+  const hasUserModifiedSelection = React.useRef(false);
+
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<SmartSetupResult | null>(null);
@@ -68,13 +72,29 @@ const Generate: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  // Sync saved interview preferences on load if user hasn't made explicit manual choices
+  React.useEffect(() => {
+    if (!recommendation && !hasUserModifiedSelection.current && settings?.interview) {
+      const preferredDiff = settings.interview.defaultDifficulty === 'Beginner' ? 'Easy' : settings.interview.defaultDifficulty;
+      const preferredType = settings.interview.defaultInterviewType;
+      setFormData(prev => ({
+        ...prev,
+        ...(preferredDiff && { difficulty: preferredDiff as InterviewDifficulty }),
+        ...(preferredType && { interviewType: preferredType as InterviewType }),
+      }));
+    }
+  }, [settings, recommendation]);
+
   const handleReset = () => {
+    hasUserModifiedSelection.current = false;
+    const preferredDiff = settings?.interview?.defaultDifficulty === 'Beginner' ? 'Easy' : (settings?.interview?.defaultDifficulty || 'Medium');
+    const preferredType = settings?.interview?.defaultInterviewType || 'Technical';
     setFormData({
       resumeId: resumes.length > 0 ? (resumes.find(r => r.isDefault)?.id || resumes[0].id) : '',
       company: '',
       role: '',
-      interviewType: 'Technical',
-      difficulty: 'Medium',
+      interviewType: preferredType as InterviewType,
+      difficulty: preferredDiff as InterviewDifficulty,
       experienceLevel: 'Mid',
       language: 'English',
       duration: 30,
@@ -281,16 +301,16 @@ const Generate: React.FC = () => {
         className="max-w-5xl mx-auto space-y-6"
       >
         {/* Step 1: Context & Analysis */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <FileText className="text-blue-600" size={24} /> 
+        <div className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <FileText className="text-blue-600" size={20} />
             1. Provide Context
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Select Resume (Optional)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3.5">
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Select Resume (Optional)</label>
                 <select 
                   value={formData.resumeId}
                   onChange={e => {
@@ -298,7 +318,7 @@ const Generate: React.FC = () => {
                     setAnalysisResult(null); // Reset analysis if context changes
                   }}
                   disabled={loadingResumes || resumes.length === 0}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">No Resume Context</option>
                   {resumes.map(r => (
@@ -307,8 +327,8 @@ const Generate: React.FC = () => {
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Job Description (Optional)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Job Description (Optional)</label>
                 <textarea 
                   value={jobDescription}
                   onChange={e => {
@@ -316,8 +336,8 @@ const Generate: React.FC = () => {
                     setAnalysisResult(null);
                   }}
                   placeholder="Paste the job description here..."
-                  rows={5}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                  rows={4}
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
                 />
               </div>
 
@@ -325,24 +345,24 @@ const Generate: React.FC = () => {
                 type="button"
                 onClick={handleAnalyze}
                 disabled={analyzing || (!formData.resumeId && !jobDescription.trim())}
-                className="w-full py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-2 bg-indigo-50 text-indigo-700 text-xs sm:text-sm font-semibold rounded-lg border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {analyzing ? (
-                  <><Loader2 size={18} className="animate-spin" /> Analyzing context...</>
+                  <><Loader2 size={16} className="animate-spin" /> Analyzing context...</>
                 ) : (
-                  <><Sparkles size={18} /> Analyze & Recommend</>
+                  <><Sparkles size={16} /> Analyze & Recommend</>
                 )}
               </button>
 
               {analysisError && (
-                <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-700 text-sm font-medium">
+                <div className="p-2.5 bg-rose-50 border border-rose-100 rounded-lg text-rose-700 text-xs font-medium">
                   {analysisError}
                 </div>
               )}
             </div>
 
             {/* Analysis Result Panel */}
-            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6">
+            <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 sm:p-5">
               {analysisResult ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-emerald-600 font-semibold mb-4">
@@ -397,27 +417,27 @@ const Generate: React.FC = () => {
         </div>
 
         {/* Step 2: Review & Edit */}
-        <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <RotateCcw className="text-blue-600" size={24} /> 
+        <form onSubmit={handleSubmit} className="bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <RotateCcw className="text-blue-600" size={20} />
             2. Review & Edit
           </h2>
 
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
-              <AlertCircle className="shrink-0 mt-0.5" size={18} />
-              <p className="text-sm font-medium">{error}</p>
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-2.5 text-rose-700">
+              <AlertCircle className="shrink-0 mt-0.5" size={16} />
+              <p className="text-xs sm:text-sm font-medium">{error}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             
             {/* Role */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Target Role <span className="text-rose-500">*</span></label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Target Role <span className="text-rose-500">*</span></label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('role', formData.role) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('role', formData.role) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('role', formData.role) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
@@ -428,16 +448,16 @@ const Generate: React.FC = () => {
                 value={formData.role}
                 onChange={e => setFormData({...formData, role: e.target.value})}
                 placeholder="e.g. Frontend Engineer"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
               />
             </div>
 
             {/* Company */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Target Company <span className="text-rose-500">*</span></label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Target Company <span className="text-rose-500">*</span></label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('company', formData.company) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('company', formData.company) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('company', formData.company) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
@@ -448,24 +468,27 @@ const Generate: React.FC = () => {
                 value={formData.company}
                 onChange={e => setFormData({...formData, company: e.target.value})}
                 placeholder="e.g. Google, Stripe"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
               />
             </div>
 
             {/* Interview Type */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Interview Type</label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Interview Type</label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('recommendedInterviewType', formData.interviewType) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('recommendedInterviewType', formData.interviewType) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('recommendedInterviewType', formData.interviewType) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
               </div>
               <select 
                 value={formData.interviewType}
-                onChange={e => setFormData({...formData, interviewType: e.target.value as any})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                onChange={e => {
+                  hasUserModifiedSelection.current = true;
+                  setFormData({...formData, interviewType: e.target.value as any});
+                }}
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Technical">Technical</option>
                 <option value="HR">HR</option>
@@ -476,11 +499,11 @@ const Generate: React.FC = () => {
             </div>
 
             {/* Experience Level */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Experience Level</label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Experience Level</label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('experienceLevel', formData.experienceLevel) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('experienceLevel', formData.experienceLevel) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('experienceLevel', formData.experienceLevel) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
@@ -488,7 +511,7 @@ const Generate: React.FC = () => {
               <select 
                 value={formData.experienceLevel}
                 onChange={e => setFormData({...formData, experienceLevel: e.target.value as any})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Fresher">Fresher</option>
                 <option value="Junior">Junior (1-3 yrs)</option>
@@ -498,19 +521,22 @@ const Generate: React.FC = () => {
             </div>
 
             {/* Difficulty */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Difficulty Level</label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Difficulty Level</label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('recommendedDifficulty', formData.difficulty) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('recommendedDifficulty', formData.difficulty) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('recommendedDifficulty', formData.difficulty) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
               </div>
               <select 
                 value={formData.difficulty}
-                onChange={e => setFormData({...formData, difficulty: e.target.value as any})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                onChange={e => {
+                  hasUserModifiedSelection.current = true;
+                  setFormData({...formData, difficulty: e.target.value as any});
+                }}
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -519,11 +545,11 @@ const Generate: React.FC = () => {
             </div>
 
             {/* Number of Questions */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-end">
-                <label className="text-sm font-semibold text-slate-700">Number of Questions: {formData.totalQuestions}</label>
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">Number of Questions: {formData.totalQuestions}</label>
                 {analysisResult && (
-                  <span className={`text-xs font-bold ${isRecommended('recommendedQuestionCount', formData.totalQuestions) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-bold ${isRecommended('recommendedQuestionCount', formData.totalQuestions) ? 'text-indigo-600' : 'text-slate-500'}`}>
                     {isRecommended('recommendedQuestionCount', formData.totalQuestions) ? '✨ Recommended' : '✎ Your choice'}
                   </span>
                 )}
@@ -547,51 +573,51 @@ const Generate: React.FC = () => {
 
           {/* Setup Summary Panel before generation */}
           {analysisResult && (
-            <div className="mt-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-800 mb-3">Setup Summary</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div className="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-800 mb-2.5">Setup Summary</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm">
                 <div>
-                  <span className="text-slate-500 block mb-1">Role</span>
+                  <span className="text-slate-500 block mb-0.5 text-xs">Role</span>
                   <span className="font-semibold text-slate-800 line-clamp-1">{formData.role || '-'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block mb-1">Type</span>
+                  <span className="text-slate-500 block mb-0.5 text-xs">Type</span>
                   <span className="font-semibold text-slate-800">{formData.interviewType}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block mb-1">Difficulty</span>
+                  <span className="text-slate-500 block mb-0.5 text-xs">Difficulty</span>
                   <span className="font-semibold text-slate-800">{formData.difficulty}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block mb-1">Questions</span>
+                  <span className="text-slate-500 block mb-0.5 text-xs">Questions</span>
                   <span className="font-semibold text-slate-800">{formData.totalQuestions}</span>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="mt-10 pt-6 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
             <button 
               type="button"
               onClick={handleReset}
-              className="px-6 py-3 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition-colors flex items-center gap-2"
+              className="px-4 py-2 text-xs sm:text-sm text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1.5"
             >
-              <RotateCcw size={18} />
+              <RotateCcw size={15} />
               Reset
             </button>
             <button 
               type="submit"
               disabled={creatingInterview || generating || !user?.id}
-              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-5 py-2 text-xs sm:text-sm bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {generating || creatingInterview ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" />
                   {generating ? 'Generating AI Questions...' : 'Saving...'}
                 </>
               ) : (
                 <>
-                  <Play size={18} />
+                  <Play size={15} />
                   Generate Interview
                 </>
               )}

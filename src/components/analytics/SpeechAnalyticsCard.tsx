@@ -7,6 +7,17 @@ interface SpeechAnalyticsCardProps {
 }
 
 export const SpeechAnalyticsCard: React.FC<SpeechAnalyticsCardProps> = ({ data }) => {
+  const hasSpeechData = data && (
+    data.averageSpeakingSpeed > 0 ||
+    data.averageFillerWords > 0 ||
+    data.averageSilenceDuration > 0 ||
+    (data.averageConfidence !== undefined && data.averageConfidence > 0)
+  );
+
+  const silencePercentage = Math.round(
+    data.averageSilenceRatio <= 1 ? data.averageSilenceRatio * 100 : data.averageSilenceRatio
+  );
+
   const metrics = [
     {
       title: 'Filler Words',
@@ -16,7 +27,7 @@ export const SpeechAnalyticsCard: React.FC<SpeechAnalyticsCardProps> = ({ data }
     },
     {
       title: 'Silence Ratio',
-      value: Math.round(data.averageSilenceRatio * 100),
+      value: silencePercentage,
       suffix: '%',
       icon: <VolumeX className="w-5 h-5 text-slate-400" />
     },
@@ -35,22 +46,36 @@ export const SpeechAnalyticsCard: React.FC<SpeechAnalyticsCardProps> = ({ data }
   ];
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">Speech Analytics</h3>
-      <div className="grid grid-cols-2 gap-4">
-        {metrics.map((metric, i) => (
-          <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-start space-x-3">
-            <div className="mt-1">{metric.icon}</div>
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{metric.title}</p>
-              <div className="flex items-baseline mt-1">
-                <span className="text-xl font-bold text-slate-900">{metric.value}</span>
-                <span className="text-xs text-slate-500 ml-1">{metric.suffix}</span>
+    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-slate-900">Speech Analytics</h3>
+          {!hasSpeechData && (
+            <span className="text-[11px] font-medium bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+              Voice not recorded
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {metrics.map((metric, i) => (
+            <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-start space-x-3">
+              <div className="mt-1">{metric.icon}</div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider truncate">{metric.title}</p>
+                <div className="flex items-baseline mt-1">
+                  <span className="text-xl font-bold text-slate-900">{metric.value}</span>
+                  <span className="text-xs text-slate-500 ml-1">{metric.suffix}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+      {!hasSpeechData && (
+        <p className="text-xs text-slate-400 mt-4 text-center">
+          Audio analytics are captured during voice-enabled mock interviews.
+        </p>
+      )}
     </div>
   );
 };

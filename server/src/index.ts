@@ -17,7 +17,10 @@ app.use(
   cors({
     origin: [
       "https://preppilot-pi-sandy.vercel.app",
-      "http://localhost:5173"
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:5176"
     ],
     credentials: true,
   })
@@ -43,6 +46,8 @@ import dashboardRoutes from './routes/dashboardRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
+import codingRoutes from './routes/codingRoutes';
+import settingsRoutes from './routes/settingsRoutes';
 
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -56,6 +61,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/assessments', assessmentRoutes);
+app.use('/api/coding', codingRoutes);
+app.use('/api/settings', settingsRoutes);
 
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);

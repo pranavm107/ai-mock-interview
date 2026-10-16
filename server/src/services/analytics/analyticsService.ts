@@ -52,9 +52,25 @@ export const getDashboardAnalytics = (sessions: InterviewSession[]): DashboardAn
       scoredCount++;
       if (s.overallScore > defaultAnalytics.bestScore) defaultAnalytics.bestScore = s.overallScore;
     }
-    if (s.duration) {
-      defaultAnalytics.totalPracticeDuration += s.duration;
+    // Robust duration normalization:
+    // 1. Prefer metrics.totalDurationMs (always in milliseconds)
+    // 2. Otherwise handle session.duration (can be ms, seconds, or minutes from blueprint)
+    let durationSeconds = 0;
+    if (s.metrics?.totalDurationMs && s.metrics.totalDurationMs > 0) {
+      durationSeconds = Math.round(s.metrics.totalDurationMs / 1000);
+    } else if (typeof s.duration === 'number' && s.duration > 0) {
+      if (s.duration > 7200) {
+        // Definitely milliseconds (e.g. 143,640 ms)
+        durationSeconds = Math.round(s.duration / 1000);
+      } else if (s.duration <= 180) {
+        // Stored as minutes (e.g. 15, 30, 45 min)
+        durationSeconds = Math.round(s.duration * 60);
+      } else {
+        // Stored as seconds (180s - 7200s)
+        durationSeconds = Math.round(s.duration);
+      }
     }
+    defaultAnalytics.totalPracticeDuration += durationSeconds;
   });
 
   if (scoredCount > 0) {
@@ -236,9 +252,9 @@ export const getSpeechAnalytics = (sessions: InterviewSession[]): SpeechAnalytic
   
   const count = completedWithSpeech.length;
   result.averageFillerWords = Math.round(result.averageFillerWords / count);
-  result.averageFillerRatio = Math.round(result.averageFillerRatio / count);
+  result.averageFillerRatio = parseFloat((result.averageFillerRatio / count).toFixed(2));
   result.averageSilenceDuration = Math.round(result.averageSilenceDuration / count);
-  result.averageSilenceRatio = Math.round(result.averageSilenceRatio / count);
+  result.averageSilenceRatio = parseFloat((result.averageSilenceRatio / count).toFixed(2));
   result.averageSpeakingSpeed = Math.round(result.averageSpeakingSpeed / count);
   
   if (confidenceCount > 0) {

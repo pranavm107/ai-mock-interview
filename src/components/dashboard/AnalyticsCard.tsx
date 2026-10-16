@@ -53,12 +53,12 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ performanceData = 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
+      className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Performance Trend</h2>
-          <p className="text-sm text-slate-500 mt-1">Your average score over time</p>
+          <h2 className="text-base sm:text-lg font-bold text-slate-900">Performance Trend</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Your average score over time</p>
         </div>
         {hasEnoughData && (
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${
@@ -70,9 +70,9 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ performanceData = 
         )}
       </div>
       
-      <div className="flex-1 min-h-[200px] w-full mt-4">
-        <ResponsiveContainer width="100%" height="100%">
-          {hasEnoughData ? (
+      <div className="relative h-[240px] min-h-[220px] w-full mt-4">
+        {hasEnoughData ? (
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={performanceData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
@@ -101,13 +101,13 @@ export const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ performanceData = 
               dot={{ r: 3, fill: "#4F46E5", stroke: "#fff", strokeWidth: 1 }}
             />
           </AreaChart>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
-              <p className="font-semibold text-slate-700 mb-1">No performance history yet.</p>
-              <p>Complete interviews to start tracking your progress.</p>
-            </div>
-          )}
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center p-8 bg-slate-50/70 rounded-xl border border-dashed border-slate-200 w-full h-full">
+            <p className="font-semibold text-slate-700 mb-1 text-sm">No performance history yet</p>
+            <p className="text-xs text-slate-500 max-w-xs">Complete mock interviews to track your skill trends and score progression over time.</p>
+          </div>
+        )}
       </div>
     </motion.div>
   );

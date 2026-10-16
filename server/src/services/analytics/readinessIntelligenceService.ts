@@ -1,6 +1,6 @@
 import { db } from '../../config/firebaseAdmin';
 import { InterviewReport } from '../../types/interviewReport';
-import { AssessmentAnalytics, getUserAnalytics } from '../assessmentAnalyticsService';
+import { getUserAnalytics } from '../assessmentAnalyticsService';
 import { 
   ReadinessProfile, 
   ReadinessLevel, 
@@ -11,14 +11,6 @@ import {
   TrendDirection,
   PriorityAction
 } from '../../types/readiness';
-
-/**
- * Normalizes a score (e.g. from 1-100 or 1-5 or 0-1) into a 0-100 percentage.
- */
-const normalizeScore = (score: number, maxScore: number = 100): number => {
-  if (maxScore === 100) return score;
-  return Math.min(100, Math.max(0, Math.round((score / maxScore) * 100)));
-};
 
 /**
  * Calculates Trend Direction based on history
@@ -89,11 +81,7 @@ export const getReadinessProfile = async (userId: string): Promise<ReadinessProf
     });
   });
 
-  assessmentAnalytics.trend.forEach(t => {
-    // Assuming trend points have scores (We need to pull them if they do, wait trend points don't have scores directly in assessmentAnalytics.trend)
-    // Actually assessmentAnalytics doesn't expose the score per trend point right now, but we'll use Interview trends primarily.
-  });
-
+  // Assessment trend points can be integrated when assessment level trends expose individual scores.
   trendHistoryMap.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
   const trendHistory = trendHistoryMap.map((t, idx) => ({
@@ -139,16 +127,16 @@ export const getReadinessProfile = async (userId: string): Promise<ReadinessProf
 
   const components: ReadinessScoreComponent[] = [];
   
-  if (countTechnical >= 2) {
+  if (countTechnical >= 1) {
     components.push({ label: 'Technical Readiness', score: Math.round(technicalComponentScore) });
   }
-  if (countCommunication >= 2) {
+  if (countCommunication >= 1) {
     components.push({ label: 'Communication', score: Math.round(sumCommunication / countCommunication) });
   }
-  if (countBehavioral >= 2) {
+  if (countBehavioral >= 1) {
     components.push({ label: 'Behavioral Readiness', score: Math.round(sumBehavioral / countBehavioral) });
   }
-  if (countProblemSolving >= 2) {
+  if (countProblemSolving >= 1) {
     components.push({ label: 'Problem Solving', score: Math.round(sumProblemSolving / countProblemSolving) });
   }
 
@@ -186,13 +174,8 @@ export const getReadinessProfile = async (userId: string): Promise<ReadinessProf
     for(let i=0; i<t.assessments; i++) rec.scores.push(t.averageScore);
   });
 
-  // From Interviews
+  // From Interviews (using structured skillsAnalysis)
   reports.forEach(r => {
-    r.questionEvaluations.forEach(q => {
-      // Very basic normalization using expected topics or skills if available
-      // Assuming skillsEvaluated or similar could be extracted. For now, rely on standard topics or general text classification.
-      // We will look at r.skillsAnalysis for now.
-    });
     r.skillsAnalysis.forEach(s => {
       if (!topicMap.has(s.skillName)) {
         topicMap.set(s.skillName, { scores: [], interviews: 0, assessments: 0, questions: 0 });

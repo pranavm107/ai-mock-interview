@@ -160,15 +160,15 @@ export const PreparationCategory: React.FC = () => {
 
   if (summary) {
     return (
-      <div className="pb-24">
+      <div className="pb-12 max-w-4xl mx-auto space-y-4 sm:space-y-5">
         <AppBreadcrumb items={[
           { label: 'Practice' },
           { label: 'Assessments', path: '/preparation' },
           { label: title, path: `/preparation/${category}` }, 
           { label: 'Configuration' }
         ]} />
-        <Link to="#" onClick={(e) => { e.preventDefault(); setSummary(null); }} className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors">
-          <ArrowLeft size={16} className="mr-2" /> Back to Configuration
+        <Link to="#" onClick={(e) => { e.preventDefault(); setSummary(null); }} className="inline-flex items-center text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-900 mb-3 transition-colors">
+          <ArrowLeft size={15} className="mr-1.5" /> Back to Configuration
         </Link>
         <PreparationNavigation />
         <PageHeader 
@@ -179,55 +179,55 @@ export const PreparationCategory: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl bg-white border border-slate-200 rounded-3xl p-8 shadow-sm"
+          className="max-w-2xl bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-sm"
         >
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
-              <AlertCircle className="shrink-0 mt-0.5" size={18} />
-              <p className="text-sm font-medium">{error}</p>
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-2.5 text-rose-700">
+              <AlertCircle className="shrink-0 mt-0.5" size={16} />
+              <p className="text-xs sm:text-sm font-medium">{error}</p>
             </div>
           )}
-          <h3 className="font-bold text-lg mb-6 flex items-center"><Settings2 className="mr-2 text-blue-600" size={20}/> Configuration Summary</h3>
-          <ul className="space-y-4 mb-8">
-            <li className="flex justify-between p-3 bg-slate-50 rounded-xl">
+          <h3 className="font-semibold text-sm sm:text-base mb-4 flex items-center text-slate-900"><Settings2 className="mr-2 text-blue-600" size={18}/> Configuration Summary</h3>
+          <ul className="space-y-2.5 mb-6">
+            <li className="flex justify-between p-2.5 bg-slate-50 rounded-lg text-xs sm:text-sm">
               <span className="text-slate-600 font-medium">Mode</span>
-              <span className="font-bold text-slate-900">{summary.mode}</span>
+              <span className="font-semibold text-slate-900">{summary.mode}</span>
             </li>
             {isResumeBased ? (
-              <li className="flex justify-between p-3 bg-slate-50 rounded-xl">
+              <li className="flex justify-between p-2.5 bg-slate-50 rounded-lg text-xs sm:text-sm">
                 <span className="text-slate-600 font-medium">Selected Resume</span>
-                <span className="font-bold text-slate-900">{resumes.find(r => r.id === summary.resumeId)?.metadata?.title || 'Selected'}</span>
+                <span className="font-semibold text-slate-900 truncate max-w-[240px] text-right">{resumes.find(r => r.id === summary.resumeId)?.metadata?.title || 'Selected'}</span>
               </li>
             ) : (
-              <li className="flex justify-between p-3 bg-slate-50 rounded-xl">
+              <li className="flex justify-between p-2.5 bg-slate-50 rounded-lg text-xs sm:text-sm">
                 <span className="text-slate-600 font-medium">Topic</span>
-                <span className="font-bold text-slate-900">{summary.topic}</span>
+                <span className="font-semibold text-slate-900">{summary.topic}</span>
               </li>
             )}
-            <li className="flex justify-between p-3 bg-slate-50 rounded-xl">
+            <li className="flex justify-between p-2.5 bg-slate-50 rounded-lg text-xs sm:text-sm">
               <span className="text-slate-600 font-medium">Difficulty</span>
-              <span className="font-bold text-slate-900">{summary.difficulty}</span>
+              <span className="font-semibold text-slate-900">{summary.difficulty}</span>
             </li>
-            <li className="flex justify-between p-3 bg-slate-50 rounded-xl">
+            <li className="flex justify-between p-2.5 bg-slate-50 rounded-lg text-xs sm:text-sm">
               <span className="text-slate-600 font-medium">Question Count</span>
-              <span className="font-bold text-slate-900">{summary.questionCount} Questions</span>
+              <span className="font-semibold text-slate-900">{summary.questionCount} Questions</span>
             </li>
             {summary.durationMinutes && (
-              <li className="flex justify-between p-3 bg-blue-50 text-blue-900 rounded-xl border border-blue-100">
+              <li className="flex justify-between p-2.5 bg-blue-50 text-blue-900 rounded-lg border border-blue-100 text-xs sm:text-sm">
                 <span className="font-medium">Planned Duration</span>
-                <span className="font-bold">{summary.durationMinutes} Minutes</span>
+                <span className="font-semibold">{summary.durationMinutes} Minutes</span>
               </li>
             )}
           </ul>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button 
               onClick={handleGenerate}
               disabled={generating}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-sm transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium h-9 px-4 rounded-lg shadow-sm transition-all flex justify-center items-center text-xs sm:text-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {generating ? (
                 <>
-                  <Loader2 size={18} className="animate-spin mr-2" />
+                  <Loader2 size={16} className="animate-spin mr-1.5" />
                   Generating...
                 </>
               ) : (
@@ -241,7 +241,7 @@ export const PreparationCategory: React.FC = () => {
   }
 
   return (
-    <div className="pb-24">
+    <div className="pb-12 max-w-4xl mx-auto space-y-4 sm:space-y-5">
       <AppBreadcrumb items={[
         { label: 'Practice' },
         { label: 'Assessments', path: '/preparation' },
@@ -258,37 +258,37 @@ export const PreparationCategory: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="max-w-3xl bg-white border border-slate-200 rounded-3xl p-8 shadow-sm"
+        transition={{ duration: 0.3 }}
+        className="max-w-3xl bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-sm"
       >
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
-            <AlertCircle className="shrink-0 mt-0.5" size={18} />
-            <p className="text-sm font-medium">{error}</p>
+          <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-lg flex items-start gap-2.5 text-rose-700">
+            <AlertCircle className="shrink-0 mt-0.5" size={16} />
+            <p className="text-xs sm:text-sm font-medium">{error}</p>
           </div>
         )}
 
         {(searchParams.get('topic') || searchParams.get('difficulty')) && (
-          <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start gap-3 text-indigo-700">
-            <Settings2 className="shrink-0 mt-0.5" size={18} />
-            <p className="text-sm font-medium">Pre-configured based on your AI preparation recommendation. You can change these settings below.</p>
+          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex items-start gap-2.5 text-indigo-700">
+            <Settings2 className="shrink-0 mt-0.5" size={16} />
+            <p className="text-xs sm:text-sm font-medium">Pre-configured based on your AI preparation recommendation. You can change these settings below.</p>
           </div>
         )}
 
-        <form onSubmit={handleContinue} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleContinue} className="space-y-4 sm:space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
             {/* Topic or Resume Selection */}
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-1.5 md:col-span-2">
               {isResumeBased ? (
                 <>
-                  <label className="text-sm font-semibold text-slate-700">Select Resume <span className="text-rose-500">*</span></label>
-                  <p className="text-xs text-slate-500 mb-2">Your personalized assessment will be built dynamically using skills and experiences extracted from this resume.</p>
+                  <label className="text-xs sm:text-sm font-medium text-slate-700">Select Resume <span className="text-rose-500">*</span></label>
+                  <p className="text-xs text-slate-500 mb-1">Your personalized assessment will be built dynamically using skills and experiences extracted from this resume.</p>
                   <select 
                     value={formData.resumeId}
                     onChange={e => setFormData({...formData, resumeId: e.target.value})}
                     disabled={loadingResumes || resumes.length === 0}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="">Choose a resume...</option>
                     {resumes.map(r => (
@@ -296,18 +296,18 @@ export const PreparationCategory: React.FC = () => {
                     ))}
                   </select>
                   {resumes.length === 0 && !loadingResumes && (
-                    <div className="mt-2 text-sm text-amber-600 flex items-center">
+                    <div className="mt-1.5 text-xs text-amber-600 flex items-center">
                       <AlertCircle size={14} className="mr-1"/> You have no resumes. Please upload one in the Resume Manager.
                     </div>
                   )}
                 </>
               ) : (
                 <>
-                  <label className="text-sm font-semibold text-slate-700">Topic <span className="text-rose-500">*</span></label>
+                  <label className="text-xs sm:text-sm font-medium text-slate-700">Topic <span className="text-rose-500">*</span></label>
                   <select 
                     value={formData.topic}
                     onChange={e => setFormData({...formData, topic: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
                   >
                     {topics.map(topic => (
                       <option key={topic} value={topic}>{topic}</option>
@@ -318,12 +318,12 @@ export const PreparationCategory: React.FC = () => {
             </div>
 
             {/* Difficulty */}
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Difficulty</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-medium text-slate-700">Difficulty</label>
               <select 
                 value={formData.difficulty}
                 onChange={e => setFormData({...formData, difficulty: e.target.value})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -332,12 +332,12 @@ export const PreparationCategory: React.FC = () => {
             </div>
 
             {/* Question Count */}
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Question Count</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-medium text-slate-700">Question Count</label>
               <select 
                 value={formData.questionCount}
                 onChange={e => setFormData({...formData, questionCount: parseInt(e.target.value)})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value={5}>5 Questions</option>
                 <option value={10}>10 Questions</option>
@@ -347,42 +347,42 @@ export const PreparationCategory: React.FC = () => {
             </div>
 
             {/* Mode Selection */}
-            <div className="space-y-3 md:col-span-2 mt-2">
-              <label className="text-sm font-semibold text-slate-700">Preparation Mode</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 md:col-span-2 mt-1">
+              <label className="text-xs sm:text-sm font-medium text-slate-700">Preparation Mode</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 
                 <div 
                   onClick={() => setFormData({...formData, mode: 'Practice Mode'})}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    formData.mode === 'Practice Mode' 
-                      ? 'border-blue-600 bg-blue-50' 
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                    formData.mode === 'Practice Mode'
+                      ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-500/30'
                       : 'border-slate-200 bg-white hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.mode === 'Practice Mode' ? 'border-blue-600' : 'border-slate-300'}`}>
-                      {formData.mode === 'Practice Mode' && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${formData.mode === 'Practice Mode' ? 'border-blue-600' : 'border-slate-300'}`}>
+                      {formData.mode === 'Practice Mode' && <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                     </div>
-                    <span className={`font-bold ${formData.mode === 'Practice Mode' ? 'text-blue-900' : 'text-slate-700'}`}>Practice Mode</span>
+                    <span className={`text-xs sm:text-sm font-semibold ${formData.mode === 'Practice Mode' ? 'text-blue-900' : 'text-slate-800'}`}>Practice Mode</span>
                   </div>
-                  <p className="text-sm text-slate-500 ml-6">Untimed session. Best for learning and reviewing explanations.</p>
+                  <p className="text-xs text-slate-500 ml-5.5 leading-relaxed">Untimed session. Best for learning and reviewing explanations.</p>
                 </div>
 
                 <div 
                   onClick={() => setFormData({...formData, mode: 'Timed Test'})}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    formData.mode === 'Timed Test' 
-                      ? 'border-blue-600 bg-blue-50' 
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                    formData.mode === 'Timed Test'
+                      ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-500/30'
                       : 'border-slate-200 bg-white hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.mode === 'Timed Test' ? 'border-blue-600' : 'border-slate-300'}`}>
-                      {formData.mode === 'Timed Test' && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${formData.mode === 'Timed Test' ? 'border-blue-600' : 'border-slate-300'}`}>
+                      {formData.mode === 'Timed Test' && <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />}
                     </div>
-                    <span className={`font-bold ${formData.mode === 'Timed Test' ? 'text-blue-900' : 'text-slate-700'}`}>Timed Test</span>
+                    <span className={`text-xs sm:text-sm font-semibold ${formData.mode === 'Timed Test' ? 'text-blue-900' : 'text-slate-800'}`}>Timed Test</span>
                   </div>
-                  <p className="text-sm text-slate-500 ml-6">Simulates a real assessment with a strict countdown timer.</p>
+                  <p className="text-xs text-slate-500 ml-5.5 leading-relaxed">Simulates a real assessment with a strict countdown timer.</p>
                 </div>
 
               </div>
@@ -390,12 +390,12 @@ export const PreparationCategory: React.FC = () => {
 
           </div>
 
-          <div className="pt-6 mt-6 border-t border-slate-100 flex justify-end">
+          <div className="pt-4 mt-4 border-t border-slate-100 flex justify-end">
             <button 
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-sm transition-all flex items-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-9 px-5 rounded-lg shadow-sm transition-all flex items-center text-xs sm:text-sm"
             >
-              Continue <ArrowLeft size={18} className="ml-2 rotate-180" />
+              Continue <ArrowLeft size={15} className="ml-1.5 rotate-180" />
             </button>
           </div>
         </form>

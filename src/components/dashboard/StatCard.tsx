@@ -21,13 +21,13 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, tr
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="relative p-[1px] rounded-[20px] bg-gradient-to-br from-slate-200 to-slate-100 hover:from-blue-400 hover:to-purple-500 transition-all duration-300 group"
+      className="min-w-0 relative p-[1px] rounded-xl bg-gradient-to-br from-slate-200 to-slate-100 hover:from-blue-400 hover:to-purple-500 transition-all duration-300 group"
     >
-      <div className="bg-white rounded-[20px] p-6 h-full flex flex-col justify-between shadow-sm group-hover:shadow-md transition-shadow duration-300">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-slate-500">{title}</h3>
-          <div className="p-2 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-blue-600 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-blue-100/50">
-            <Icon size={20} />
+      <div className="bg-white rounded-xl p-3.5 sm:p-4.5 min-w-0 overflow-hidden h-full flex flex-col justify-between shadow-sm group-hover:shadow-md transition-shadow duration-300">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <h3 className="text-xs sm:text-sm font-medium text-slate-500 truncate mr-2">{title}</h3>
+          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg text-blue-600 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-blue-100/50 shrink-0">
+            <Icon size={16} className="sm:w-4.5 sm:h-4.5" />
           </div>
         </div>
         
@@ -36,7 +36,7 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, tr
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: delay + 0.2 }}
-            className="text-3xl font-bold text-slate-900"
+            className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight"
           >
             {value}
           </motion.h2>

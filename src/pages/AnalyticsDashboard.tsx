@@ -22,8 +22,19 @@ const AnalyticsDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-8">Analytics Dashboard</h1>
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 pb-12">
+        <AppBreadcrumb items={[
+          { label: 'Progress' },
+          { label: 'Analytics', path: '/analytics' }
+        ]} />
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Analytics Dashboard</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Track your interview performance, skill progression, and AI coaching insights.
+            </p>
+          </div>
+        </div>
         <AnalyticsLoading />
       </div>
     );
@@ -31,23 +42,35 @@ const AnalyticsDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-8">Analytics Dashboard</h1>
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 pb-12">
+        <AppBreadcrumb items={[
+          { label: 'Progress' },
+          { label: 'Analytics', path: '/analytics' }
+        ]} />
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Analytics Dashboard</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Track your interview performance, skill progression, and AI coaching insights.
+            </p>
+          </div>
+        </div>
+        <ReadinessIntelligencePanel />
         <AnalyticsError message={error} onRetry={refetch} />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 pb-12">
       <AppBreadcrumb items={[
         { label: 'Progress' },
         { label: 'Analytics', path: '/analytics' }
       ]} />
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex justify-between items-end mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Analytics Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Analytics Dashboard</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Track your interview performance, skill progression, and AI coaching insights.
           </p>
         </div>

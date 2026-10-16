@@ -164,7 +164,7 @@ export const PreparationRecommendations: React.FC = () => {
   };
 
   return (
-    <div className="pb-24 max-w-7xl mx-auto space-y-8">
+    <div className="pb-12 max-w-7xl mx-auto space-y-4 sm:space-y-5">
       <div>
         <AppBreadcrumb items={[{ label: 'Practice' }, { label: 'Assessments', path: '/preparation' }, { label: 'AI Recommendations' }]} />
         <PreparationNavigation />
@@ -179,46 +179,46 @@ export const PreparationRecommendations: React.FC = () => {
       </div>
 
       {/* Summary */}
-      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-xl p-4 sm:p-5 text-white relative overflow-hidden shadow-xs">
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-4 text-indigo-300">
-            <Sparkles size={20} />
-            <span className="font-semibold tracking-wide text-sm uppercase">AI Preparation Summary</span>
+          <div className="flex items-center gap-1.5 mb-2.5 text-indigo-300">
+            <Sparkles size={16} />
+            <span className="font-semibold tracking-wider text-xs uppercase">AI Preparation Summary</span>
           </div>
-          <p className="text-xl leading-relaxed max-w-3xl font-medium text-slate-100">
+          <p className="text-sm sm:text-base leading-relaxed max-w-3xl font-normal text-slate-100">
             {rec.summary}
           </p>
         </div>
         {/* Decorative background element */}
-        <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/20 blur-3xl rounded-full -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/15 blur-3xl rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         
         {/* Main Content Area */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-5">
           
           {/* Study Plan */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-                <CalendarDays size={24} />
+          <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
+            <div className="flex items-center gap-2 mb-4 sm:mb-5">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <CalendarDays size={18} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">7-Day Study Plan</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-slate-900">7-Day Study Plan</h3>
             </div>
             
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+            <div className="space-y-3.5 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
               {rec.studyPlan.map((day, idx) => (
                 <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-indigo-100 text-indigo-600 font-bold text-sm shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-indigo-100 text-indigo-600 font-bold text-xs shadow-xs shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                     {day.day}
                   </div>
-                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-                    <h4 className="font-bold text-slate-900 text-lg mb-1">{day.focus}</h4>
-                    <p className="text-sm text-slate-500 mb-3">{day.activity}</p>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-2rem)] bg-white border border-slate-200/90 p-3 sm:p-3.5 rounded-xl shadow-xs">
+                    <h4 className="font-semibold text-slate-900 text-xs sm:text-sm mb-0.5">{day.focus}</h4>
+                    <p className="text-xs text-slate-500 mb-2 leading-relaxed">{day.activity}</p>
+                    <div className="flex flex-wrap gap-1.5">
                       {day.topics.map((t, i) => (
-                        <span key={i} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">
+                        <span key={i} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">
                           {t}
                         </span>
                       ))}
@@ -230,101 +230,101 @@ export const PreparationRecommendations: React.FC = () => {
           </div>
 
           {/* Next Assessment Recommendation */}
-          <div className="bg-white rounded-3xl border border-indigo-100 p-8 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900 mb-6">Recommended Next Assessment</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              <div className="p-4 bg-slate-50 rounded-2xl">
-                <p className="text-sm font-medium text-slate-500 mb-1">Category</p>
-                <p className="font-bold text-slate-900">{rec.nextAssessment.category}</p>
+          <div className="bg-white rounded-xl border border-indigo-100 p-4 sm:p-5 shadow-xs">
+            <h3 className="text-sm sm:text-base font-semibold text-slate-900 mb-3.5">Recommended Next Assessment</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs font-medium text-slate-500 mb-0.5">Category</p>
+                <p className="text-xs sm:text-sm font-semibold text-slate-900 truncate">{rec.nextAssessment.category}</p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl">
-                <p className="text-sm font-medium text-slate-500 mb-1">Topic Focus</p>
-                <p className="font-bold text-slate-900">{rec.nextAssessment.topic}</p>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs font-medium text-slate-500 mb-0.5">Topic Focus</p>
+                <p className="text-xs sm:text-sm font-semibold text-slate-900 truncate">{rec.nextAssessment.topic}</p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl">
-                <p className="text-sm font-medium text-slate-500 mb-1">Difficulty</p>
-                <p className={`font-bold ${rec.nextAssessment.difficulty === 'HARD' ? 'text-rose-600' : rec.nextAssessment.difficulty === 'MEDIUM' ? 'text-amber-600' : 'text-emerald-600'}`}>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs font-medium text-slate-500 mb-0.5">Difficulty</p>
+                <p className={`text-xs sm:text-sm font-semibold ${rec.nextAssessment.difficulty === 'HARD' ? 'text-rose-600' : rec.nextAssessment.difficulty === 'MEDIUM' ? 'text-amber-600' : 'text-emerald-600'}`}>
                   {rec.nextAssessment.difficulty}
                 </p>
               </div>
             </div>
-            <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-2xl mb-8">
-              <div className="flex items-start gap-3">
-                <Sparkles className="text-indigo-600 shrink-0 mt-0.5" size={20} />
-                <p className="text-slate-700 leading-relaxed text-sm">
-                  <span className="font-semibold text-slate-900 mr-2">Why this test?</span>
+            <div className="p-3.5 bg-indigo-50/70 border border-indigo-100/70 rounded-lg mb-4">
+              <div className="flex items-start gap-2.5">
+                <Sparkles className="text-indigo-600 shrink-0 mt-0.5" size={16} />
+                <p className="text-slate-700 leading-relaxed text-xs sm:text-sm">
+                  <span className="font-semibold text-slate-900 mr-1.5">Why this test?</span>
                   {rec.nextAssessment.reason}
                 </p>
               </div>
             </div>
             <Link 
               to={`/preparation/${getCategorySlug(rec.nextAssessment.category)}?topic=${encodeURIComponent(rec.nextAssessment.topic)}&difficulty=${encodeURIComponent(rec.nextAssessment.difficulty)}`}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto justify-center"
+              className="inline-flex items-center gap-1.5 h-9 px-4 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors text-xs sm:text-sm w-full sm:w-auto justify-center shadow-xs"
             >
-              <BookOpen size={20} /> Configure Assessment
+              <BookOpen size={16} /> Configure Assessment
             </Link>
           </div>
 
         </div>
 
         {/* Sidebar Area */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5">
           
           {/* Focus Areas */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6">
-            <div className="flex items-center gap-2 mb-6 text-rose-600">
-              <Target size={20} />
-              <h3 className="font-bold text-slate-900">Needs Improvement</h3>
+          <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
+            <div className="flex items-center gap-1.5 mb-3 text-rose-600">
+              <Target size={16} />
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Needs Improvement</h3>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-3">
               {rec.focusAreas.length > 0 ? rec.focusAreas.map((focus, i) => (
-                <div key={i} className="border-b border-slate-100 last:border-0 pb-6 last:pb-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-bold text-slate-800">{focus.topic}</h4>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-md ${getPriorityColor(focus.priority)}`}>
-                      {focus.priority} PRIORITY
+                <div key={i} className="border-b border-slate-100 last:border-0 pb-3 last:pb-0">
+                  <div className="flex items-start justify-between mb-1">
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-800 truncate pr-2">{focus.topic}</h4>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getPriorityColor(focus.priority)} shrink-0`}>
+                      {focus.priority}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-medium text-slate-500">Verified Score:</span>
-                    <span className="text-sm font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">{focus.accuracy}%</span>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-xs font-medium text-slate-500">Verified:</span>
+                    <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">{focus.accuracy}%</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-sm text-slate-600 flex items-start gap-2">
-                      <Sparkles className="shrink-0 text-slate-400 mt-0.5" size={16} />
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p className="text-xs text-slate-600 flex items-start gap-1.5">
+                      <Sparkles className="shrink-0 text-slate-400 mt-0.5" size={13} />
                       {focus.reason}
                     </p>
                   </div>
                 </div>
               )) : (
-                <p className="text-sm text-slate-500 italic">No critical weak areas identified.</p>
+                <p className="text-xs text-slate-500 italic">No critical weak areas identified.</p>
               )}
             </div>
           </div>
 
           {/* Strengths */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6">
-            <div className="flex items-center gap-2 mb-6 text-emerald-600">
-              <CheckCircle2 size={20} />
-              <h3 className="font-bold text-slate-900">Your Strengths</h3>
+          <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
+            <div className="flex items-center gap-1.5 mb-3 text-emerald-600">
+              <CheckCircle2 size={16} />
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Your Strengths</h3>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-3">
               {rec.strengths.length > 0 ? rec.strengths.map((str, i) => (
-                <div key={i} className="border-b border-slate-100 last:border-0 pb-6 last:pb-0">
-                  <h4 className="font-bold text-slate-800 mb-2">{str.topic}</h4>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm font-medium text-slate-500">Verified Score:</span>
-                    <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{str.accuracy}%</span>
+                <div key={i} className="border-b border-slate-100 last:border-0 pb-3 last:pb-0">
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-800 mb-1 truncate">{str.topic}</h4>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-xs font-medium text-slate-500">Verified:</span>
+                    <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">{str.accuracy}%</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-sm text-slate-600 flex items-start gap-2">
-                      <Sparkles className="shrink-0 text-slate-400 mt-0.5" size={16} />
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p className="text-xs text-slate-600 flex items-start gap-1.5">
+                      <Sparkles className="shrink-0 text-slate-400 mt-0.5" size={13} />
                       {str.reason}
                     </p>
                   </div>
                 </div>
               )) : (
-                <p className="text-sm text-slate-500 italic">Complete more assessments to verify your strengths.</p>
+                <p className="text-xs text-slate-500 italic">Complete more assessments to verify your strengths.</p>
               )}
             </div>
           </div>

@@ -112,14 +112,14 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`relative group flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-2xl transition-all duration-300 ${
-          isDragging 
-            ? 'border-primary bg-primary/5' 
+        className={`relative group flex flex-col items-center justify-center w-full h-36 sm:h-40 border-2 border-dashed rounded-xl transition-all duration-300 ${
+          isDragging
+            ? 'border-blue-500 bg-blue-50/50'
             : status === 'error'
-            ? 'border-destructive/50 bg-destructive/5'
+            ? 'border-rose-400 bg-rose-50/50'
             : status === 'success'
-            ? 'border-green-500/50 bg-green-500/10'
-            : 'border-border/50 hover:border-primary/50 hover:bg-white/5'
+            ? 'border-emerald-400 bg-emerald-50/50'
+            : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/50'
         } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
       >
         <input 
@@ -130,7 +130,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
           disabled={isUploading || status === 'success'}
         />
         
-        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+        <div className="flex flex-col items-center justify-center py-3 text-center px-4">
           <AnimatePresence mode="wait">
             {(status !== 'idle' && status !== 'error' && status !== 'success') ? (
               <motion.div
@@ -138,10 +138,10 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="mb-4 flex flex-col items-center"
+                className="flex flex-col items-center"
               >
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="mt-4 text-sm font-medium text-primary">
+                <Loader2 className="w-7 h-7 animate-spin text-blue-600" />
+                <p className="mt-2 text-xs sm:text-sm font-medium text-blue-600">
                   {status === 'analyzing' ? 'AI Analysis...' :
                    status === 'structuring' ? 'Building Resume Profile...' :
                    status === 'cleaning' ? 'Cleaning Resume...' : 
@@ -154,10 +154,10 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="mb-4 flex flex-col items-center"
+                className="flex flex-col items-center"
               >
-                <CheckCircle2 className="w-10 h-10 text-green-500" />
-                <p className="mt-2 text-sm font-medium text-green-500">Completed</p>
+                <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+                <p className="mt-1.5 text-xs sm:text-sm font-medium text-emerald-600">Completed</p>
               </motion.div>
             ) : status === 'error' ? (
                <motion.div
@@ -165,11 +165,11 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="mb-4 flex flex-col items-center"
+                className="flex flex-col items-center"
               >
-                <XCircle className="w-10 h-10 text-destructive" />
-                <p className="mt-2 text-sm font-medium text-destructive">Upload Failed</p>
-                <p className="text-xs text-destructive/80 mt-1">{errorMessage}</p>
+                <XCircle className="w-7 h-7 text-rose-500" />
+                <p className="mt-1.5 text-xs sm:text-sm font-medium text-rose-600">Upload Failed</p>
+                <p className="text-[11px] text-rose-500 mt-0.5">{errorMessage}</p>
               </motion.div>
             ) : (
               <motion.div
@@ -177,13 +177,13 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ onUpload, isUploadin
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="mb-4 text-muted-foreground group-hover:text-primary transition-colors flex flex-col items-center"
+                className="text-slate-400 group-hover:text-blue-600 transition-colors flex flex-col items-center"
               >
-                <UploadCloud className="w-10 h-10" />
-                <p className="mb-2 mt-4 text-sm text-foreground font-medium">
-                  <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+                <UploadCloud className="w-8 h-8" />
+                <p className="mb-1 mt-2 text-xs sm:text-sm text-slate-800 font-medium">
+                  <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] text-slate-400">
                   PDF documents only (Max 5MB)
                 </p>
               </motion.div>

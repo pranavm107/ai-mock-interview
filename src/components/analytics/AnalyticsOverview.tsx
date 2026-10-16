@@ -6,7 +6,22 @@ interface AnalyticsOverviewProps {
   overview: DashboardAnalytics;
 }
 
+const formatDuration = (seconds: number): { value: number | string; suffix: string } => {
+  if (!seconds || seconds <= 0) return { value: 0, suffix: ' min' };
+  const mins = Math.round(seconds / 60);
+  if (mins === 0 && seconds > 0) return { value: '< 1', suffix: ' min' };
+  if (mins >= 60) {
+    const hours = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return { value: `${hours}h${remMins > 0 ? ` ${remMins}m` : ''}`, suffix: '' };
+  }
+  return { value: mins, suffix: ' min' };
+};
+
 export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ overview }) => {
+  const avgDur = formatDuration(overview.averageInterviewDuration);
+  const totalDur = formatDuration(overview.totalPracticeDuration);
+
   const cards = [
     {
       title: 'Overall Score',
@@ -46,20 +61,20 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ overview }
     },
     {
       title: 'Avg Duration',
-      value: overview.averageInterviewDuration ? Math.round(overview.averageInterviewDuration / 60) : 0,
+      value: avgDur.value,
       icon: <Clock className="w-5 h-5 text-blue-500" />,
-      suffix: ' min'
+      suffix: avgDur.suffix
     },
     {
       title: 'Total Practice',
-      value: overview.totalPracticeDuration ? Math.round(overview.totalPracticeDuration / 60) : 0,
+      value: totalDur.value,
       icon: <Clock className="w-5 h-5 text-blue-600" />,
-      suffix: ' min'
+      suffix: totalDur.suffix
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4">
       {cards.map((card, i) => (
         <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center space-x-2 text-slate-500 mb-2">

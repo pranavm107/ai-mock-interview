@@ -398,3 +398,4 @@ describe('interviewController', () => {
       expect(response.body.error).toBe('Already completed');
     });
   });
+});

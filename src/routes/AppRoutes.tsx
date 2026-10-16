@@ -46,6 +46,9 @@ import { PreparationHistory } from '../pages/PreparationHistory';
 import { PreparationAnalytics } from '../pages/PreparationAnalytics';
 import { PreparationRecommendations } from '../pages/PreparationRecommendations';
 import { PreparationPractice } from '../pages/PreparationPractice';
+import CodingDashboard from '../pages/CodingDashboard';
+import CodingProblemDetails from '../pages/CodingProblemDetails';
+import CodingWorkspace from '../pages/CodingWorkspace';
 
 const router = createBrowserRouter([
   {
@@ -102,6 +105,9 @@ const router = createBrowserRouter([
       { path: 'preparation/:category', element: <PreparationCategory /> },
       { path: 'preparation/assessment/:id', element: <PreparationAssessment /> },
       { path: 'preparation/results/:id', element: <PreparationResult /> },
+      { path: 'coding', element: <CodingDashboard /> },
+      { path: 'coding/problem/:slug', element: <CodingProblemDetails /> },
+      { path: 'coding/problem/:slug/workspace', element: <CodingWorkspace /> },
     ],
   },
   {

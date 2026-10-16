@@ -27,13 +27,14 @@ export const CategoryRadarChart: React.FC<CategoryRadarChartProps> = ({ data }) 
       <div className="flex-1 w-full min-h-0 relative">
         {radarData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+            <RadarChart cx="50%" cy="50%" outerRadius="62%" data={radarData}>
               <PolarGrid stroke="#E2E8F0" />
               <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748B', fontSize: 11 }} />
               <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', color: '#0F172A', borderRadius: '0.5rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
                 itemStyle={{ color: '#2563EB' }}
+                formatter={(value: any) => [`${value}/100`, 'Score']}
               />
               <Radar 
                 name="Score" 

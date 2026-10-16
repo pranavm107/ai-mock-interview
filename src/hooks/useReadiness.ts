@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import type { ReadinessProfile } from '../../server/src/types/readiness';
+import { API_BASE_URL } from '../config/api';
 
 export const useReadiness = () => {
   const { getToken } = useAuth();
@@ -12,18 +13,26 @@ export const useReadiness = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = await getToken();
-      const response = await fetch('/api/analytics/readiness', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch readiness intelligence');
+      if (!token) {
+        throw new Error('Authentication required');
       }
-      
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/analytics/readiness`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `Failed to fetch readiness intelligence (Status ${response.status})`);
+      }
+
       const json = await response.json();
       setData(json);
     } catch (err: any) {

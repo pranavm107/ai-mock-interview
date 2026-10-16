@@ -21,42 +21,42 @@ export const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({ goals }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
+      transition={{ delay: 0.35 }}
+      className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-          <CheckSquare className="w-5 h-5 text-blue-600" />
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+          <CheckSquare className="w-4 h-4 text-blue-600" />
           Daily Goals
         </h3>
-        <span className="text-sm font-bold text-slate-500">{progressPercent}%</span>
+        <span className="text-xs font-bold text-slate-500">{progressPercent}%</span>
       </div>
 
-      <div className="w-full bg-slate-100 rounded-full h-2 mb-6">
+      <div className="w-full bg-slate-100 rounded-full h-1.5 mb-4">
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
-          className="bg-blue-600 h-2 rounded-full"
+          className="bg-blue-600 h-1.5 rounded-full"
         ></motion.div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-1.5">
         {goals.map((task, idx) => (
-          <div key={task.id || idx} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group cursor-pointer">
+          <div key={task.id || idx} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group cursor-pointer">
             {task.completed ? (
-              <CheckSquare className="w-5 h-5 text-green-500 shrink-0" />
+              <CheckSquare className="w-4 h-4 text-green-500 shrink-0" />
             ) : (
-              <div className="w-5 h-5 rounded-md border-2 border-slate-300 group-hover:border-blue-400 shrink-0 transition-colors flex items-center justify-center">
+              <div className="w-4 h-4 rounded border border-slate-300 group-hover:border-blue-400 shrink-0 transition-colors flex items-center justify-center">
               </div>
             )}
-            <span className={`text-sm font-medium ${task.completed ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+            <span className={`text-xs font-medium ${task.completed ? 'text-slate-400 line-through' : 'text-slate-700'} leading-tight`}>
               {task.title}
             </span>
             {!task.completed && (
               <button className="ml-auto opacity-0 group-hover:opacity-100 text-blue-600 hover:text-blue-700 transition-opacity">
-                <PlayCircle className="w-5 h-5" />
+                <PlayCircle className="w-4 h-4" />
               </button>
             )}
           </div>

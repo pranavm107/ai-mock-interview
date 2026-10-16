@@ -126,32 +126,32 @@ const MCQRuntime: React.FC = () => {
           <h2 className="text-2xl font-bold text-center mb-6">Score: {result.score}%</h2>
           <div className="flex justify-around mb-8 text-center">
             <div>
-              <p className="text-3xl font-semibold text-emerald-600">{result.correctCount}</p>
-              <p className="text-sm text-slate-500">Correct</p>
+              <p className="text-2xl font-bold text-emerald-600">{result.correctCount}</p>
+              <p className="text-xs text-slate-500">Correct</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-rose-600">{result.incorrectCount}</p>
-              <p className="text-sm text-slate-500">Incorrect</p>
+              <p className="text-2xl font-bold text-rose-600">{result.incorrectCount}</p>
+              <p className="text-xs text-slate-500">Incorrect</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-slate-600">{result.unansweredCount}</p>
-              <p className="text-sm text-slate-500">Unanswered</p>
+              <p className="text-2xl font-bold text-slate-600">{result.unansweredCount}</p>
+              <p className="text-xs text-slate-500">Unanswered</p>
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {result.results.map((res: any, idx: number) => {
               const q = interview.questions.find((qi: any) => qi.id === res.questionId);
               return (
-                <div key={res.questionId} className={`p-4 border rounded-xl ${res.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
-                  <p className="font-medium text-slate-800 mb-2">Q{idx + 1}: {q?.question}</p>
+                <div key={res.questionId} className={`p-4 border rounded-xl ${res.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`}>
+                  <p className="font-semibold text-sm sm:text-base text-slate-800 mb-2">Q{idx + 1}: {q?.question}</p>
                   
-                  <div className="space-y-2 mt-4">
+                  <div className="space-y-2 mt-3">
                     {q?.options?.map((opt: any) => {
                       const isSelected = res.selectedOptionId === opt.id;
                       const isCorrectOpt = res.correctOptionId === opt.id;
                       
-                      let className = "p-3 rounded-lg border ";
+                      let className = "p-2.5 rounded-lg border text-xs sm:text-sm ";
                       if (isCorrectOpt) {
                         className += "bg-emerald-100 border-emerald-400 text-emerald-800 font-medium";
                       } else if (isSelected) {
@@ -162,7 +162,7 @@ const MCQRuntime: React.FC = () => {
 
                       return (
                         <div key={opt.id} className={className}>
-                          <span className="font-semibold mr-2">{opt.id}.</span> {opt.text}
+                          <span className="font-semibold mr-1.5">{opt.id}.</span> {opt.text}
                           {isSelected && !isCorrectOpt && <span className="ml-2 text-xs font-bold uppercase">(Your Answer)</span>}
                           {isSelected && isCorrectOpt && <span className="ml-2 text-xs font-bold uppercase">(Your Answer)</span>}
                         </div>
@@ -170,7 +170,7 @@ const MCQRuntime: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="mt-4 p-3 bg-white rounded-lg border border-slate-200 text-sm text-slate-600">
+                  <div className="mt-3 p-2.5 bg-white rounded-lg border border-slate-200 text-xs sm:text-sm text-slate-600">
                     <span className="font-semibold text-slate-700">Explanation:</span> {res.explanation}
                   </div>
                 </div>
@@ -178,8 +178,8 @@ const MCQRuntime: React.FC = () => {
             })}
           </div>
           
-          <div className="mt-8 text-center">
-            <button onClick={() => navigate('/dashboard')} className="px-6 py-2 bg-blue-600 text-white rounded-xl">Back to Dashboard</button>
+          <div className="mt-6 text-center">
+            <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 shadow-2xs transition-colors">Back to Dashboard</button>
           </div>
         </div>
       </div>
@@ -190,58 +190,58 @@ const MCQRuntime: React.FC = () => {
   const isLast = currentIndex === interview.questions.length - 1;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 h-[calc(100vh-4rem)] flex flex-col">
+    <div className="max-w-3xl mx-auto py-5 px-3 sm:px-4 min-h-[calc(100vh-4rem)] flex flex-col">
       <PageHeader 
         title={`MCQ Interview: ${interview.settings?.targetRole}`} 
         description={`Question ${currentIndex + 1} of ${interview.questions.length}`} 
         icon={CheckCircle2} 
       />
 
-      <div className="mt-8 flex-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-        <div className="mb-4">
-          <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded">
+      <div className="mt-2 flex-1 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-200 flex flex-col">
+        <div className="mb-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
             {currentQ.section} • {currentQ.difficulty}
           </span>
         </div>
         
-        <h3 className="text-xl font-medium text-slate-800 mb-6">{currentQ.question}</h3>
+        <h3 className="text-base sm:text-lg font-medium text-slate-800 mb-4 leading-snug">{currentQ.question}</h3>
 
-        <div className="space-y-3 mb-8 flex-1">
+        <div className="space-y-2.5 mb-6 flex-1">
           {currentQ.options?.map((opt: any) => {
             const selected = answers[currentQ.id] === opt.id;
             return (
               <button
                 key={opt.id}
                 onClick={() => handleSelectOption(currentQ.id, opt.id)}
-                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selected 
                     ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
                     : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center text-sm font-medium ${
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs font-medium shrink-0 ${
                     selected ? 'border-blue-500 bg-blue-500 text-white' : 'border-slate-300 text-slate-500'
                   }`}>
                     {opt.id}
                   </div>
-                  <span className="text-slate-700 font-medium">{opt.text}</span>
+                  <span className="text-xs sm:text-sm text-slate-700 font-medium">{opt.text}</span>
                 </div>
               </button>
             );
           })}
         </div>
 
-        <div className="flex justify-between items-center pt-6 border-t border-slate-100">
+        <div className="flex justify-between items-center pt-4 border-t border-slate-100">
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="flex items-center gap-2 px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs sm:text-sm text-slate-600 font-medium hover:bg-slate-100 rounded-lg disabled:opacity-50 transition-colors"
           >
-            <ArrowLeft size={18} /> Previous
+            <ArrowLeft size={15} /> Previous
           </button>
           
-          <div className="text-sm text-slate-500 font-medium">
+          <div className="text-xs sm:text-sm text-slate-500 font-medium">
             Answered: {Object.keys(answers).length} / {interview.questions.length}
           </div>
 
@@ -249,16 +249,16 @@ const MCQRuntime: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2 bg-emerald-500 text-white font-medium hover:bg-emerald-600 rounded-lg disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-600 rounded-lg disabled:opacity-50 transition-colors"
             >
-              {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Submit'}
+              {submitting ? <Loader2 size={15} className="animate-spin" /> : 'Submit'}
             </button>
           ) : (
             <button
               onClick={handleNext}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 rounded-lg"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-600 text-xs sm:text-sm font-semibold hover:bg-blue-100 rounded-lg transition-colors"
             >
-              Next <ArrowRight size={18} />
+              Next <ArrowRight size={15} />
             </button>
           )}
         </div>
