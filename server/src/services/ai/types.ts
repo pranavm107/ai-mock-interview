@@ -30,6 +30,9 @@ export interface TaskConfig {
   cacheTtlMs?: number;
   cacheScope?: 'USER' | 'GLOBAL';
   promptVersion?: string;
+  maxConcurrency?: number;
+  rateLimitRpm?: number;
+  tokenBudgetPerCall?: number;
 }
 
 export interface AIGatewayRequest<T = any> {
@@ -63,7 +66,17 @@ export interface AIGatewayResponse<T = any> {
   attempts: number;
   fallbackUsed: boolean;
   cached?: boolean;
+  retryCount?: number;
+  estimatedCostUsd?: number | null;
 }
+
+export type TelemetryEventType =
+  | 'LOGICAL_REQUEST'
+  | 'CACHE_HIT'
+  | 'COALESCED'
+  | 'SUCCESS'
+  | 'ERROR'
+  | 'REJECTED';
 
 export interface TelemetryEvent {
   timestamp: string;
@@ -71,13 +84,18 @@ export interface TelemetryEvent {
   task: string;
   provider: string;
   model: string;
+  eventType?: TelemetryEventType;
   promptTokens: number | null;
   completionTokens: number | null;
   totalTokens: number | null;
+  estimatedCostUsd?: number | null;
   durationMs: number;
   status: 'SUCCESS' | 'ERROR';
   attemptCount: number;
+  retryCount?: number;
   fallbackUsed: boolean;
   errorCategory: string | null;
   cacheHit?: boolean;
+  coalesced?: boolean;
+  rejectionReason?: string | null;
 }

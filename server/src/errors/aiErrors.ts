@@ -34,3 +34,15 @@ export class TransientAIError extends AIError {
     super('TRANSIENT_AI_ERROR', message, true);
   }
 }
+
+export class AIOverloadError extends AIError {
+  constructor(message: string = 'AI service is currently at maximum capacity. Please retry shortly.') {
+    super('AI_OVERLOAD', message, true);
+  }
+}
+
+export class AIBudgetExceededError extends AIError {
+  constructor(message: string = 'AI usage budget exceeded for this task.') {
+    super('AI_BUDGET_EXCEEDED', message, false);
+  }
+}

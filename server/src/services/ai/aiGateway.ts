@@ -5,12 +5,17 @@ import { getTaskConfig } from './taskConfig';
 import { AIGatewayRequest, AIGatewayResponse, TaskConfig, TokenUsage } from './types';
 import { AITelemetryService } from './aiTelemetryService';
 import { aiCache, AICache } from './aiCache';
-import { QuotaExceededError, InvalidApiKeyError, TransientAIError, AIError } from '../../errors/aiErrors';
+import { QuotaExceededError, InvalidApiKeyError, TransientAIError, AIError, AIOverloadError, AIBudgetExceededError } from '../../errors/aiErrors';
 import { GroqTimeoutError } from '../../types/careerErrors';
+import { concurrencyController, ConcurrencyController, ConcurrencyPermit } from './concurrencyController';
+import { taskBudgetManager, TaskBudgetManager } from './budgetManager';
+import { estimateCost } from './costCalculator';
 
 export class AIGateway {
   private static instance: AIGateway | null = null;
   private providers: Map<string, LLMProvider> = new Map();
+  private concurrencyController: ConcurrencyController = concurrencyController;
+  private budgetManager: TaskBudgetManager = taskBudgetManager;
 
   constructor() {
     this.registerProvider(new GroqProviderAdapter());
@@ -27,6 +32,22 @@ export class AIGateway {
   // Allow test suites to reset or inject custom gateway instances
   static setInstance(instance: AIGateway | null) {
     AIGateway.instance = instance;
+  }
+
+  getConcurrencyController(): ConcurrencyController {
+    return this.concurrencyController;
+  }
+
+  setConcurrencyController(controller: ConcurrencyController) {
+    this.concurrencyController = controller;
+  }
+
+  getBudgetManager(): TaskBudgetManager {
+    return this.budgetManager;
+  }
+
+  setBudgetManager(manager: TaskBudgetManager) {
+    this.budgetManager = manager;
   }
 
   registerProvider(provider: LLMProvider) {
@@ -75,21 +96,29 @@ export class AIGateway {
     if (isCacheable && !bypassCache && cacheKey) {
       const cached = cache.get<T>(cacheKey);
       if (cached) {
+        const estimatedCost = cached.usage
+          ? estimateCost(cached.model, cached.usage.promptTokens, cached.usage.completionTokens)
+          : null;
+
         await this.safeRecordTelemetry({
           timestamp: new Date().toISOString(),
           userId: request.userId || 'anonymous',
           task: request.task,
           provider: cached.provider,
           model: cached.model,
+          eventType: 'CACHE_HIT',
           promptTokens: cached.usage?.promptTokens ?? null,
           completionTokens: cached.usage?.completionTokens ?? null,
           totalTokens: cached.usage?.totalTokens ?? null,
+          estimatedCostUsd: estimatedCost,
           durationMs: 0,
           status: 'SUCCESS',
           attemptCount: 0,
+          retryCount: 0,
           fallbackUsed: false,
           errorCategory: null,
           cacheHit: true,
+          coalesced: false,
         });
 
         return {
@@ -100,6 +129,8 @@ export class AIGateway {
           usage: cached.usage,
           durationMs: 0,
           attempts: 0,
+          retryCount: 0,
+          estimatedCostUsd: estimatedCost,
           fallbackUsed: false,
           cached: true,
         };
@@ -109,6 +140,33 @@ export class AIGateway {
     }
 
     const runExecution = async (sharedSignal?: AbortSignal): Promise<AIGatewayResponse<T>> => {
+      // 1. Task Budget check (sliding-window rate limit)
+      try {
+        this.budgetManager.checkAndConsumeBudget(request.task, taskConfig.rateLimitRpm);
+      } catch (budgetErr: any) {
+        await this.safeRecordTelemetry({
+          timestamp: new Date().toISOString(),
+          userId: request.userId || 'anonymous',
+          task: request.task,
+          provider: request.provider || taskConfig.defaultProvider,
+          model: request.model || taskConfig.defaultModel,
+          eventType: 'REJECTED',
+          promptTokens: null,
+          completionTokens: null,
+          totalTokens: null,
+          estimatedCostUsd: null,
+          durationMs: 0,
+          status: 'ERROR',
+          attemptCount: 0,
+          retryCount: 0,
+          fallbackUsed: false,
+          errorCategory: 'BUDGET_EXCEEDED',
+          rejectionReason: budgetErr.message,
+        });
+        throw budgetErr;
+      }
+
+      // 2. Execute pipeline (admission control permit acquired inside executePipeline)
       const response = await this.executePipeline<T>(request, taskConfig, sharedSignal);
       if (isCacheable && cacheKey && response.data) {
         cache.set(
@@ -161,191 +219,72 @@ export class AIGateway {
       throw new AIError('AI_ABORTED', 'Request was cancelled', false);
     }
 
-    const startTime = Date.now();
-    let totalAttempts = 0;
-    let lastError: any = null;
-    let errorCategory: string | null = null;
-    let usedProvider = primaryProviderName;
-    let usedModel = primaryModel;
-    let fallbackUsed = false;
-    let responseUsage: TokenUsage = { promptTokens: null, completionTokens: null, totalTokens: null };
+    // Acquire concurrency admission permit before touching providers
+    let permit: ConcurrencyPermit;
+    try {
+      const permitOrPromise = this.concurrencyController.acquire({
+        task: request.task,
+        userId: request.userId,
+        maxTaskConcurrency: taskConfig.maxConcurrency,
+        signal: effectiveSignal,
+      });
+      permit = permitOrPromise instanceof Promise ? await permitOrPromise : permitOrPromise;
+    } catch (acquireErr: any) {
+      if (acquireErr instanceof AIOverloadError) {
+        await this.safeRecordTelemetry({
+          timestamp: new Date().toISOString(),
+          userId: request.userId || 'anonymous',
+          task: request.task,
+          provider: primaryProviderName,
+          model: primaryModel,
+          eventType: 'REJECTED',
+          promptTokens: null,
+          completionTokens: null,
+          totalTokens: null,
+          estimatedCostUsd: null,
+          durationMs: 0,
+          status: 'ERROR',
+          attemptCount: 0,
+          retryCount: 0,
+          fallbackUsed: false,
+          errorCategory: 'OVERLOAD',
+          rejectionReason: acquireErr.message,
+        });
+      }
+      throw acquireErr;
+    }
 
-    // ----------------------------------------------------
-    // PHASE 1: Primary Provider Execution with Model Fallbacks
-    // ----------------------------------------------------
-    let primarySucceeded = false;
-    let primaryResult: any = null;
-    let primaryRawText = '';
+    try {
+      const startTime = Date.now();
+      let totalAttempts = 0;
+      let lastError: any = null;
+      let errorCategory: string | null = null;
+      let usedProvider = primaryProviderName;
+      let usedModel = primaryModel;
+      let fallbackUsed = false;
+      let responseUsage: TokenUsage = { promptTokens: null, completionTokens: null, totalTokens: null };
 
-    for (const currentModel of primaryModelCandidates) {
-      usedModel = currentModel;
-      fallbackUsed = currentModel !== primaryModel;
+      // ----------------------------------------------------
+      // PHASE 1: Primary Provider Execution with Model Fallbacks
+      // ----------------------------------------------------
+      let primarySucceeded = false;
+      let primaryResult: any = null;
+      let primaryRawText = '';
 
-      while (totalAttempts < maxPrimaryAttempts) {
-        const elapsedMs = Date.now() - startTime;
-        const remainingMs = totalTimeoutMs - elapsedMs;
-        if (remainingMs <= 0) {
-          errorCategory = 'TIMEOUT';
-          lastError = new GroqTimeoutError(`AI Gateway call timed out after ${totalTimeoutMs}ms.`);
-          break;
-        }
+      for (const currentModel of primaryModelCandidates) {
+        usedModel = currentModel;
+        fallbackUsed = currentModel !== primaryModel;
 
-        totalAttempts++;
-        const abortController = new AbortController();
-        let timedOut = false;
-
-        const onCallerAbort = () => abortController.abort();
-        if (effectiveSignal) {
-          effectiveSignal.addEventListener('abort', onCallerAbort, { once: true });
-        }
-
-        const timeoutHandle = setTimeout(() => {
-          timedOut = true;
-          abortController.abort();
-        }, remainingMs);
-
-        try {
-          const rawResponse = await primaryProvider.complete({
-            model: currentModel,
-            prompt: request.prompt,
-            systemPrompt: request.systemPrompt,
-            maxTokens,
-            temperature,
-            outputMode,
-            signal: abortController.signal,
-          });
-
-          clearTimeout(timeoutHandle);
-          if (effectiveSignal) {
-            effectiveSignal.removeEventListener('abort', onCallerAbort);
-          }
-
-          responseUsage = rawResponse.usage;
-          usedModel = rawResponse.model || currentModel;
-          primaryRawText = rawResponse.text;
-
-          // Process and validate output
-          primaryResult = this.parseAndValidateOutput(rawResponse.text, outputMode, request.validator);
-          primarySucceeded = true;
-          break;
-        } catch (err: any) {
-          clearTimeout(timeoutHandle);
-          if (effectiveSignal) {
-            effectiveSignal.removeEventListener('abort', onCallerAbort);
-          }
-          lastError = err;
-
-          if (timedOut) {
+        while (totalAttempts < maxPrimaryAttempts) {
+          const elapsedMs = Date.now() - startTime;
+          const remainingMs = totalTimeoutMs - elapsedMs;
+          if (remainingMs <= 0) {
             errorCategory = 'TIMEOUT';
             lastError = new GroqTimeoutError(`AI Gateway call timed out after ${totalTimeoutMs}ms.`);
-          } else if (effectiveSignal?.aborted) {
-            errorCategory = 'ABORTED';
-            lastError = new AIError('AI_ABORTED', 'Request was cancelled', false);
-          } else {
-            errorCategory = this.classifyError(err);
-          }
-
-          // 1. Fail fast without retries on non-transient client/auth/abort errors
-          if (
-            errorCategory === 'AUTH_ERROR' ||
-            errorCategory === 'CLIENT_ERROR' ||
-            errorCategory === 'ABORTED'
-          ) {
-            break; // Do not retry this model or further primary attempts
-          }
-
-          // 2. On 429 quota exhaustion, fail fast without retry loops on primary
-          if (errorCategory === 'QUOTA_EXHAUSTED') {
             break;
           }
 
-          // 3. For transient errors, bounded backoff if primary attempts remain
-          if (totalAttempts < maxPrimaryAttempts) {
-            const backoffMs = Math.min(1000 * Math.pow(2, totalAttempts - 1), 2500) + Math.random() * 200;
-            await new Promise(resolve => setTimeout(resolve, backoffMs));
-          } else {
-            break;
-          }
-        }
-      }
-
-      if (primarySucceeded) {
-        break;
-      }
-
-      // If non-retryable client error or abort, break primary model loop
-      if (
-        errorCategory === 'AUTH_ERROR' ||
-        errorCategory === 'CLIENT_ERROR' ||
-        errorCategory === 'QUOTA_EXHAUSTED' ||
-        errorCategory === 'ABORTED'
-      ) {
-        break;
-      }
-
-      if (totalAttempts >= maxPrimaryAttempts) {
-        break;
-      }
-    }
-
-    if (primarySucceeded) {
-      const durationMs = Date.now() - startTime;
-      await this.safeRecordTelemetry({
-        timestamp: new Date().toISOString(),
-        userId: request.userId || 'anonymous',
-        task: request.task,
-        provider: primaryProviderName,
-        model: usedModel,
-        promptTokens: responseUsage.promptTokens,
-        completionTokens: responseUsage.completionTokens,
-        totalTokens: responseUsage.totalTokens,
-        durationMs,
-        status: 'SUCCESS',
-        attemptCount: totalAttempts,
-        fallbackUsed,
-        errorCategory: null,
-      });
-
-      return {
-        data: primaryResult as T,
-        rawText: primaryRawText,
-        provider: primaryProviderName,
-        model: usedModel,
-        usage: responseUsage,
-        durationMs,
-        attempts: totalAttempts,
-        fallbackUsed,
-        cached: false,
-      };
-    }
-
-    // ----------------------------------------------------
-    // PHASE 2: Secondary Provider Fallback
-    // ----------------------------------------------------
-    const fallbackProviderName = request.fallbackProvider !== undefined ? request.fallbackProvider : taskConfig.fallbackProvider;
-    const isEligibleForProviderFallback =
-      Boolean(fallbackProviderName) &&
-      fallbackProviderName !== primaryProviderName &&
-      this.hasProvider(fallbackProviderName!) &&
-      errorCategory !== 'CLIENT_ERROR' &&
-      errorCategory !== 'ABORTED' &&
-      errorCategory !== 'AUTH_ERROR'; // Do not fallback on permanent primary credential failure
-
-    if (isEligibleForProviderFallback) {
-      const fallbackProvider = this.getProvider(fallbackProviderName!);
-      if (fallbackProvider.isConfigured?.()) {
-        const elapsedMs = Date.now() - startTime;
-        const remainingMs = totalTimeoutMs - elapsedMs;
-
-        if (remainingMs <= 0) {
-          errorCategory = 'TIMEOUT';
-          lastError = new GroqTimeoutError(`AI Gateway operation timed out after ${totalTimeoutMs}ms before fallback.`);
-        } else {
           totalAttempts++;
-          usedProvider = fallbackProviderName!;
-          usedModel = request.fallbackProviderModel || taskConfig.fallbackProviderModel || 'gpt-4o-mini';
-          fallbackUsed = true;
-
           const abortController = new AbortController();
           let timedOut = false;
 
@@ -360,8 +299,8 @@ export class AIGateway {
           }, remainingMs);
 
           try {
-            const rawResponse = await fallbackProvider.complete({
-              model: usedModel,
+            const rawResponse = await primaryProvider.complete({
+              model: currentModel,
               prompt: request.prompt,
               systemPrompt: request.systemPrompt,
               maxTokens,
@@ -376,81 +315,262 @@ export class AIGateway {
             }
 
             responseUsage = rawResponse.usage;
-            usedModel = rawResponse.model || usedModel;
+            usedModel = rawResponse.model || currentModel;
+            primaryRawText = rawResponse.text;
 
-            const processedData = this.parseAndValidateOutput(rawResponse.text, outputMode, request.validator);
-            const durationMs = Date.now() - startTime;
-
-            await this.safeRecordTelemetry({
-              timestamp: new Date().toISOString(),
-              userId: request.userId || 'anonymous',
-              task: request.task,
-              provider: usedProvider,
-              model: usedModel,
-              promptTokens: responseUsage.promptTokens,
-              completionTokens: responseUsage.completionTokens,
-              totalTokens: responseUsage.totalTokens,
-              durationMs,
-              status: 'SUCCESS',
-              attemptCount: totalAttempts,
-              fallbackUsed: true,
-              errorCategory: null,
-            });
-
-            return {
-              data: processedData as T,
-              rawText: rawResponse.text,
-              provider: usedProvider,
-              model: usedModel,
-              usage: responseUsage,
-              durationMs,
-              attempts: totalAttempts,
-              fallbackUsed: true,
-              cached: false,
-            };
-          } catch (fbErr: any) {
+            // Process and validate output
+            primaryResult = this.parseAndValidateOutput(rawResponse.text, outputMode, request.validator);
+            primarySucceeded = true;
+            break;
+          } catch (err: any) {
             clearTimeout(timeoutHandle);
             if (effectiveSignal) {
               effectiveSignal.removeEventListener('abort', onCallerAbort);
             }
-            lastError = fbErr;
+            lastError = err;
 
             if (timedOut) {
               errorCategory = 'TIMEOUT';
-              lastError = new GroqTimeoutError(`AI Gateway fallback call timed out after ${totalTimeoutMs}ms.`);
+              lastError = new GroqTimeoutError(`AI Gateway call timed out after ${totalTimeoutMs}ms.`);
             } else if (effectiveSignal?.aborted) {
               errorCategory = 'ABORTED';
               lastError = new AIError('AI_ABORTED', 'Request was cancelled', false);
             } else {
-              errorCategory = this.classifyError(fbErr);
+              errorCategory = this.classifyError(err);
+            }
+
+            // 1. Fail fast without retries on non-transient client/auth/abort errors
+            if (
+              errorCategory === 'AUTH_ERROR' ||
+              errorCategory === 'CLIENT_ERROR' ||
+              errorCategory === 'ABORTED'
+            ) {
+              break; // Do not retry this model or further primary attempts
+            }
+
+            // 2. On 429 quota exhaustion, fail fast without retry loops on primary
+            if (errorCategory === 'QUOTA_EXHAUSTED') {
+              break;
+            }
+
+            // 3. For transient errors, bounded backoff if primary attempts remain
+            if (totalAttempts < maxPrimaryAttempts) {
+              const backoffMs = Math.min(1000 * Math.pow(2, totalAttempts - 1), 2500) + Math.random() * 200;
+              await new Promise(resolve => setTimeout(resolve, backoffMs));
+            } else {
+              break;
+            }
+          }
+        }
+
+        if (primarySucceeded) {
+          break;
+        }
+
+        // If non-retryable client error or abort, break primary model loop
+        if (
+          errorCategory === 'AUTH_ERROR' ||
+          errorCategory === 'CLIENT_ERROR' ||
+          errorCategory === 'QUOTA_EXHAUSTED' ||
+          errorCategory === 'ABORTED'
+        ) {
+          break;
+        }
+
+        if (totalAttempts >= maxPrimaryAttempts) {
+          break;
+        }
+      }
+
+      if (primarySucceeded) {
+        const durationMs = Date.now() - startTime;
+        const retryCount = Math.max(0, totalAttempts - 1);
+        const estimatedCostUsd = estimateCost(usedModel, responseUsage.promptTokens, responseUsage.completionTokens);
+        this.budgetManager.evaluateTokenCeiling(request.task, responseUsage.totalTokens, taskConfig.tokenBudgetPerCall);
+
+        await this.safeRecordTelemetry({
+          timestamp: new Date().toISOString(),
+          userId: request.userId || 'anonymous',
+          task: request.task,
+          provider: primaryProviderName,
+          model: usedModel,
+          eventType: 'SUCCESS',
+          promptTokens: responseUsage.promptTokens,
+          completionTokens: responseUsage.completionTokens,
+          totalTokens: responseUsage.totalTokens,
+          estimatedCostUsd,
+          durationMs,
+          status: 'SUCCESS',
+          attemptCount: totalAttempts,
+          retryCount,
+          fallbackUsed,
+          errorCategory: null,
+        });
+
+        return {
+          data: primaryResult as T,
+          rawText: primaryRawText,
+          provider: primaryProviderName,
+          model: usedModel,
+          usage: responseUsage,
+          durationMs,
+          attempts: totalAttempts,
+          retryCount,
+          estimatedCostUsd,
+          fallbackUsed,
+          cached: false,
+        };
+      }
+
+      // ----------------------------------------------------
+      // PHASE 2: Secondary Provider Fallback
+      // ----------------------------------------------------
+      const fallbackProviderName = request.fallbackProvider !== undefined ? request.fallbackProvider : taskConfig.fallbackProvider;
+      const isEligibleForProviderFallback =
+        Boolean(fallbackProviderName) &&
+        fallbackProviderName !== primaryProviderName &&
+        this.hasProvider(fallbackProviderName!) &&
+        errorCategory !== 'CLIENT_ERROR' &&
+        errorCategory !== 'ABORTED' &&
+        errorCategory !== 'AUTH_ERROR' &&
+        errorCategory !== 'OVERLOAD' &&
+        errorCategory !== 'BUDGET_EXCEEDED'; // Do not fallback on permanent primary credential failure or system admission limits
+
+      if (isEligibleForProviderFallback) {
+        const fallbackProvider = this.getProvider(fallbackProviderName!);
+        if (fallbackProvider.isConfigured?.()) {
+          const elapsedMs = Date.now() - startTime;
+          const remainingMs = totalTimeoutMs - elapsedMs;
+
+          if (remainingMs <= 0) {
+            errorCategory = 'TIMEOUT';
+            lastError = new GroqTimeoutError(`AI Gateway operation timed out after ${totalTimeoutMs}ms before fallback.`);
+          } else {
+            totalAttempts++;
+            usedProvider = fallbackProviderName!;
+            usedModel = request.fallbackProviderModel || taskConfig.fallbackProviderModel || 'gpt-4o-mini';
+            fallbackUsed = true;
+
+            const abortController = new AbortController();
+            let timedOut = false;
+
+            const onCallerAbort = () => abortController.abort();
+            if (effectiveSignal) {
+              effectiveSignal.addEventListener('abort', onCallerAbort, { once: true });
+            }
+
+            const timeoutHandle = setTimeout(() => {
+              timedOut = true;
+              abortController.abort();
+            }, remainingMs);
+
+            try {
+              const rawResponse = await fallbackProvider.complete({
+                model: usedModel,
+                prompt: request.prompt,
+                systemPrompt: request.systemPrompt,
+                maxTokens,
+                temperature,
+                outputMode,
+                signal: abortController.signal,
+              });
+
+              clearTimeout(timeoutHandle);
+              if (effectiveSignal) {
+                effectiveSignal.removeEventListener('abort', onCallerAbort);
+              }
+
+              responseUsage = rawResponse.usage;
+              usedModel = rawResponse.model || usedModel;
+
+              const processedData = this.parseAndValidateOutput(rawResponse.text, outputMode, request.validator);
+              const durationMs = Date.now() - startTime;
+              const retryCount = Math.max(0, totalAttempts - 1);
+              const estimatedCostUsd = estimateCost(usedModel, responseUsage.promptTokens, responseUsage.completionTokens);
+              this.budgetManager.evaluateTokenCeiling(request.task, responseUsage.totalTokens, taskConfig.tokenBudgetPerCall);
+
+              await this.safeRecordTelemetry({
+                timestamp: new Date().toISOString(),
+                userId: request.userId || 'anonymous',
+                task: request.task,
+                provider: usedProvider,
+                model: usedModel,
+                eventType: 'SUCCESS',
+                promptTokens: responseUsage.promptTokens,
+                completionTokens: responseUsage.completionTokens,
+                totalTokens: responseUsage.totalTokens,
+                estimatedCostUsd,
+                durationMs,
+                status: 'SUCCESS',
+                attemptCount: totalAttempts,
+                retryCount,
+                fallbackUsed: true,
+                errorCategory: null,
+              });
+
+              return {
+                data: processedData as T,
+                rawText: rawResponse.text,
+                provider: usedProvider,
+                model: usedModel,
+                usage: responseUsage,
+                durationMs,
+                attempts: totalAttempts,
+                retryCount,
+                estimatedCostUsd,
+                fallbackUsed: true,
+                cached: false,
+              };
+            } catch (fbErr: any) {
+              clearTimeout(timeoutHandle);
+              if (effectiveSignal) {
+                effectiveSignal.removeEventListener('abort', onCallerAbort);
+              }
+              lastError = fbErr;
+
+              if (timedOut) {
+                errorCategory = 'TIMEOUT';
+                lastError = new GroqTimeoutError(`AI Gateway fallback call timed out after ${totalTimeoutMs}ms.`);
+              } else if (effectiveSignal?.aborted) {
+                errorCategory = 'ABORTED';
+                lastError = new AIError('AI_ABORTED', 'Request was cancelled', false);
+              } else {
+                errorCategory = this.classifyError(fbErr);
+              }
             }
           }
         }
       }
+
+      // ----------------------------------------------------
+      // All attempts failed: Record Failure Telemetry & Throw Normalized Error
+      // ----------------------------------------------------
+      const durationMs = Date.now() - startTime;
+      const retryCount = Math.max(0, totalAttempts - 1);
+
+      await this.safeRecordTelemetry({
+        timestamp: new Date().toISOString(),
+        userId: request.userId || 'anonymous',
+        task: request.task,
+        provider: usedProvider,
+        model: usedModel,
+        eventType: 'ERROR',
+        promptTokens: responseUsage.promptTokens,
+        completionTokens: responseUsage.completionTokens,
+        totalTokens: responseUsage.totalTokens,
+        estimatedCostUsd: null,
+        durationMs,
+        status: 'ERROR',
+        attemptCount: totalAttempts,
+        retryCount,
+        fallbackUsed,
+        errorCategory: errorCategory || 'UNKNOWN',
+      });
+
+      throw this.normalizeError(lastError, errorCategory);
+    } finally {
+      permit.release();
     }
-
-    // ----------------------------------------------------
-    // All attempts failed: Record Failure Telemetry & Throw Normalized Error
-    // ----------------------------------------------------
-    const durationMs = Date.now() - startTime;
-
-    await this.safeRecordTelemetry({
-      timestamp: new Date().toISOString(),
-      userId: request.userId || 'anonymous',
-      task: request.task,
-      provider: usedProvider,
-      model: usedModel,
-      promptTokens: responseUsage.promptTokens,
-      completionTokens: responseUsage.completionTokens,
-      totalTokens: responseUsage.totalTokens,
-      durationMs,
-      status: 'ERROR',
-      attemptCount: totalAttempts,
-      fallbackUsed,
-      errorCategory: errorCategory || 'UNKNOWN',
-    });
-
-    throw this.normalizeError(lastError, errorCategory);
   }
 
   /**
@@ -527,6 +647,8 @@ export class AIGateway {
   }
 
   private classifyError(error: any): string {
+    if (error instanceof AIOverloadError) return 'OVERLOAD';
+    if (error instanceof AIBudgetExceededError) return 'BUDGET_EXCEEDED';
     if (error instanceof GroqTimeoutError) return 'TIMEOUT';
     if (error instanceof QuotaExceededError) return 'QUOTA_EXHAUSTED';
     if (error instanceof InvalidApiKeyError) return 'AUTH_ERROR';
@@ -600,6 +722,10 @@ export class AIGateway {
     }
 
     switch (category) {
+      case 'OVERLOAD':
+        return new AIOverloadError(sanitizedMsg);
+      case 'BUDGET_EXCEEDED':
+        return new AIBudgetExceededError(sanitizedMsg);
       case 'TIMEOUT':
         return new GroqTimeoutError(sanitizedMsg);
       case 'QUOTA_EXHAUSTED':

@@ -24,6 +24,7 @@ export class AITelemetryService {
       // 1. Structured operational logging
       logger.info({
         event: 'ai.gateway.usage',
+        eventType: event.eventType || (event.cacheHit ? 'CACHE_HIT' : event.status === 'SUCCESS' ? 'SUCCESS' : 'ERROR'),
         userId: event.userId,
         task: event.task,
         provider: event.provider,
@@ -31,12 +32,16 @@ export class AITelemetryService {
         promptTokens: event.promptTokens,
         completionTokens: event.completionTokens,
         totalTokens: event.totalTokens,
+        estimatedCostUsd: event.estimatedCostUsd ?? null,
         durationMs: event.durationMs,
         status: event.status,
         attemptCount: event.attemptCount,
+        retryCount: event.retryCount ?? Math.max(0, event.attemptCount - 1),
         fallbackUsed: event.fallbackUsed,
         errorCategory: event.errorCategory,
         cacheHit: Boolean(event.cacheHit),
+        coalesced: Boolean(event.coalesced),
+        rejectionReason: event.rejectionReason ?? null,
       });
 
       // 2. Server-side Firestore persistence
@@ -54,6 +59,7 @@ export class AITelemetryService {
       if (db && typeof db.collection === 'function') {
         await db.collection('ai_usage_events').add({
           timestamp: event.timestamp,
+          eventType: event.eventType || (event.cacheHit ? 'CACHE_HIT' : event.status === 'SUCCESS' ? 'SUCCESS' : 'ERROR'),
           userId: event.userId,
           task: event.task,
           provider: event.provider,
@@ -61,12 +67,16 @@ export class AITelemetryService {
           promptTokens: event.promptTokens,
           completionTokens: event.completionTokens,
           totalTokens: event.totalTokens,
+          estimatedCostUsd: event.estimatedCostUsd ?? null,
           durationMs: event.durationMs,
           status: event.status,
           attemptCount: event.attemptCount,
+          retryCount: event.retryCount ?? Math.max(0, event.attemptCount - 1),
           fallbackUsed: event.fallbackUsed,
           errorCategory: event.errorCategory,
           cacheHit: Boolean(event.cacheHit),
+          coalesced: Boolean(event.coalesced),
+          rejectionReason: event.rejectionReason ?? null,
         });
       }
     } catch (err: any) {

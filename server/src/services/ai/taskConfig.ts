@@ -16,6 +16,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     cacheTtlMs: 86400000, // 24 hours
     cacheScope: 'USER',
     promptVersion: 'v1.0',
+    maxConcurrency: 5,
+    rateLimitRpm: 60,
+    tokenBudgetPerCall: 2000,
   },
   SMART_SETUP: {
     defaultProvider: 'groq',
@@ -32,6 +35,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     cacheTtlMs: 3600000, // 1 hour
     cacheScope: 'USER',
     promptVersion: 'v1.0',
+    maxConcurrency: 5,
+    rateLimitRpm: 60,
+    tokenBudgetPerCall: 1500,
   },
   INTERVIEW_QUESTIONS_LEGACY: {
     defaultProvider: 'groq',
@@ -44,6 +50,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     maxRetries: 1,
     outputMode: 'json',
     temperature: 0.2,
+    maxConcurrency: 4,
+    rateLimitRpm: 40,
+    tokenBudgetPerCall: 3500,
   },
   REPORT_QUESTION_EVALUATION: {
     defaultProvider: 'groq',
@@ -56,6 +65,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     maxRetries: 1,
     outputMode: 'json',
     temperature: 0.1,
+    maxConcurrency: 3,
+    rateLimitRpm: 30,
+    tokenBudgetPerCall: 4000,
   },
   REPORT_RECOMMENDATIONS: {
     defaultProvider: 'groq',
@@ -68,6 +80,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     maxRetries: 1,
     outputMode: 'json',
     temperature: 0.2,
+    maxConcurrency: 4,
+    rateLimitRpm: 40,
+    tokenBudgetPerCall: 2000,
   },
   REPORT_SUMMARY: {
     defaultProvider: 'groq',
@@ -80,6 +95,9 @@ export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
     maxRetries: 1,
     outputMode: 'json',
     temperature: 0.2,
+    maxConcurrency: 4,
+    rateLimitRpm: 40,
+    tokenBudgetPerCall: 1500,
   },
 };
 
@@ -99,7 +117,10 @@ export const getTaskConfig = (task: AITask): TaskConfig => {
     maxTokens: 1000,
     timeoutMs: 30000,
     maxRetries: 1,
-    outputMode: 'text',
-    temperature: 0.2,
+    outputMode: 'json',
+    temperature: 0.1,
+    maxConcurrency: 5,
+    rateLimitRpm: 60,
+    tokenBudgetPerCall: 2500,
   };
 };
