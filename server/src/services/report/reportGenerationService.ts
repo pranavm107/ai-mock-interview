@@ -56,8 +56,8 @@ export const generateInterviewReport = async (
     console.warn("Failed to fetch adaptive state for report generation");
   }
 
-  // 3. Evaluate Questions
-  const questionEvaluations = await evaluateQuestions(allQuestions, answers);
+  // 3. Evaluate Questions (Batched via Central AI Gateway)
+  const questionEvaluations = await evaluateQuestions(allQuestions, answers, session.userId);
   
   // 4. Calculate Scores
   const scores = calculateScores(questionEvaluations);
@@ -66,15 +66,16 @@ export const generateInterviewReport = async (
   const strengths = analyzeStrengths(questionEvaluations);
   const weaknesses = analyzeWeaknesses(questionEvaluations);
   
-  // 6. Generate Recommendations
+  // 6. Generate Recommendations (via Central AI Gateway)
   const { skillsAnalysis, recommendations, improvementPlan } = await generateRecommendations(
     strengths, 
     weaknesses, 
     interview.role, 
-    interview.settings.candidateExperienceLevel
+    interview.settings.candidateExperienceLevel,
+    session.userId
   );
 
-  // 7. Generate Summary and Hiring Verdict
+  // 7. Generate Summary and Hiring Verdict (via Central AI Gateway)
   const { summary, hiringRecommendation } = await generateReportSummaryAndVerdict(
     scores.overallEvaluation.overallScore,
     scores.overallEvaluation.technicalScore,
@@ -84,7 +85,8 @@ export const generateInterviewReport = async (
     strengths,
     weaknesses,
     interview.role,
-    interview.settings.candidateExperienceLevel
+    interview.settings.candidateExperienceLevel,
+    session.userId
   );
   
   scores.overallEvaluation.summary = summary;

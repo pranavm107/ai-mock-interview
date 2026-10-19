@@ -49,6 +49,10 @@ export const resetMemory = async (sessionId: string): Promise<ConversationMemory
 };
 
 export const extractEntities = async (question: string, answerText: string): Promise<MemoryUpdate> => {
+  if (!answerText || answerText.trim().length < 15) {
+    return {};
+  }
+
   const prompt = `
 Extract structured entities from the candidate's answer to the following question.
 Question: "${question}"

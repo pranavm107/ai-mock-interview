@@ -1,0 +1,105 @@
+import { AITask, TaskConfig } from './types';
+
+export const DEFAULT_TASK_CONFIGS: Record<string, TaskConfig> = {
+  RESUME_ANALYSIS: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 1200,
+    timeoutMs: 30000,
+    maxRetries: 1, // Single retry owner in gateway; max 2 total attempts on primary
+    outputMode: 'json',
+    temperature: 0.1,
+    cacheable: true,
+    cacheTtlMs: 86400000, // 24 hours
+    cacheScope: 'USER',
+    promptVersion: 'v1.0',
+  },
+  SMART_SETUP: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 600,
+    timeoutMs: 25000,
+    maxRetries: 1,
+    outputMode: 'json',
+    temperature: 0.1,
+    cacheable: true,
+    cacheTtlMs: 3600000, // 1 hour
+    cacheScope: 'USER',
+    promptVersion: 'v1.0',
+  },
+  INTERVIEW_QUESTIONS_LEGACY: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 2500,
+    timeoutMs: 30000,
+    maxRetries: 1,
+    outputMode: 'json',
+    temperature: 0.2,
+  },
+  REPORT_QUESTION_EVALUATION: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 2500,
+    timeoutMs: 40000,
+    maxRetries: 1,
+    outputMode: 'json',
+    temperature: 0.1,
+  },
+  REPORT_RECOMMENDATIONS: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 1200,
+    timeoutMs: 25000,
+    maxRetries: 1,
+    outputMode: 'json',
+    temperature: 0.2,
+  },
+  REPORT_SUMMARY: {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 800,
+    timeoutMs: 20000,
+    maxRetries: 1,
+    outputMode: 'json',
+    temperature: 0.2,
+  },
+};
+
+export const getTaskConfig = (task: AITask): TaskConfig => {
+  const configured = DEFAULT_TASK_CONFIGS[task];
+  if (configured) {
+    return { ...configured };
+  }
+
+  // Sensible default fallback config for unlisted tasks
+  return {
+    defaultProvider: 'groq',
+    defaultModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+    fallbackModels: ['qwen/qwen3.8-27b'],
+    fallbackProvider: 'openai',
+    fallbackProviderModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    maxTokens: 1000,
+    timeoutMs: 30000,
+    maxRetries: 1,
+    outputMode: 'text',
+    temperature: 0.2,
+  };
+};

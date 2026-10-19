@@ -141,6 +141,24 @@ export const evaluateAnswerAndGenerateFollowUp = async (context: FollowUpContext
     };
   }
 
+  // 1.5 Deterministic check for empty or whitespace answer
+  if (!context.candidateAnswer || context.candidateAnswer.trim().length === 0) {
+    return {
+      followUp: {
+        shouldGenerate: false,
+        category: null,
+        reason: 'Candidate provided no answer',
+        priority: null,
+        question: null,
+        estimatedDifficulty: null,
+        score: 0,
+      },
+      generationTimeMs: Date.now() - startTime,
+      isFallback: false,
+      validationFailures: 0,
+    };
+  }
+
   const prompt = buildPrompt(context);
   let validationFailures = 0;
 

@@ -104,19 +104,33 @@ export const processResume = async (resumeId: string, fileUrl: string): Promise<
     try {
       let aiAnalysis;
       
-      // Check cache
+      const resumeDocSnap = await getDoc(resumeRef);
+      const resumeUserId = resumeDocSnap.exists() ? resumeDocSnap.data()?.userId : undefined;
+
+      // Check cache with user isolation
       const { collection, query, where, getDocs } = require('firebase/firestore');
       const resumesCol = collection(db, 'resumes');
-      const q = query(resumesCol, where('metadata.hash', '==', textHash), where('status.state', '==', 'AI_COMPLETED'));
+      const queryConstraints = [
+        where('metadata.hash', '==', textHash),
+        where('status.state', '==', 'AI_COMPLETED')
+      ];
+      if (resumeUserId) {
+        queryConstraints.push(where('userId', '==', resumeUserId));
+      }
+      const q = query(resumesCol, ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
-      if (!querySnapshot.empty && querySnapshot.docs[0].data().analysis?.aiAnalysis) {
-        console.log(`[AI Cache Hit] Reusing AI analysis for hash ${textHash}`);
-        aiAnalysis = querySnapshot.docs[0].data().analysis.aiAnalysis;
+      const { PROMPT_VERSION } = require('./ai/promptBuilder');
+      const cachedDoc = !querySnapshot.empty ? querySnapshot.docs[0].data() : null;
+      const cachedAnalysis = cachedDoc?.analysis?.aiAnalysis;
+
+      if (cachedAnalysis && cachedAnalysis.promptVersion === PROMPT_VERSION) {
+        console.log(`[AI Cache Hit] Reusing AI analysis for hash ${textHash} (user: ${resumeUserId || 'unknown'})`);
+        aiAnalysis = cachedAnalysis;
       } else {
-        console.log(`[AI Cache Miss] Calling Groq for hash ${textHash}`);
+        console.log(`[AI Cache Miss] Calling AI Gateway for hash ${textHash}`);
         const { analyzeStructuredResume } = require('./ai/resumeAnalysisService');
-        aiAnalysis = await analyzeStructuredResume(structuredResume);
+        aiAnalysis = await analyzeStructuredResume(structuredResume, resumeUserId);
       }
       
       const analyzeMs = Math.round(performance.now() - analyzeStart);

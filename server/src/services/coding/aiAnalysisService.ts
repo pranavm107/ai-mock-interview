@@ -1,10 +1,38 @@
+import crypto from 'crypto';
 import { db } from '../../config/firebaseAdmin';
 import { generateJson } from '../ai/groqClient';
 import { CodingProblem, AIAnalysisResult } from '../../types/coding';
 
+interface CachedAnalysis {
+  result: AIAnalysisResult;
+  expiresAt: number;
+}
+
 export class AiAnalysisService {
   private activeUserAnalyses = new Set<string>();
   private readonly MAX_SOURCE_SIZE_BYTES = 256 * 1024; // 256 KB
+  private codeCache = new Map<string, CachedAnalysis>();
+  private readonly CODE_CACHE_MAX_ENTRIES = 100;
+  private readonly CODE_CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+  public readonly PROMPT_VERSION = 'v1.0';
+
+  constructor() {
+    if (process.env.VITEST || process.env.NODE_ENV === 'test') {
+      import('vitest')
+        .then((v) => {
+          if (typeof v.afterEach === 'function') {
+            v.afterEach(() => {
+              this.clearCache();
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  public clearCache(): void {
+    this.codeCache.clear();
+  }
 
   public async analyzeCode(
     userId: string,
@@ -18,6 +46,14 @@ export class AiAnalysisService {
 
     if (Buffer.byteLength(sourceCode, 'utf8') > this.MAX_SOURCE_SIZE_BYTES) {
       throw new Error('Source code exceeds maximum allowed size (256KB)');
+    }
+
+    // Check in-memory cache for identical code submission
+    const codeHash = crypto.createHash('sha256').update(sourceCode).digest('hex').substring(0, 32);
+    const cacheKey = `codecache:${this.PROMPT_VERSION}:${userId}:${problemSlug}:${language}:${codeHash}`;
+    const cached = this.codeCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.result;
     }
 
     this.activeUserAnalyses.add(userId);
@@ -105,6 +141,15 @@ Ensure the response is valid JSON and nothing else.`;
            ? parsedResult.suggestions.map(String).map((s: string) => truncate(s, 500)).slice(0, 10) 
            : []
       };
+
+      if (this.codeCache.size >= this.CODE_CACHE_MAX_ENTRIES) {
+        const oldestKey = this.codeCache.keys().next().value;
+        if (oldestKey) this.codeCache.delete(oldestKey);
+      }
+      this.codeCache.set(cacheKey, {
+        result: analysisResult,
+        expiresAt: Date.now() + this.CODE_CACHE_TTL_MS,
+      });
 
       return analysisResult;
     } finally {

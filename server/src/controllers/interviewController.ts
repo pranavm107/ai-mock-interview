@@ -251,6 +251,9 @@ export const generateInterviewQuestions = async (req: Request, res: Response) =>
       return res.status(400).json({ error: 'Missing required fields: company, role, or questionCount' });
     }
 
+    const authReq = req as any;
+    const userId = authReq.auth?.userId || authReq.auth?.()?.userId;
+
     const questions = await generateQuestions({
       company,
       role,
@@ -258,7 +261,7 @@ export const generateInterviewQuestions = async (req: Request, res: Response) =>
       difficulty: difficulty || 'Medium',
       skills,
       questionCount
-    });
+    }, userId);
 
     res.json(questions);
   } catch (error: any) {
@@ -528,7 +531,7 @@ export const analyzeSmartSetupController = async (req: Request, res: Response) =
       return res.status(400).json({ error: 'Must provide either a valid resume ID or job description.' });
     }
 
-    const result = await analyzeSmartSetup(resumeText, jobDescription || null);
+    const result = await analyzeSmartSetup(resumeText, jobDescription || null, userId);
 
     res.json({
       success: true,
