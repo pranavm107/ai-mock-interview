@@ -11,25 +11,30 @@ import { setupVoiceSocket } from './websocket/voiceSocketHandler';
 import { clerkMiddleware } from '@clerk/express';
 import { setupDeepgramSocket } from './websocket/deepgramSocket';
 import { requestIdMiddleware } from './middleware/requestId';
+import { createCorsOptions } from './config/cors';
+import { errorHandler } from './middleware/errorHandler';
+import { setupGracefulShutdown, GracefulShutdownController } from './lifecycle/shutdown';
 
 const app = express();
-app.use(
-  cors({
-    origin: [
-      "https://preppilot-pi-sandy.vercel.app",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:5175",
-      "http://localhost:5176"
-    ],
-    credentials: true,
-  })
-);
-app.use(express.json());
+
+// Correlation ID middleware must be first so all subsequent middleware and logs have requestId
 app.use(requestIdMiddleware);
+
+// Configurable CORS allowlist with secure defaults and credentials support
+app.use(cors(createCorsOptions()));
+
+// Request body parsing
+app.use(express.json());
+
+// Clerk authentication middleware
 app.use(clerkMiddleware());
 
+let shutdownManager: GracefulShutdownController | null = null;
+
 app.get('/health', (req, res) => {
+  if (shutdownManager?.isShuttingDown()) {
+    return res.status(503).json({ status: 'shutting_down' });
+  }
   res.json({ status: 'ok' });
 });
 
@@ -64,15 +69,29 @@ app.use('/api/assessments', assessmentRoutes);
 app.use('/api/coding', codingRoutes);
 app.use('/api/settings', settingsRoutes);
 
+// Centralized error-handling middleware (must follow all routes)
+app.use(errorHandler);
+
 console.log('4. Creating HTTP server...');
 const server = http.createServer(app);
 
 console.log('5. Attaching WebSockets...');
-setupVoiceSocket(server);
-setupDeepgramSocket(server);
+const voiceWs = setupVoiceSocket(server);
+const deepgramWs = setupDeepgramSocket(server);
+
+// Idempotent graceful shutdown handling with bounded deadline
+shutdownManager = setupGracefulShutdown({
+  server,
+  wsServers: [voiceWs, deepgramWs],
+  timeoutMs: parseInt(process.env.SHUTDOWN_TIMEOUT_MS || '10000', 10),
+});
 
 const PORT = process.env.PORT || 3001;
-console.log(`6. Binding to PORT ${PORT}...`);
-server.listen(PORT, () => {
-  console.log(`Backend server listening on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  console.log(`6. Binding to PORT ${PORT}...`);
+  server.listen(PORT, () => {
+    console.log(`Backend server listening on port ${PORT}`);
+  });
+}
+
+export { app, server, shutdownManager };

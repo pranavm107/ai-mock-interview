@@ -3,7 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { setupDeepgramService } from '../services/deepgramService';
 import { LiveTranscriptionEvents } from '@deepgram/sdk';
 
-export const setupDeepgramSocket = (server: HttpServer) => {
+export const setupDeepgramSocket = (server: HttpServer): WebSocketServer => {
   const wss = new WebSocketServer({ server, path: '/api/deepgram/socket' });
 
   wss.on('connection', (ws: WebSocket) => {
@@ -109,4 +109,6 @@ export const setupDeepgramSocket = (server: HttpServer) => {
       }
     });
   });
+
+  return wss;
 };

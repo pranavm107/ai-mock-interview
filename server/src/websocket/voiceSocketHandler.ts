@@ -3,7 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { getActiveVoiceSession } from '../controllers/voiceController';
 import { VoiceEvent } from '../types/voice';
 
-export const setupVoiceSocket = (server: HttpServer) => {
+export const setupVoiceSocket = (server: HttpServer): WebSocketServer => {
   const wss = new WebSocketServer({ server, path: '/api/voice/socket' });
 
   wss.on('connection', (ws: WebSocket, req) => {
@@ -55,4 +55,6 @@ export const setupVoiceSocket = (server: HttpServer) => {
       voiceSessionService.off(VoiceEvent.USER_STARTED, handleUserStarted);
     });
   });
+
+  return wss;
 };
