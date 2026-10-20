@@ -10,6 +10,7 @@ console.log('2. Loading WebSockets & Middleware...');
 import { setupVoiceSocket } from './websocket/voiceSocketHandler';
 import { clerkMiddleware } from '@clerk/express';
 import { setupDeepgramSocket } from './websocket/deepgramSocket';
+import { attachWebSocketUpgradeHandler } from './websocket/upgradeHandler';
 import { requestIdMiddleware } from './middleware/requestId';
 import { createCorsOptions } from './config/cors';
 import { errorHandler } from './middleware/errorHandler';
@@ -78,6 +79,7 @@ const server = http.createServer(app);
 console.log('5. Attaching WebSockets...');
 const voiceWs = setupVoiceSocket(server);
 const deepgramWs = setupDeepgramSocket(server);
+attachWebSocketUpgradeHandler(server, { voiceWs, deepgramWs });
 
 // Idempotent graceful shutdown handling with bounded deadline
 shutdownManager = setupGracefulShutdown({

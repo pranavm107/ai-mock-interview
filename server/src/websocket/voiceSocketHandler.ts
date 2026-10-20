@@ -3,12 +3,13 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { getActiveVoiceSession } from '../controllers/voiceController';
 import { VoiceEvent } from '../types/voice';
 
-export const setupVoiceSocket = (server: HttpServer): WebSocketServer => {
-  const wss = new WebSocketServer({ server, path: '/api/voice/socket' });
+export const setupVoiceSocket = (_server?: HttpServer): WebSocketServer => {
+  const wss = new WebSocketServer({ noServer: true });
 
   wss.on('connection', (ws: WebSocket, req) => {
     // Basic session extraction from url or protocol, usually passed in url query like ?sessionId=...
-    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const host = req.headers.host || 'localhost';
+    const url = new URL(req.url || '', `http://${host}`);
     const sessionId = url.searchParams.get('sessionId');
 
     if (!sessionId) {

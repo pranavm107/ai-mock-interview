@@ -3,8 +3,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { setupDeepgramService } from '../services/deepgramService';
 import { LiveTranscriptionEvents } from '@deepgram/sdk';
 
-export const setupDeepgramSocket = (server: HttpServer): WebSocketServer => {
-  const wss = new WebSocketServer({ server, path: '/api/deepgram/socket' });
+export const setupDeepgramSocket = (_server?: HttpServer): WebSocketServer => {
+  const wss = new WebSocketServer({ noServer: true });
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('Client connected to websocket');
